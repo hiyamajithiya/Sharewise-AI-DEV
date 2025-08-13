@@ -4,8 +4,8 @@ djangorestframework==3.14.0
 django-cors-headers==4.3.1
 django-environ==0.11.2
 
-# Database (will configure PostgreSQL later)
-# psycopg2-binary==2.9.7  # Will install separately when PostgreSQL is available
+# Database
+psycopg2-binary==2.9.7
 django-extensions==3.2.3
 
 # Authentication & Security
