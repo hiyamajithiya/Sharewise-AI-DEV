@@ -1,0 +1,1 @@
+import React from "react"; import { View, Text } from "react-native"; const PlaceholderScreen = () => <View><Text>PerformanceScreen implementation pending</Text></View>; export default PlaceholderScreen;
