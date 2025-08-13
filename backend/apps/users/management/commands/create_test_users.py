@@ -22,7 +22,7 @@ class Command(BaseCommand):
                 first_name='Super',
                 last_name='Admin',
                 role=User.Role.SUPER_ADMIN,
-                subscription_tier=User.SubscriptionTier.ENTERPRISE,
+                subscription_tier=User.SubscriptionTier.ELITE,
                 is_active=True,
                 email_verified=True
             )

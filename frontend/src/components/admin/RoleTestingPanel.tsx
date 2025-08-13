@@ -81,10 +81,27 @@ interface SystemInfo {
   };
 }
 
+interface SystemUser {
+  id: string;
+  email: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  role_display: string;
+  subscription_tier: string;
+  subscription_tier_display: string;
+  is_active: boolean;
+  email_verified: boolean;
+  date_joined: string;
+  last_login: string | null;
+}
+
 const RoleTestingPanel: React.FC = () => {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [testResults, setTestResults] = useState<TestResult | null>(null);
   const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
+  const [allUsers, setAllUsers] = useState<SystemUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
   const [testType, setTestType] = useState('basic');
@@ -95,6 +112,7 @@ const RoleTestingPanel: React.FC = () => {
   useEffect(() => {
     fetchUserRole();
     fetchSystemInfo();
+    fetchAllUsers();
   }, []);
 
   const fetchUserRole = async () => {
@@ -115,6 +133,16 @@ const RoleTestingPanel: React.FC = () => {
       setSystemInfo(response);
     } catch (error: any) {
       console.error('Failed to fetch system info:', error);
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    try {
+      const response: any = await apiService.get('/users/admin/all-users/');
+      setAllUsers(response.results || response);
+    } catch (error: any) {
+      console.error('Failed to fetch all users:', error);
+      setAllUsers([]);
     }
   };
 
@@ -314,6 +342,107 @@ const RoleTestingPanel: React.FC = () => {
                       </Typography>
                     </Box>
                   )}
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* All Users Section */}
+        <Grid item xs={12}>
+          <Card elevation={3}>
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={2} mb={3}>
+                <People sx={{ color: '#0052CC' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  All System Users
+                </Typography>
+                <Chip 
+                  label={`${allUsers.length} Total`} 
+                  color="primary" 
+                  size="small" 
+                />
+              </Box>
+
+              {allUsers.length > 0 ? (
+                <Grid container spacing={2}>
+                  {allUsers.map((systemUser) => (
+                    <Grid item xs={12} sm={6} md={4} key={systemUser.id}>
+                      <Paper 
+                        sx={{ 
+                          p: 2, 
+                          border: '1px solid #e0e0e0',
+                          borderRadius: 2,
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': {
+                            boxShadow: 3,
+                            borderColor: 'primary.main'
+                          }
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" gap={2} mb={2}>
+                          {getRoleIcon(systemUser.role)}
+                          <Box flex={1}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                              {systemUser.first_name} {systemUser.last_name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.2 }}>
+                              {systemUser.email}
+                            </Typography>
+                          </Box>
+                          <Box display="flex" alignItems="center" gap={0.5}>
+                            {systemUser.is_active ? 
+                              <CheckCircle sx={{ color: '#10B981', fontSize: 16 }} /> : 
+                              <Cancel sx={{ color: '#EF4444', fontSize: 16 }} />
+                            }
+                          </Box>
+                        </Box>
+
+                        <Box display="flex" gap={1} mb={2}>
+                          <Chip 
+                            label={systemUser.role_display} 
+                            color={getRoleColor(systemUser.role) as any}
+                            size="small"
+                          />
+                          <Chip 
+                            label={systemUser.subscription_tier_display || systemUser.subscription_tier} 
+                            variant="outlined"
+                            size="small"
+                          />
+                        </Box>
+
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            <strong>Joined:</strong> {new Date(systemUser.date_joined).toLocaleDateString()}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            <strong>Last Login:</strong> {
+                              systemUser.last_login 
+                                ? new Date(systemUser.last_login).toLocaleDateString()
+                                : 'Never'
+                            }
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            <strong>Email Verified:</strong> {systemUser.email_verified ? 'Yes' : 'No'}
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Box 
+                  display="flex" 
+                  justifyContent="center" 
+                  alignItems="center" 
+                  minHeight="200px"
+                  flexDirection="column"
+                  color="text.secondary"
+                >
+                  <People sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
+                  <Typography variant="body1">
+                    No users found or insufficient permissions to view users
+                  </Typography>
                 </Box>
               )}
             </CardContent>

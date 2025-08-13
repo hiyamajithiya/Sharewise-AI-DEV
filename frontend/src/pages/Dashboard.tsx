@@ -27,6 +27,7 @@ import {
   AdminPanelSettings,
   Support,
   SellOutlined,
+  CheckCircle,
 } from '@mui/icons-material';
 import { useSelector, useDispatch } from 'react-redux';
 import StatCard from '../components/common/StatCard';
@@ -37,6 +38,7 @@ const Dashboard: React.FC = () => {
   const [activeTab] = useState(0);
   const [userRole, setUserRole] = useState<any>(null);
   const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [systemInfo, setSystemInfo] = useState<any>(null);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -66,6 +68,17 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const fetchSystemInfo = async () => {
+    try {
+      const apiService = (await import('../services/api')).default;
+      const systemData: any = await apiService.get('/users/system/info/');
+      setSystemInfo(systemData);
+    } catch (error) {
+      console.error('Failed to fetch system info:', error);
+      setSystemInfo(null);
+    }
+  };
+
   const handleUserSelection = (selectedUser: any) => {
     dispatch(startTesting({ selectedUser, originalUser: user }));
     console.log('Testing as user:', selectedUser);
@@ -84,6 +97,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchUserRole();
+    fetchSystemInfo();
   }, []);
 
   useEffect(() => {
@@ -218,8 +232,8 @@ const Dashboard: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Total Users"
-            value="5"
-            change="+2 today"
+            value={systemInfo?.total_users?.toString() || '5'}
+            change={systemInfo?.recent_registrations_24h ? `+${systemInfo.recent_registrations_24h} today` : '+2 today'}
             changeType="positive"
             icon={<Person />}
             color="primary"
@@ -228,47 +242,97 @@ const Dashboard: React.FC = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="System Revenue"
-            value="₹125,000"
-            change="+15%"
+            title="Verified Users"
+            value={systemInfo?.verified_users?.toString() || '5'}
+            change={`${Math.round((systemInfo?.verified_users || 5) / (systemInfo?.total_users || 5) * 100)}% verified`}
             changeType="positive"
-            icon={<AccountBalance />}
+            icon={<CheckCircle />}
             color="success"
-            subtitle="Monthly revenue"
+            subtitle="Email verified"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Active Trades"
-            value="50"
-            change="+8 today"
-            changeType="positive"
-            icon={<ShowChart />}
-            color="info"
-            subtitle="All users trading"
+            title="Super Admins"
+            value={systemInfo?.super_admins?.toString() || '1'}
+            change="System administrators"
+            changeType="neutral"
+            icon={<AdminPanelSettings />}
+            color="error"
+            subtitle="Full access users"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Support Tickets"
-            value="12"
-            change="-3 today"
-            changeType="positive"
+            title="Support Team"
+            value={systemInfo?.support_team?.toString() || '1'}
+            change="Support staff"
+            changeType="neutral"
             icon={<Support />}
-            color="warning"
-            subtitle="Open tickets"
+            color="info"
+            subtitle="Customer support"
           />
         </Grid>
       </Grid>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-              🔧 Super Admin Dashboard - Full System Access
+              🔧 Super Admin Dashboard
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
               You have complete access to all system features, user management, analytics, and configuration settings.
             </Typography>
+            
+            {systemInfo && (
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                  User Breakdown:
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  • Regular Users: {systemInfo.regular_users || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  • Sales Team: {systemInfo.sales_team || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  • Support Team: {systemInfo.support_team || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  • Super Admins: {systemInfo.super_admins || 0}
+                </Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              📊 Recent Activity
+            </Typography>
+            {systemInfo?.recent_registrations_7d !== undefined ? (
+              <Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  New registrations in the last:
+                </Typography>
+                <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 600, mb: 0.5 }}>
+                  {systemInfo.recent_registrations_24h}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  in the last 24 hours
+                </Typography>
+                <Typography variant="h4" sx={{ color: 'success.main', fontWeight: 600, mb: 0.5 }}>
+                  {systemInfo.recent_registrations_7d}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  in the last 7 days
+                </Typography>
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                Recent activity data will be displayed here.
+              </Typography>
+            )}
           </Paper>
         </Grid>
       </Grid>

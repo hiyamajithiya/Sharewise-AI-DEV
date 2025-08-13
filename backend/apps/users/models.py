@@ -16,7 +16,7 @@ class CustomUser(AbstractUser):
     class SubscriptionTier(models.TextChoices):
         BASIC = 'BASIC', 'Basic Plan'
         PRO = 'PRO', 'Pro Plan'
-        ENTERPRISE = 'ENTERPRISE', 'Enterprise Plan'
+        ELITE = 'ELITE', 'Elite Plan'
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
