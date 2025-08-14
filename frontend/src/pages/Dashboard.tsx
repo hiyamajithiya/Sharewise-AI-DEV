@@ -33,12 +33,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import StatCard from '../components/common/StatCard';
 import DataTable, { TableColumn } from '../components/common/DataTable';
 import { startTesting, exitTesting, selectTestingState } from '../store/slices/testingSlice';
+import AddUserModal from '../components/admin/AddUserModal';
 
 const Dashboard: React.FC = () => {
   const [activeTab] = useState(0);
   const [userRole, setUserRole] = useState<any>(null);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [systemInfo, setSystemInfo] = useState<any>(null);
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -764,7 +766,7 @@ const Dashboard: React.FC = () => {
                         variant="contained"
                         startIcon={<Add />}
                         sx={{ borderRadius: '8px' }}
-                        onClick={() => alert('Admin panel for adding users will be implemented')}
+                        onClick={() => setAddUserModalOpen(true)}
                       >
                         Add User
                       </Button>
@@ -812,6 +814,16 @@ const Dashboard: React.FC = () => {
           {getRoleDashboardContent(getEffectiveUser())}
         </>
       )}
+
+      {/* Add User Modal */}
+      <AddUserModal
+        open={addUserModalOpen}
+        onClose={() => setAddUserModalOpen(false)}
+        onUserAdded={() => {
+          fetchAllUsers(); // Refresh the users list
+          fetchSystemInfo(); // Refresh system stats
+        }}
+      />
     </Container>
   );
 };

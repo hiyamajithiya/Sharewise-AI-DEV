@@ -24,4 +24,5 @@ urlpatterns = [
     
     # Admin endpoints
     path('admin/all-users/', views.get_all_users, name='get_all_users'),
+    path('admin/create-user/', views.create_user_admin, name='create_user_admin'),
 ]

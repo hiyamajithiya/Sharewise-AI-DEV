@@ -116,6 +116,35 @@ class RoleTestSerializer(serializers.Serializer):
     )
 
 
+class AdminUserCreationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    username = serializers.CharField(min_length=3, max_length=150)
+    password = serializers.CharField(write_only=True, min_length=8)
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150)
+    role = serializers.ChoiceField(choices=CustomUser.Role.choices, default=CustomUser.Role.USER)
+    subscription_tier = serializers.ChoiceField(choices=CustomUser.SubscriptionTier.choices, default=CustomUser.SubscriptionTier.BASIC)
+    is_active = serializers.BooleanField(default=True)
+    email_verified = serializers.BooleanField(default=True)
+    
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+    
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        return value
+    
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.messages)
+        return value
+
+
 class UserRoleSerializer(serializers.ModelSerializer):
     role_display = serializers.CharField(source='get_role_display', read_only=True)
     subscription_tier_display = serializers.CharField(source='get_subscription_tier_display', read_only=True)

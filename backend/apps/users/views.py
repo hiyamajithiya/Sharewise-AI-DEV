@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import CustomUser, UserProfile
 from .utils import generate_otp, generate_verification_token, send_verification_email, is_otp_valid, send_welcome_email
-from .serializers import UserRegistrationSerializer, UserSerializer, EmailVerificationSerializer, LoginSerializer
+from .serializers import UserRegistrationSerializer, UserSerializer, EmailVerificationSerializer, LoginSerializer, AdminUserCreationSerializer
 
 User = get_user_model()
 
@@ -399,7 +399,7 @@ def get_system_info(request):
             'subscription_breakdown': {
                 'basic': User.objects.filter(subscription_tier=User.SubscriptionTier.BASIC).count(),
                 'pro': User.objects.filter(subscription_tier=User.SubscriptionTier.PRO).count(),
-                'enterprise': User.objects.filter(subscription_tier=User.SubscriptionTier.ENTERPRISE).count(),
+                'elite': User.objects.filter(subscription_tier=User.SubscriptionTier.ELITE).count(),
             }
         })
     
@@ -444,3 +444,60 @@ def get_all_users(request):
         'count': len(users_data),
         'results': users_data
     }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_user_admin(request):
+    """
+    Create a new user - only for super admin
+    """
+    user = request.user
+    
+    # Only super admin can create users
+    if not user.is_super_admin():
+        return Response({
+            'error': 'Access denied. Only super admin can create users.'
+        }, status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = AdminUserCreationSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        try:
+            # Create user with admin privileges (skip email verification)
+            new_user = User.objects.create_user(
+                email=serializer.validated_data['email'],
+                username=serializer.validated_data['username'],
+                password=serializer.validated_data['password'],
+                first_name=serializer.validated_data['first_name'],
+                last_name=serializer.validated_data['last_name'],
+                role=serializer.validated_data['role'],
+                subscription_tier=serializer.validated_data['subscription_tier'],
+                is_active=serializer.validated_data['is_active'],
+                email_verified=serializer.validated_data['email_verified'],
+            )
+            
+            # Set superuser status if role is SUPER_ADMIN
+            if new_user.role == User.Role.SUPER_ADMIN:
+                new_user.is_superuser = True
+                new_user.is_staff = True
+                new_user.save()
+            elif new_user.role == User.Role.SUPPORT:
+                new_user.is_staff = True
+                new_user.save()
+            
+            # Send welcome email if user is active
+            if new_user.is_active:
+                send_welcome_email(new_user)
+            
+            return Response({
+                'message': 'User created successfully!',
+                'user': UserSerializer(new_user).data
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({
+                'error': f'Failed to create user: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
