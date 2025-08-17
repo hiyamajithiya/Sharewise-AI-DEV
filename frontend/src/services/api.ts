@@ -34,12 +34,77 @@ class ApiService {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor - Handle token refresh
+    // Response interceptor - Handle token refresh, rate limiting, and security violations
     this.api.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
 
+        // Handle rate limiting (429 status)
+        if (error.response?.status === 429) {
+          const retryAfter = error.response.headers['retry-after'];
+          const rateLimitData = error.response.data;
+          
+          console.warn('Rate limit exceeded:', rateLimitData);
+          
+          // Create user-friendly error message
+          const waitTime = retryAfter ? `${retryAfter} seconds` : 'a moment';
+          const rateLimitError = new Error(
+            rateLimitData.message || 
+            `Too many requests. Please wait ${waitTime} before trying again.`
+          );
+          
+          // Add rate limit context to error
+          (rateLimitError as any).isRateLimit = true;
+          (rateLimitError as any).retryAfter = retryAfter;
+          (rateLimitError as any).rateLimitData = rateLimitData;
+          
+          // Optionally auto-retry after specified time (for non-user-initiated requests)
+          if (retryAfter && parseInt(retryAfter) <= 10 && !originalRequest._retryAfterRateLimit) {
+            originalRequest._retryAfterRateLimit = true;
+            console.log(`Auto-retrying request after ${retryAfter} seconds...`);
+            
+            await new Promise(resolve => setTimeout(resolve, parseInt(retryAfter) * 1000));
+            return this.api(originalRequest);
+          }
+          
+          return Promise.reject(rateLimitError);
+        }
+
+        // Handle security violations (400 with security context)
+        if (error.response?.status === 400 && error.response.data?.error === 'Security violation detected') {
+          const securityData = error.response.data;
+          
+          console.warn('Security violation detected:', securityData);
+          
+          const securityError = new Error(
+            securityData.message || 
+            'Your request contains potentially harmful content and has been blocked for security reasons.'
+          );
+          
+          // Add security context to error
+          (securityError as any).isSecurityViolation = true;
+          (securityError as any).violationType = securityData.violation_type;
+          (securityError as any).securityData = securityData;
+          
+          return Promise.reject(securityError);
+        }
+
+        // Handle blocked IP (403 from IP blocking middleware)
+        if (error.response?.status === 403 && 
+            (error.response.data?.error === 'Access denied' || 
+             error.response.data?.message?.includes('IP address has been blocked'))) {
+          const blockedError = new Error(
+            'Access temporarily restricted due to suspicious activity. Please try again later.'
+          );
+          
+          (blockedError as any).isIPBlocked = true;
+          (blockedError as any).blockedData = error.response.data;
+          
+          return Promise.reject(blockedError);
+        }
+
+        // Handle token refresh (401 status)
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
@@ -51,6 +116,17 @@ class ApiService {
             window.location.href = '/login';
             return Promise.reject(refreshError);
           }
+        }
+
+        // Handle server errors with user-friendly messages
+        if (error.response?.status >= 500) {
+          const serverError = new Error(
+            'Server is temporarily unavailable. Please try again in a few moments.'
+          );
+          (serverError as any).isServerError = true;
+          (serverError as any).originalError = error;
+          
+          return Promise.reject(serverError);
         }
 
         return Promise.reject(error);
@@ -596,6 +672,69 @@ class ApiService {
   // Generic DELETE method
   async delete(endpoint: string): Promise<void> {
     await this.api.delete(endpoint);
+  }
+
+  // Health monitoring methods
+  async checkServerHealth(): Promise<any> {
+    try {
+      const response = await this.api.get('/health/', { timeout: 5000 });
+      return response.data;
+    } catch (error) {
+      console.warn('Health check failed:', error);
+      return { status: 'unhealthy', error: (error as Error).message };
+    }
+  }
+
+  async getDetailedHealth(): Promise<any> {
+    const response = await this.api.get('/health/detailed/');
+    return response.data;
+  }
+
+  async getSystemMetrics(): Promise<any> {
+    const response = await this.api.get('/metrics/');
+    return response.data;
+  }
+
+  async getSecurityStatus(): Promise<any> {
+    const response = await this.api.get('/security/monitoring/');
+    return response.data;
+  }
+
+  // Utility method to handle errors with user-friendly messages
+  handleApiError(error: any): string {
+    if (error.isRateLimit) {
+      return error.message;
+    }
+    
+    if (error.isSecurityViolation) {
+      return 'Your request was blocked for security reasons. Please check your input and try again.';
+    }
+    
+    if (error.isIPBlocked) {
+      return 'Access temporarily restricted. Please try again later.';
+    }
+    
+    if (error.isServerError) {
+      return 'Server is temporarily unavailable. Please try again in a few moments.';
+    }
+    
+    if (error.response?.status === 404) {
+      return 'The requested resource was not found.';
+    }
+    
+    if (error.response?.status === 403) {
+      return 'You do not have permission to access this resource.';
+    }
+    
+    if (error.response?.data?.message) {
+      return error.response.data.message;
+    }
+    
+    if (error.response?.data?.error) {
+      return error.response.data.error;
+    }
+    
+    return error.message || 'An unexpected error occurred. Please try again.';
   }
 
   // Check if user is authenticated
