@@ -25,6 +25,9 @@ urlpatterns = [
     path('api/brokers/', include('apps.brokers.urls')),
     path('api/trading/', include('apps.trading.urls')),
     path('api/market-data/', include('apps.market_data.urls')),
+    path('api/audit/', include('apps.audit.urls')),
+    path('api/system/', include('system_config.urls')),
+    path('', include('system_config.urls')),  # Health checks at root level
 ]
 
 # Add debug toolbar URLs in development

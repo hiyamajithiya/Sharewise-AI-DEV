@@ -6,6 +6,65 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 User = get_user_model()
 
 
+class ModelReview(models.Model):
+    """User reviews for published models"""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    model = models.ForeignKey('MLModel', on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews_given')
+    
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    review_text = models.TextField(blank=True)
+    
+    # Performance verification
+    verified_performance = models.BooleanField(default=False)
+    actual_win_rate = models.FloatField(null=True, blank=True)
+    actual_returns = models.FloatField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['model', 'reviewer']
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.reviewer.username} review for {self.model.name}"
+
+
+class MarketplaceEarnings(models.Model):
+    """Track earnings from marketplace transactions"""
+    
+    class TransactionType(models.TextChoices):
+        LEASE_PAYMENT = 'LEASE_PAYMENT', 'Lease Payment'
+        COMMISSION = 'COMMISSION', 'Platform Commission'
+        REFUND = 'REFUND', 'Refund'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    model = models.ForeignKey('MLModel', on_delete=models.CASCADE, related_name='earnings')
+    lease = models.ForeignKey('ModelLeasing', on_delete=models.CASCADE, related_name='earnings')
+    
+    transaction_type = models.CharField(max_length=20, choices=TransactionType.choices)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    platform_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    creator_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-transaction_date']
+    
+    def save(self, *args, **kwargs):
+        # Calculate 10% platform commission
+        if self.transaction_type == self.TransactionType.LEASE_PAYMENT:
+            self.platform_commission = self.amount * 0.10
+            self.creator_earnings = self.amount * 0.90
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.transaction_type} - {self.amount} for {self.model.name}"
+
+
 class MLModel(models.Model):
     """Custom ML models created by users"""
     
@@ -296,31 +355,3 @@ class FnOStrategy(models.Model):
         return f"{self.name} ({self.strategy_type})"
 
 
-class ModelReview(models.Model):
-    """Reviews and ratings for published models in marketplace"""
-    
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    model = models.ForeignKey(MLModel, on_delete=models.CASCADE, related_name='reviews')
-    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='model_reviews')
-    
-    # Review Content
-    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
-    title = models.CharField(max_length=200)
-    comment = models.TextField()
-    
-    # Performance Feedback
-    actual_performance = models.JSONField(default=dict, help_text="Actual performance metrics experienced")
-    would_recommend = models.BooleanField(default=True)
-    
-    # Metadata
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'ai_studio_modelreview'
-        verbose_name = 'Model Review'
-        verbose_name_plural = 'Model Reviews'
-        unique_together = ['model', 'reviewer']
-    
-    def __str__(self):
-        return f"Review for {self.model.name} by {self.reviewer.email}"

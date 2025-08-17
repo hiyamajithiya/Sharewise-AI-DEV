@@ -28,6 +28,26 @@ except ImportError as e:
     logging.warning(f"ML packages not available: {e}")
     ML_PACKAGES_AVAILABLE = False
 
+# Deep Learning imports
+try:
+    from .deep_learning import DeepFinancialPredictor, DeepEnsemble, create_deep_learning_model
+    from .training_pipeline import DEEP_LEARNING_AVAILABLE
+    import torch
+    import pytorch_lightning as pl
+    DEEP_LEARNING_TASKS_AVAILABLE = True
+    logging.info("Deep Learning tasks enabled")
+except ImportError as e:
+    DEEP_LEARNING_TASKS_AVAILABLE = False
+    logging.warning(f"Deep Learning tasks disabled: {e}")
+
+# Enhanced training pipeline
+try:
+    from .training_pipeline import TrainingPipeline
+    ENHANCED_PIPELINE_AVAILABLE = True
+except ImportError as e:
+    ENHANCED_PIPELINE_AVAILABLE = False
+    logging.warning(f"Enhanced training pipeline not available: {e}")
+
 try:
     import xgboost as xgb
     import lightgbm as lgb

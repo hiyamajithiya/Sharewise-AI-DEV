@@ -7,6 +7,9 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.utils import timezone
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 def generate_otp(length=6):
@@ -17,6 +20,70 @@ def generate_otp(length=6):
 def generate_verification_token():
     """Generate a secure random token for email verification"""
     return secrets.token_urlsafe(32)
+
+
+def get_email_config():
+    """Get email configuration from database"""
+    from system_config.models import EmailConfiguration
+    return EmailConfiguration.objects.filter(is_active=True).first()
+
+
+def send_email_via_config(to_email, subject, html_content, text_content):
+    """Send email using database configuration"""
+    config = get_email_config()
+    
+    if not config:
+        # Fallback to Django's send_mail with console backend
+        print(f"\n{'='*60}")
+        print(f"EMAIL TO: {to_email}")
+        print(f"SUBJECT: {subject}")
+        print(f"{'='*60}")
+        print(text_content)
+        print(f"{'='*60}\n")
+        return True
+    
+    try:
+        # Get SMTP settings
+        smtp_settings = config.get_smtp_settings()
+        
+        # Create SMTP connection
+        if smtp_settings['use_ssl']:
+            server = smtplib.SMTP_SSL(smtp_settings['host'], smtp_settings['port'])
+        else:
+            server = smtplib.SMTP(smtp_settings['host'], smtp_settings['port'])
+            if smtp_settings['use_tls']:
+                server.starttls()
+        
+        # Login to SMTP server
+        server.login(config.email_address, config.decrypt_password())
+        
+        # Create message
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = config.get_from_email()
+        msg['To'] = to_email
+        
+        # Attach parts
+        part1 = MIMEText(text_content, 'plain')
+        part2 = MIMEText(html_content, 'html')
+        msg.attach(part1)
+        msg.attach(part2)
+        
+        # Send email
+        server.send_message(msg)
+        server.quit()
+        
+        return True
+    except Exception as e:
+        print(f"Failed to send email via config: {e}")
+        # Fallback to console output
+        print(f"\n{'='*60}")
+        print(f"EMAIL TO: {to_email}")
+        print(f"SUBJECT: {subject}")
+        print(f"{'='*60}")
+        print(text_content)
+        print(f"{'='*60}\n")
+        return True
 
 
 def send_verification_email(user, otp_code):
@@ -104,19 +171,8 @@ def send_verification_email(user, otp_code):
     © 2025 ShareWise AI. All rights reserved.
     """
     
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return False
+    # Use our custom email sending function
+    return send_email_via_config(user.email, subject, html_message, plain_message)
 
 
 def is_otp_valid(user, otp_code, max_age_minutes=10):
@@ -220,16 +276,5 @@ def send_welcome_email(user):
     © 2025 ShareWise AI. All rights reserved.
     """
     
-    try:
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send welcome email: {e}")
-        return False
+    # Use our custom email sending function
+    return send_email_via_config(user.email, subject, html_message, plain_message)

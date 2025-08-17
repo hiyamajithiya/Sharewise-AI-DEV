@@ -39,15 +39,17 @@ import {
   Lock,
   CheckCircle,
   Star,
+  Email,
 } from '@mui/icons-material';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
 import { setThemeMode } from '../store/slices/themeSlice';
 import { RootState } from '../store';
+import EmailConfiguration from '../components/settings/EmailConfiguration';
 
 const Settings: React.FC = () => {
   const dispatch = useDispatch();
-  const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'notifications' | 'preferences' | 'subscription' | 'billing'>('profile');
+  const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'notifications' | 'preferences' | 'subscription' | 'billing' | 'email'>('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [upgradeDialog, setUpgradeDialog] = useState(false);
   
@@ -68,6 +70,9 @@ const Settings: React.FC = () => {
   
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
   const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+  
+  // Check if user is super admin for email configuration
+  const isSuperAdmin = effectiveUser?.role === 'SUPER_ADMIN';
 
   // Tier-based settings access
   const getTierFeatures = (tier: string): {
@@ -142,6 +147,7 @@ const Settings: React.FC = () => {
     { id: 'preferences', label: 'Preferences', icon: <Palette /> },
     { id: 'subscription', label: 'Subscription', icon: <Star /> },
     { id: 'billing', label: 'Billing', icon: <AccountBalance /> },
+    ...(isSuperAdmin ? [{ id: 'email', label: 'Email Configuration', icon: <Email /> }] : []),
   ];
 
   const renderProfileSettings = () => (
@@ -630,6 +636,10 @@ const Settings: React.FC = () => {
     </Paper>
   );
 
+  const renderEmailConfiguration = () => (
+    <EmailConfiguration />
+  );
+
   const renderContent = () => {
     switch (activeSection) {
       case 'profile': return renderProfileSettings();
@@ -638,6 +648,7 @@ const Settings: React.FC = () => {
       case 'preferences': return renderPreferences();
       case 'subscription': return renderSubscription();
       case 'billing': return renderBilling();
+      case 'email': return renderEmailConfiguration();
       default: return renderProfileSettings();
     }
   };

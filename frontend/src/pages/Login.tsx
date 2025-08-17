@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink, useLocation } from 'react-router-dom';
 import {
-  Container,
-  Paper,
   Box,
   TextField,
   Button,
@@ -11,12 +9,12 @@ import {
   Alert,
   InputAdornment,
   IconButton,
+  Grid,
 } from '@mui/material';
-import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Email, Lock, TrendingUp, Analytics, Security, Speed, ShowChart, Assessment } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, selectAuthLoading, selectAuthError } from '../store/slices/authSlice';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { MockAuthService } from '../services/mockAuth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -87,379 +85,357 @@ const Login: React.FC = () => {
     setShowPassword(!showPassword);
   };
 
+  const features = [
+    { icon: <TrendingUp />, title: 'Real-Time Analytics', description: 'Live market data and trend analysis' },
+    { icon: <Security />, title: 'Secure Trading', description: 'Bank-level security for your investments' },
+    { icon: <Speed />, title: 'Lightning Fast', description: 'Execute trades in milliseconds' },
+    { icon: <ShowChart />, title: 'Advanced Charts', description: 'Professional technical analysis tools' },
+    { icon: <Analytics />, title: 'AI Predictions', description: 'Machine learning powered insights' },
+    { icon: <Assessment />, title: 'Portfolio Tracking', description: 'Monitor your complete portfolio' },
+  ];
+
   if (loading) {
     return (
-      <Container maxWidth="sm">
-        <Box sx={{ mt: 8 }}>
-          <LoadingSpinner message="Signing in..." />
-        </Box>
-      </Container>
+      <Box sx={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      }}>
+        <LoadingSpinner message="Signing in..." />
+      </Box>
     );
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        py: 4,
-      }}
-    >
-      <Container component="main" maxWidth="sm">
-        <Paper
-          elevation={24}
+    <Box sx={{ height: '100vh', display: 'flex', overflow: 'hidden' }}>
+      <Grid container sx={{ flex: 1, height: '100%' }}>
+        {/* Left Column - Branding */}
+        <Grid 
+          item 
+          xs={12} 
+          md={6}
           sx={{
-            padding: { xs: 3, sm: 5 },
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: { xs: 2, sm: 3, md: 4 },
+            position: 'relative',
+            overflow: 'hidden',
+            height: '100%',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: '-50%',
+              right: '-50%',
+              width: '200%',
+              height: '200%',
+              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+              animation: 'rotate 30s linear infinite',
+            },
+            '@keyframes rotate': {
+              '0%': { transform: 'rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg)' },
+            },
+          }}
+        >
+          <Box sx={{ 
+            zIndex: 1, 
+            maxWidth: 550, 
+            width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            width: '100%',
-            borderRadius: 4,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-          }}
-        >
-          {/* Logo/Brand */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+          }}>
+            {/* Logo */}
             <Box
               sx={{
-                width: 80,
-                height: 80,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #0052CC 100%)',
-                borderRadius: '24px',
+                width: { xs: 70, sm: 80, md: 90 },
+                height: { xs: 70, sm: 80, md: 90 },
+                background: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '22px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 10px 25px rgba(102, 126, 234, 0.4)',
-                mb: 3,
-                position: 'relative',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: -2,
-                  left: -2,
-                  right: -2,
-                  bottom: -2,
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  borderRadius: '26px',
-                  zIndex: -1,
-                },
+                mb: 2,
+                border: '3px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 12px 24px rgba(0, 0, 0, 0.2)',
               }}
             >
-              <Typography variant="h3" sx={{ color: 'white', fontWeight: 800, fontSize: '2.2rem' }}>
+              <Typography variant="h1" sx={{ 
+                color: 'white', 
+                fontWeight: 900, 
+                fontSize: { xs: '2.5rem', sm: '3rem', md: '3rem' },
+                textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+              }}>
                 S
               </Typography>
             </Box>
-            <Typography 
-              component="h1" 
-              variant="h3" 
-              sx={{ 
-                fontWeight: 800, 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                mb: 1,
-                textAlign: 'center',
-              }}
-            >
+
+            {/* Brand Name */}
+            <Typography variant="h2" sx={{ 
+              color: 'white', 
+              fontWeight: 800,
+              fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.3rem' },
+              mb: 0.5,
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+            }}>
               ShareWise AI
             </Typography>
-            <Typography 
-              variant="body1" 
-              sx={{ 
-                color: 'text.secondary',
-                fontWeight: 500,
-                fontSize: '1.1rem',
-                mb: 2,
-              }}
-            >
-              Professional Trading Platform
-            </Typography>
-          </Box>
-          
-          <Typography 
-            component="h2" 
-            variant="h4" 
-            sx={{ 
-              mb: 4, 
-              fontWeight: 700,
-              color: '#2D3748',
-              textAlign: 'center',
-            }}
-          >
-            Welcome Back
-          </Typography>
-
-          {/* Error Alert */}
-          {error && (
-            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          {/* Login Form */}
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="usernameOrEmail"
-              label="Username or Email"
-              name="usernameOrEmail"
-              autoComplete="username"
-              autoFocus
-              value={formData.usernameOrEmail}
-              onChange={handleChange}
-              error={!!errors.usernameOrEmail}
-              helperText={errors.usernameOrEmail}
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 1)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'rgba(255, 255, 255, 1)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)',
-                  },
-                },
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email sx={{ color: '#667eea' }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
             
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              id="password"
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              error={!!errors.password}
-              helperText={errors.password}
-              sx={{
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 1)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'rgba(255, 255, 255, 1)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)',
-                  },
-                },
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock sx={{ color: '#667eea' }} />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleTogglePasswordVisibility}
-                      edge="end"
-                      sx={{ 
-                        color: '#667eea',
-                        '&:hover': {
-                          backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        },
-                      }}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+            <Typography variant="h6" sx={{ 
+              color: 'rgba(255, 255, 255, 0.9)', 
+              mb: 3,
+              fontWeight: 300,
+              fontSize: { xs: '0.95rem', sm: '1rem', md: '1.1rem' },
+            }}>
+              Your Intelligent Trading Platform
+            </Typography>
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={loading}
-              sx={{ 
-                mt: 2, 
-                mb: 3, 
-                py: 2,
-                fontSize: '1.1rem',
-                fontWeight: 600,
-                borderRadius: 3,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
-                transition: 'all 0.3s ease',
-                textTransform: 'none',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
-                  boxShadow: '0 12px 30px rgba(102, 126, 234, 0.4)',
-                  transform: 'translateY(-3px)',
-                },
-                '&:active': {
-                  transform: 'translateY(-1px)',
-                },
-                '&:disabled': {
-                  background: 'linear-gradient(135deg, #a0a0a0 0%, #808080 100%)',
-                  boxShadow: 'none',
-                  transform: 'none',
-                },
-              }}
-            >
-              {loading ? 'Signing In...' : 'Sign In'}
-            </Button>
-
-            <Box sx={{ textAlign: 'center' }}>
-              <Link 
-                component={RouterLink} 
-                to="/register" 
-                variant="body1"
-                sx={{
-                  color: '#667eea',
-                  fontWeight: 500,
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    color: '#764ba2',
-                    textDecoration: 'underline',
-                  },
-                }}
-              >
-                Don't have an account? Sign Up
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
-
-        {/* Demo Credentials Info */}
-        <Paper 
-          sx={{ 
-            mt: 4, 
-            p: 3,
-            borderRadius: 3,
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(15px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          <Typography 
-            variant="h5" 
-            sx={{ 
-              mb: 3, 
-              fontWeight: 700,
-              textAlign: 'center',
-              color: '#2D3748',
-            }}
-          >
-            🚀 Try Demo Accounts
-          </Typography>
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              mb: 3, 
-              fontWeight: 500, 
-              color: '#4A5568',
-              textAlign: 'center',
-            }}
-          >
-            Explore different subscription tiers with these demo credentials:
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {MockAuthService.getDemoCredentials().map((cred, index) => (
-              <Paper 
-                key={index} 
-                sx={{ 
-                  p: 2.5,
-                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-                  border: '1px solid rgba(102, 126, 234, 0.2)',
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 20px rgba(102, 126, 234, 0.15)',
-                  },
-                }}
-              >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#2D3748' }}>
-                    {cred.tier} Plan
-                  </Typography>
-                  <Button 
-                    size="medium" 
-                    variant="contained"
-                    onClick={() => {
-                      setFormData({
-                        usernameOrEmail: cred.email,
-                        password: cred.password
-                      });
-                    }}
+            {/* Features Grid */}
+            <Grid container spacing={2} sx={{ mt: 2, px: 2 }}>
+              {features.map((feature, index) => (
+                <Grid item xs={12} sm={6} key={index}>
+                  <Box
                     sx={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      textAlign: 'left',
+                      p: 2,
+                      height: '100%',
+                      minHeight: '80px',
                       borderRadius: 2,
-                      textTransform: 'none',
-                      px: 2,
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      transition: 'all 0.3s ease',
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
-                        transform: 'translateY(-1px)',
+                        background: 'rgba(255, 255, 255, 0.15)',
+                        transform: 'translateY(-2px)',
                       },
                     }}
                   >
-                    Use This Account
-                  </Button>
-                </Box>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, fontSize: '0.9rem' }}>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#4A5568' }}>
-                    <strong>Email:</strong> {cred.email}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#4A5568' }}>
-                    <strong>Username:</strong> {cred.username}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#4A5568', gridColumn: '1 / -1' }}>
-                    <strong>Password:</strong> {cred.password}
-                  </Typography>
-                </Box>
-              </Paper>
-            ))}
+                    <Box sx={{ 
+                      color: 'white', 
+                      mr: 2,
+                      minWidth: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      '& svg': { fontSize: 28 },
+                    }}>
+                      {feature.icon}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle2" sx={{ 
+                        color: 'white', 
+                        fontWeight: 600,
+                        mb: 0.5,
+                        fontSize: '0.95rem',
+                        lineHeight: 1.2,
+                      }}>
+                        {feature.title}
+                      </Typography>
+                      <Typography variant="caption" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.85)',
+                        lineHeight: 1.3,
+                        fontSize: '0.8rem',
+                        display: 'block',
+                      }}>
+                        {feature.description}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
           </Box>
-          <Box sx={{ mt: 4, textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ color: '#4A5568', fontWeight: 500, mb: 1 }}>
-              Welcome to ShareWise AI - Your Intelligent Trading Platform
+        </Grid>
+
+        {/* Right Column - Login Form */}
+        <Grid 
+          item 
+          xs={12} 
+          md={6}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: { xs: 2, sm: 3, md: 4 },
+            backgroundColor: '#f8f9fa',
+            height: '100%',
+            overflow: 'hidden',
+          }}
+        >
+          <Box sx={{ width: '100%', maxWidth: 400 }}>
+            <Typography variant="h3" sx={{ 
+              mb: 1,
+              fontWeight: 700,
+              color: '#2D3748',
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '2.5rem' },
+            }}>
+              Welcome Back
             </Typography>
-            <Typography variant="body2" sx={{ color: '#718096' }}>
-              Experience AI-powered trading with comprehensive market analysis
+            
+            <Typography variant="body1" sx={{ 
+              mb: 3,
+              color: '#718096',
+              fontSize: { xs: '0.9rem', sm: '1rem' },
+            }}>
+              Sign in to access your trading dashboard
             </Typography>
+
+            {/* Error Alert */}
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            {/* Login Form */}
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="usernameOrEmail"
+                label="Username or Email"
+                name="usernameOrEmail"
+                autoComplete="username"
+                autoFocus
+                value={formData.usernameOrEmail}
+                onChange={handleChange}
+                error={!!errors.usernameOrEmail}
+                helperText={errors.usernameOrEmail}
+                size="medium"
+                sx={{
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: 'white',
+                    '&:hover': {
+                      '& fieldset': {
+                        borderColor: '#667eea',
+                      },
+                    },
+                    '&.Mui-focused': {
+                      '& fieldset': {
+                        borderColor: '#667eea',
+                      },
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email sx={{ color: '#667eea' }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                autoComplete="current-password"
+                value={formData.password}
+                onChange={handleChange}
+                error={!!errors.password}
+                helperText={errors.password}
+                size="medium"
+                sx={{
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: 'white',
+                    '&:hover': {
+                      '& fieldset': {
+                        borderColor: '#667eea',
+                      },
+                    },
+                    '&.Mui-focused': {
+                      '& fieldset': {
+                        borderColor: '#667eea',
+                      },
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock sx={{ color: '#667eea' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleTogglePasswordVisibility}
+                        edge="end"
+                        sx={{ color: '#667eea' }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading}
+                sx={{ 
+                  mt: 2, 
+                  mb: 2, 
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                  textTransform: 'none',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                    boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
+                  },
+                }}
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
+              </Button>
+
+              <Box sx={{ textAlign: 'center' }}>
+                <Link 
+                  component={RouterLink} 
+                  to="/register" 
+                  variant="body1"
+                  sx={{
+                    color: '#667eea',
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Don't have an account? Sign Up
+                </Link>
+              </Box>
+            </Box>
           </Box>
-        </Paper>
-      </Container>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

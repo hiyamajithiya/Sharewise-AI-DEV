@@ -36,6 +36,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'django_extensions',
     'channels',
+    'django_celery_results',  # For Celery database results backend
 ]
 
 LOCAL_APPS = [
@@ -44,6 +45,9 @@ LOCAL_APPS = [
     'apps.ai_studio',
     'apps.brokers',
     'apps.market_data',
+    'apps.audit',
+    'apps.security',
+    'system_config',
     # Add other apps as they are created
     # 'apps.strategies',
     # 'apps.portfolios',
@@ -58,12 +62,18 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'apps.security.middleware.SecurityHeadersMiddleware',
+    'apps.security.middleware.IPBlockingMiddleware',
+    'apps.security.middleware.RateLimitMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'apps.security.middleware.InputValidationMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.audit.middleware.AuditMiddleware',
+    'apps.audit.middleware.SecurityMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -87,12 +97,73 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
-# Channels configuration
-CHANNEL_LAYERS = {
+# Redis Configuration
+REDIS_URL = env('REDIS_URL', default='redis://localhost:6379')
+
+# Cache Configuration
+CACHES = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL + '/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 50,
+                'retry_on_timeout': True,
+            },
+            'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
+        },
+        'KEY_PREFIX': 'sharewise_ai',
+        'TIMEOUT': 300,  # 5 minutes default
+    },
+    'sessions': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL + '/2',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'sharewise_sessions',
+        'TIMEOUT': 86400,  # 24 hours
     }
 }
+
+# Session Configuration
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'sessions'
+SESSION_COOKIE_AGE = 86400  # 24 hours
+
+# Channels configuration with Redis fallback
+try:
+    import redis
+    redis_client = redis.Redis.from_url(REDIS_URL + '/3')
+    redis_client.ping()
+    
+    # Redis is available
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL + '/3'],
+                'capacity': 1500,
+                'expiry': 60,
+                'group_expiry': 86400,
+                'channel_capacity': {
+                    'http.request': 200,
+                    'http.response': 10,
+                    'websocket.send': 20,
+                },
+            },
+        },
+    }
+    
+except (ImportError, Exception):
+    # Redis not available - use in-memory fallback
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        }
+    }
 
 # Database
 DATABASES = {
@@ -252,6 +323,36 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Enhanced Security Configuration
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# Session Security
+SESSION_COOKIE_SECURE = True  # Only send over HTTPS in production
+SESSION_COOKIE_HTTPONLY = True  # Prevent JS access to session cookies
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+SESSION_COOKIE_AGE = 86400  # 24 hours
+
+# CSRF Security
+CSRF_COOKIE_SECURE = True  # Only send over HTTPS in production
+CSRF_COOKIE_HTTPONLY = True  # Prevent JS access to CSRF token
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
+
+# Rate Limiting Configuration
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+
+# CORS Security Enhancement
+ALLOWED_CORS_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://sharewise-ai.com',
+]
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development

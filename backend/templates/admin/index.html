@@ -1,0 +1,162 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Marketplace Dashboard Link -->
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="margin: 0; font-size: 1.8em;">📊 ShareWise AI Marketplace</h2>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">Comprehensive marketplace analytics and management dashboard</p>
+        </div>
+        <div>
+            <a href="/api/ai-studio/admin-dashboard/" 
+               style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); display: inline-block; transition: all 0.3s ease;">
+                🚀 Open Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #10B981;">
+        <div style="font-size: 2em; font-weight: bold; color: #10B981;">{{ total_models|default:"0" }}</div>
+        <div style="color: #666; font-size: 0.9em;">Total Models</div>
+    </div>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #3B82F6;">
+        <div style="font-size: 2em; font-weight: bold; color: #3B82F6;">{{ active_leases|default:"0" }}</div>
+        <div style="color: #666; font-size: 0.9em;">Active Leases</div>
+    </div>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #F59E0B;">
+        <div style="font-size: 2em; font-weight: bold; color: #F59E0B;">{{ total_users|default:"0" }}</div>
+        <div style="color: #666; font-size: 0.9em;">Total Users</div>
+    </div>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #EF4444;">
+        <div style="font-size: 2em; font-weight: bold; color: #EF4444;">₹{{ total_revenue|default:"0" }}</div>
+        <div style="color: #666; font-size: 0.9em;">Total Revenue</div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px;">
+    <h3 style="margin: 0 0 15px 0; color: #333;">🛠️ Quick Actions</h3>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <a href="/admin/ai_studio/mlmodel/" style="background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            📊 Manage Models
+        </a>
+        <a href="/admin/ai_studio/modelleasing/" style="background: #10B981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            💰 Manage Leases
+        </a>
+        <a href="/admin/ai_studio/trainingjob/" style="background: #F59E0B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            ⚙️ Training Jobs
+        </a>
+        <a href="/admin/audit/auditevent/" style="background: #EF4444; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            🔒 Audit Logs
+        </a>
+        <a href="/api/ai-studio/admin-export/?type=models" style="background: #6366F1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            📥 Export Data
+        </a>
+    </div>
+</div>
+
+<!-- System Health -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px;">
+    <h3 style="margin: 0 0 15px 0; color: #333;">🏥 System Health</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div>
+            <div style="color: #666; font-size: 0.9em;">Training Jobs</div>
+            <div style="font-size: 1.2em; font-weight: bold;">
+                <span style="color: #10B981;">{{ completed_jobs|default:"0" }} ✓</span> | 
+                <span style="color: #F59E0B;">{{ running_jobs|default:"0" }} ⏳</span> | 
+                <span style="color: #EF4444;">{{ failed_jobs|default:"0" }} ✗</span>
+            </div>
+        </div>
+        <div>
+            <div style="color: #666; font-size: 0.9em;">Published Models</div>
+            <div style="font-size: 1.2em; font-weight: bold; color: #10B981;">{{ published_models|default:"0" }}/{{ total_models|default:"0" }}</div>
+        </div>
+        <div>
+            <div style="color: #666; font-size: 0.9em;">Security Events</div>
+            <div style="font-size: 1.2em; font-weight: bold; color: #EF4444;">{{ security_events|default:"0" }} today</div>
+        </div>
+        <div>
+            <div style="color: #666; font-size: 0.9em;">Server Status</div>
+            <div style="font-size: 1.2em; font-weight: bold; color: #10B981;">🟢 Online</div>
+        </div>
+    </div>
+</div>
+
+{{ block.super }}
+
+<style>
+/* Add some enhanced styling */
+.dashboard-link {
+    transition: all 0.3s ease;
+}
+
+.dashboard-link:hover {
+    background: rgba(255,255,255,0.3) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.stat-card {
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.quick-action {
+    transition: all 0.2s ease;
+}
+
+.quick-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column !important;
+        text-align: center !important;
+    }
+    
+    .quick-actions {
+        flex-direction: column !important;
+    }
+    
+    .quick-actions a {
+        text-align: center;
+    }
+}
+</style>
+
+<script>
+// Auto-refresh system health every 30 seconds
+setInterval(() => {
+    // This would fetch updated health data via AJAX
+    // For now, we'll just add a visual indicator
+    const healthElement = document.querySelector('[data-health="server"]');
+    if (healthElement) {
+        healthElement.style.opacity = '0.5';
+        setTimeout(() => {
+            healthElement.style.opacity = '1';
+        }, 200);
+    }
+}, 30000);
+
+// Add click tracking for analytics
+document.querySelectorAll('a[href*="admin"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+        console.log('Admin action:', e.target.textContent, e.target.href);
+    });
+});
+</script>
+{% endblock %}

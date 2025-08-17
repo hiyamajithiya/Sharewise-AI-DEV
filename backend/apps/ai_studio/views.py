@@ -1,5 +1,7 @@
+import os
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.conf import settings
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
@@ -13,9 +15,14 @@ from .serializers import (
     ModelPublishSerializer, FnOStrategySerializer
 )
 try:
-    from .tasks import start_model_training
+    from .tasks import start_model_training as celery_start_training
+    from celery.result import AsyncResult
+    CELERY_AVAILABLE = True
 except ImportError:
-    start_model_training = None
+    celery_start_training = None
+    CELERY_AVAILABLE = False
+
+from .training_pipeline import start_model_training, get_training_progress, load_trained_model
 
 from .security import security_manager, access_control, api_security
 from .model_monitoring import ModelMonitor, ModelLifecycleManager
@@ -100,25 +107,52 @@ class MLModelViewSet(ModelViewSet):
             status=TrainingJob.Status.QUEUED
         )
         
-        # Start async training task
-        if start_model_training is None:
-            return Response({
-                'error': 'ML training not available. Please install required packages.'
-            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        
-        task = start_model_training.delay(str(model.id), str(training_job.id))
-        training_job.celery_task_id = task.id
-        training_job.save()
-        
-        # Update model status
-        model.status = MLModel.Status.TRAINING
-        model.training_started_at = timezone.now()
-        model.save()
-        
-        return Response({
-            'message': 'Training started successfully',
-            'training_job_id': str(training_job.id)
-        }, status=status.HTTP_200_OK)
+        # Use Celery for asynchronous training if available
+        if CELERY_AVAILABLE:
+            try:
+                # Start Celery task for training
+                task = celery_start_training.delay(str(model.id), str(training_job.id))
+                
+                # Update training job with Celery task ID
+                training_job.celery_task_id = task.id
+                training_job.save()
+                
+                return Response({
+                    'message': 'Training started asynchronously',
+                    'training_job_id': str(training_job.id),
+                    'task_id': task.id,
+                    'model_id': str(model.id),
+                    'status': 'queued'
+                }, status=status.HTTP_202_ACCEPTED)
+                
+            except Exception as e:
+                training_job.status = TrainingJob.Status.FAILED
+                training_job.error_message = f'Failed to start Celery task: {str(e)}'
+                training_job.save()
+                
+                return Response({
+                    'error': f'Failed to start async training: {str(e)}'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            # Fallback to synchronous training using our pipeline
+            try:
+                result = start_model_training(str(model.id))
+                
+                if result['status'] == 'success':
+                    return Response({
+                        'message': 'Training completed successfully (synchronous)',
+                        'training_job_id': result['training_job_id'],
+                        'model_id': result['model_id']
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        'error': f'Training failed: {result.get("error", "Unknown error")}'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
+            except Exception as e:
+                return Response({
+                    'error': f'Training failed: {str(e)}'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=True, methods=['post'])
     def publish(self, request, pk=None):
@@ -255,6 +289,368 @@ def training_job_detail(request, job_id):
         return Response({
             'error': 'Training job not found'
         }, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def training_progress(request, job_id):
+    """Get real-time training progress for a job"""
+    try:
+        job = TrainingJob.objects.get(
+            id=job_id,
+            model__user=request.user
+        )
+        
+        progress_data = {}
+        
+        # Check if using Celery
+        if CELERY_AVAILABLE and job.celery_task_id:
+            try:
+                # Get Celery task result
+                task_result = AsyncResult(job.celery_task_id)
+                
+                if task_result.state == 'PROGRESS':
+                    # Get progress info from Celery task
+                    progress_info = task_result.info
+                    progress_data = {
+                        'status': job.status,
+                        'progress_percentage': progress_info.get('percentage', job.progress_percentage),
+                        'current_step': progress_info.get('description', job.current_step),
+                        'total_steps': progress_info.get('total_steps', job.total_steps),
+                        'started_at': job.started_at.isoformat() if job.started_at else None,
+                        'estimated_completion': None,
+                        'logs': job.training_logs,
+                        'task_state': task_result.state,
+                        'task_info': progress_info
+                    }
+                elif task_result.state == 'SUCCESS':
+                    progress_data = {
+                        'status': 'COMPLETED',
+                        'progress_percentage': 100,
+                        'current_step': 'Training completed successfully',
+                        'total_steps': job.total_steps,
+                        'started_at': job.started_at.isoformat() if job.started_at else None,
+                        'logs': job.training_logs,
+                        'task_state': task_result.state,
+                        'result': task_result.result
+                    }
+                elif task_result.state == 'FAILURE':
+                    progress_data = {
+                        'status': 'FAILED',
+                        'progress_percentage': job.progress_percentage,
+                        'current_step': 'Training failed',
+                        'total_steps': job.total_steps,
+                        'started_at': job.started_at.isoformat() if job.started_at else None,
+                        'logs': job.training_logs,
+                        'task_state': task_result.state,
+                        'error': str(task_result.info)
+                    }
+                else:
+                    # Default to database values
+                    progress_data = {
+                        'status': job.status,
+                        'progress_percentage': job.progress_percentage,
+                        'current_step': job.current_step,
+                        'total_steps': job.total_steps,
+                        'started_at': job.started_at.isoformat() if job.started_at else None,
+                        'logs': job.training_logs,
+                        'task_state': task_result.state
+                    }
+                    
+            except Exception as celery_error:
+                # Fall back to database values if Celery fails
+                progress_data = get_training_progress(str(job_id))
+        else:
+            # Use our pipeline progress tracking
+            progress_data = get_training_progress(str(job_id))
+        
+        if 'error' in progress_data:
+            return Response(progress_data, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({
+            'job_id': str(job.id),
+            'model_id': str(job.model.id),
+            'model_name': job.model.name,
+            'status': job.status,
+            'progress': progress_data,
+            'created_at': job.queued_at,
+            'started_at': job.started_at,
+            'completed_at': job.completed_at,
+            'using_celery': CELERY_AVAILABLE and job.celery_task_id is not None
+        }, status=status.HTTP_200_OK)
+        
+    except TrainingJob.DoesNotExist:
+        return Response({
+            'error': 'Training job not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': f'Progress check failed: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_training(request, job_id):
+    """Cancel a running training job"""
+    try:
+        job = TrainingJob.objects.get(
+            id=job_id,
+            model__user=request.user
+        )
+        
+        # Only allow cancellation of queued or running jobs
+        if job.status not in [TrainingJob.Status.QUEUED, TrainingJob.Status.RUNNING]:
+            return Response({
+                'error': 'Cannot cancel completed or failed training job'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Cancel Celery task if it exists
+        if CELERY_AVAILABLE and job.celery_task_id:
+            try:
+                from celery import current_app
+                current_app.control.revoke(job.celery_task_id, terminate=True)
+            except Exception as celery_error:
+                logger.warning(f"Failed to cancel Celery task {job.celery_task_id}: {celery_error}")
+        
+        # Update job status
+        job.status = TrainingJob.Status.CANCELLED
+        job.completed_at = timezone.now()
+        job.error_message = "Training cancelled by user"
+        job.save()
+        
+        # Update model status
+        job.model.status = MLModel.Status.DRAFT
+        job.model.save()
+        
+        return Response({
+            'message': 'Training job cancelled successfully',
+            'job_id': str(job.id)
+        }, status=status.HTTP_200_OK)
+        
+    except TrainingJob.DoesNotExist:
+        return Response({
+            'error': 'Training job not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': f'Cancellation failed: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def test_model(request, model_id):
+    """Test a trained model with sample data"""
+    try:
+        model = MLModel.objects.get(id=model_id, user=request.user)
+        
+        if model.status != MLModel.Status.COMPLETED:
+            return Response({
+                'error': 'Model must be completed to run tests'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Load trained model
+        model_data = load_trained_model(str(model.id))
+        if not model_data:
+            return Response({
+                'error': 'Failed to load trained model'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Get test data from request or generate sample
+        test_data = request.data.get('test_data')
+        if not test_data:
+            # Generate sample test data
+            import numpy as np
+            import pandas as pd
+            
+            feature_names = model_data['feature_names']
+            n_samples = 10
+            
+            # Generate random test data matching training features
+            test_data = {}
+            for feature in feature_names:
+                if 'rsi' in feature:
+                    test_data[feature] = np.random.uniform(20, 80, n_samples).tolist()
+                elif 'price' in feature or 'sma' in feature or 'ema' in feature:
+                    test_data[feature] = np.random.uniform(100, 3000, n_samples).tolist()
+                elif 'volume' in feature:
+                    test_data[feature] = np.random.uniform(0.5, 3.0, n_samples).tolist()
+                else:
+                    test_data[feature] = np.random.uniform(-2, 2, n_samples).tolist()
+        
+        # Convert to DataFrame
+        test_df = pd.DataFrame(test_data)
+        
+        # Make predictions
+        trained_model = model_data['model']
+        predictions = trained_model.predict(test_df)
+        
+        # Get prediction probabilities if available
+        probabilities = None
+        if hasattr(trained_model, 'predict_proba'):
+            probabilities = trained_model.predict_proba(test_df).tolist()
+        
+        return Response({
+            'model_id': str(model.id),
+            'model_name': model.name,
+            'test_samples': len(test_df),
+            'predictions': predictions.tolist() if hasattr(predictions, 'tolist') else predictions,
+            'probabilities': probabilities,
+            'feature_names': feature_names,
+            'test_data': test_data
+        }, status=status.HTTP_200_OK)
+        
+    except MLModel.DoesNotExist:
+        return Response({
+            'error': 'Model not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': f'Model testing failed: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def deploy_model(request, model_id):
+    """Deploy a model for production use"""
+    try:
+        model = MLModel.objects.get(id=model_id, user=request.user)
+        
+        if model.status != MLModel.Status.COMPLETED:
+            return Response({
+                'error': 'Only completed models can be deployed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if model file exists
+        if not model.model_file_path or not os.path.exists(model.model_file_path):
+            return Response({
+                'error': 'Model file not found'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate model performance meets minimum thresholds
+        min_accuracy = 0.6  # 60% minimum accuracy
+        if model.accuracy and model.accuracy < min_accuracy:
+            return Response({
+                'error': f'Model accuracy ({model.accuracy:.2%}) is below minimum threshold ({min_accuracy:.2%})'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create deployment configuration
+        deployment_config = {
+            'model_id': str(model.id),
+            'model_path': model.model_file_path,
+            'feature_names': model.training_results.get('feature_names', []),
+            'model_type': model.model_type,
+            'target_variable': model.target_variable,
+            'deployment_timestamp': timezone.now().isoformat(),
+            'version': f"v{model.created_at.strftime('%Y%m%d_%H%M%S')}"
+        }
+        
+        # Update model metadata
+        model.status = MLModel.Status.PUBLISHED  # Use PUBLISHED for deployed models
+        deployment_metadata = model.training_results.copy()
+        deployment_metadata['deployment_config'] = deployment_config
+        model.training_results = deployment_metadata
+        model.save()
+        
+        return Response({
+            'message': 'Model deployed successfully',
+            'model_id': str(model.id),
+            'deployment_config': deployment_config,
+            'endpoint_url': f'/api/ai-studio/models/{model.id}/predict/',
+            'deployment_status': 'active'
+        }, status=status.HTTP_200_OK)
+        
+    except MLModel.DoesNotExist:
+        return Response({
+            'error': 'Model not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': f'Deployment failed: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def predict_with_model(request, model_id):
+    """Use a deployed model for prediction"""
+    try:
+        model = MLModel.objects.get(id=model_id, user=request.user)
+        
+        if model.status != MLModel.Status.PUBLISHED:
+            return Response({
+                'error': 'Model must be deployed to make predictions'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Load trained model
+        model_data = load_trained_model(str(model.id))
+        if not model_data:
+            return Response({
+                'error': 'Failed to load trained model'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Get input data
+        input_data = request.data.get('input_data')
+        if not input_data:
+            return Response({
+                'error': 'input_data is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate input features
+        expected_features = model_data['feature_names']
+        missing_features = [f for f in expected_features if f not in input_data]
+        if missing_features:
+            return Response({
+                'error': f'Missing required features: {missing_features}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Prepare input data
+        import pandas as pd
+        input_df = pd.DataFrame([input_data])
+        input_df = input_df[expected_features]  # Ensure correct order
+        
+        # Make prediction
+        trained_model = model_data['model']
+        prediction = trained_model.predict(input_df)[0]
+        
+        # Get confidence/probability if available
+        confidence = None
+        if hasattr(trained_model, 'predict_proba'):
+            probabilities = trained_model.predict_proba(input_df)[0]
+            confidence = float(max(probabilities))
+        elif hasattr(trained_model, 'decision_function'):
+            decision_score = trained_model.decision_function(input_df)[0]
+            confidence = float(abs(decision_score))
+        
+        # Log prediction for monitoring
+        prediction_log = {
+            'model_id': str(model.id),
+            'prediction': str(prediction),
+            'confidence': confidence,
+            'timestamp': timezone.now().isoformat(),
+            'input_features': list(expected_features)
+        }
+        
+        return Response({
+            'model_id': str(model.id),
+            'model_name': model.name,
+            'prediction': prediction,
+            'confidence': confidence,
+            'model_type': model.model_type,
+            'target_variable': model.target_variable,
+            'prediction_log': prediction_log
+        }, status=status.HTTP_200_OK)
+        
+    except MLModel.DoesNotExist:
+        return Response({
+            'error': 'Model not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': f'Prediction failed: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class MarketplaceViewSet(generics.ListAPIView):
@@ -944,12 +1340,45 @@ def system_status(request):
         model_dir = os.path.join(settings.BASE_DIR, 'media', 'ml_models')
         model_files = len([f for f in os.listdir(model_dir) if f.startswith('model_')]) if os.path.exists(model_dir) else 0
         
+        # Celery status
+        celery_status = {
+            'available': CELERY_AVAILABLE,
+            'workers': {},
+            'queues': {}
+        }
+        
+        if CELERY_AVAILABLE:
+            try:
+                from celery import current_app
+                inspect = current_app.control.inspect()
+                
+                # Get active workers
+                active_workers = inspect.active()
+                if active_workers:
+                    celery_status['workers'] = {
+                        'active': len(active_workers),
+                        'details': active_workers
+                    }
+                
+                # Get queue information
+                reserved_tasks = inspect.reserved()
+                active_tasks = inspect.active()
+                if reserved_tasks or active_tasks:
+                    celery_status['queues'] = {
+                        'reserved_tasks': reserved_tasks or {},
+                        'active_tasks': active_tasks or {}
+                    }
+                
+            except Exception as celery_error:
+                celery_status['error'] = str(celery_error)
+        
         return Response({
             'system': {
                 'status': 'healthy',
                 'total_models': total_models,
                 'active_training_jobs': active_training,
-                'model_files': model_files
+                'model_files': model_files,
+                'celery': celery_status
             },
             'user': {
                 'models': user_models,
@@ -962,4 +1391,110 @@ def system_status(request):
     except Exception as e:
         return Response({
             'error': f'Status check failed: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def start_celery_training(request, model_id):
+    """Start model training using Celery (alternative endpoint)"""
+    if not CELERY_AVAILABLE:
+        return Response({
+            'error': 'Celery is not available'
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    
+    try:
+        model = MLModel.objects.get(id=model_id, user=request.user)
+        
+        if model.status not in [MLModel.Status.DRAFT, MLModel.Status.FAILED]:
+            return Response({
+                'error': 'Model must be in DRAFT or FAILED status to start training'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create training job
+        training_job = TrainingJob.objects.create(
+            model=model,
+            status=TrainingJob.Status.QUEUED
+        )
+        
+        # Start Celery task
+        task = celery_start_training.delay(str(model.id), str(training_job.id))
+        
+        # Update training job with task ID
+        training_job.celery_task_id = task.id
+        training_job.save()
+        
+        # Update model status
+        model.status = MLModel.Status.TRAINING
+        model.training_started_at = timezone.now()
+        model.save()
+        
+        return Response({
+            'message': 'Celery training started successfully',
+            'training_job_id': str(training_job.id),
+            'task_id': task.id,
+            'model_id': str(model.id)
+        }, status=status.HTTP_202_ACCEPTED)
+        
+    except MLModel.DoesNotExist:
+        return Response({
+            'error': 'Model not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': f'Failed to start Celery training: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def celery_worker_status(request):
+    """Get detailed Celery worker status"""
+    if not CELERY_AVAILABLE:
+        return Response({
+            'error': 'Celery is not available'
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    
+    try:
+        from celery import current_app
+        inspect = current_app.control.inspect()
+        
+        # Get comprehensive worker information
+        worker_info = {
+            'active_workers': inspect.active() or {},
+            'reserved_tasks': inspect.reserved() or {},
+            'scheduled_tasks': inspect.scheduled() or {},
+            'worker_stats': inspect.stats() or {},
+            'registered_tasks': inspect.registered() or {},
+            'ping_results': inspect.ping() or {}
+        }
+        
+        # Get queue lengths if using Redis
+        queue_info = {}
+        try:
+            from django.conf import settings
+            if 'redis' in settings.CELERY_BROKER_URL:
+                import redis
+                redis_client = redis.Redis.from_url(settings.CELERY_BROKER_URL)
+                
+                # Get queue lengths for different queues
+                queues = ['ml_training', 'trading', 'monitoring', 'maintenance', 'celery']
+                for queue in queues:
+                    try:
+                        queue_length = redis_client.llen(queue)
+                        queue_info[queue] = queue_length
+                    except:
+                        queue_info[queue] = 'unknown'
+        except:
+            queue_info = {'error': 'Could not get queue information'}
+        
+        return Response({
+            'worker_info': worker_info,
+            'queue_info': queue_info,
+            'timestamp': timezone.now()
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to get worker status: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

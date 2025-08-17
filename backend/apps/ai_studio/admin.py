@@ -1,9 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import MLModel, ModelLeasing, TrainingJob, ModelReview, FnOStrategy
+from .models import MLModel, ModelLeasing, TrainingJob, FnOStrategy
 
 
-@admin.register(MLModel)
 class MLModelAdmin(admin.ModelAdmin):
     list_display = [
         'name', 'user_email', 'model_type', 'status_badge', 'is_published',
@@ -69,7 +68,6 @@ class MLModelAdmin(admin.ModelAdmin):
     status_badge.short_description = 'Status'
 
 
-@admin.register(ModelLeasing)
 class ModelLeasingAdmin(admin.ModelAdmin):
     list_display = [
         'lessee_email', 'model_name', 'lease_price', 'status', 
@@ -102,7 +100,6 @@ class ModelLeasingAdmin(admin.ModelAdmin):
     is_active_display.short_description = 'Active Status'
 
 
-@admin.register(TrainingJob)
 class TrainingJobAdmin(admin.ModelAdmin):
     list_display = [
         'model_name', 'status_badge', 'progress_percentage', 'current_step',
@@ -145,31 +142,7 @@ class TrainingJobAdmin(admin.ModelAdmin):
     duration_display.short_description = 'Duration'
 
 
-@admin.register(ModelReview)
-class ModelReviewAdmin(admin.ModelAdmin):
-    list_display = [
-        'model_name', 'reviewer_email', 'rating_display', 'title',
-        'would_recommend', 'created_at'
-    ]
-    list_filter = ['rating', 'would_recommend', 'created_at']
-    search_fields = ['model__name', 'reviewer__email', 'title']
-    readonly_fields = ['id', 'created_at', 'updated_at']
-    
-    def model_name(self, obj):
-        return obj.model.name
-    model_name.short_description = 'Model Name'
-    
-    def reviewer_email(self, obj):
-        return obj.reviewer.email
-    reviewer_email.short_description = 'Reviewer Email'
-    
-    def rating_display(self, obj):
-        stars = '⭐' * obj.rating
-        return f"{stars} ({obj.rating}/5)"
-    rating_display.short_description = 'Rating'
 
-
-@admin.register(FnOStrategy)
 class FnOStrategyAdmin(admin.ModelAdmin):
     list_display = [
         'name', 'strategy_type', 'risk_level_badge', 'minimum_capital',
@@ -238,7 +211,223 @@ class FnOStrategyAdmin(admin.ModelAdmin):
     reset_usage_count.short_description = 'Reset usage count'
 
 
+# Enhanced Admin Actions and Features
+
+class EnhancedMLModelAdmin(MLModelAdmin):
+    """Enhanced ML Model Admin with marketplace features"""
+    
+    actions = ['publish_models', 'unpublish_models', 'bulk_update_prices', 'generate_performance_report']
+    
+    def publish_models(self, request, queryset):
+        """Bulk publish models"""
+        count = 0
+        for model in queryset:
+            if model.status == 'TRAINED':
+                model.is_published = True
+                model.save()
+                count += 1
+        
+        self.message_user(
+            request,
+            f'{count} models were successfully published.',
+            messages.SUCCESS
+        )
+    publish_models.short_description = 'Publish selected models'
+    
+    def unpublish_models(self, request, queryset):
+        """Bulk unpublish models"""
+        count = queryset.update(is_published=False)
+        self.message_user(
+            request,
+            f'{count} models were successfully unpublished.',
+            messages.WARNING
+        )
+    unpublish_models.short_description = 'Unpublish selected models'
+    
+    def bulk_update_prices(self, request, queryset):
+        """Bulk update model prices"""
+        # This would typically open a form for price updates
+        selected = queryset.values_list('id', flat=True)
+        return HttpResponseRedirect(
+            f'/admin/ai-studio/bulk-price-update/?ids={",".join(map(str, selected))}'
+        )
+    bulk_update_prices.short_description = 'Update prices for selected models'
+    
+    def generate_performance_report(self, request, queryset):
+        """Generate performance report for selected models"""
+        # Generate CSV report
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="model_performance_report.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'Model Name', 'Creator', 'Accuracy', 'Sharpe Ratio', 'Total Return',
+            'Max Drawdown', 'Total Leases', 'Total Earnings', 'Status'
+        ])
+        
+        for model in queryset:
+            writer.writerow([
+                model.name,
+                model.user.email,
+                model.accuracy or 0,
+                model.sharpe_ratio or 0,
+                model.total_return or 0,
+                model.max_drawdown or 0,
+                model.total_leases,
+                model.total_earnings or 0,
+                model.get_status_display()
+            ])
+        
+        return response
+    generate_performance_report.short_description = 'Export performance report'
+
+
+# Register the enhanced MLModel admin
+admin.site.register(MLModel, EnhancedMLModelAdmin)
+
+
+# Enhanced Model Leasing Admin
+class EnhancedModelLeasingAdmin(ModelLeasingAdmin):
+    """Enhanced Model Leasing Admin with marketplace features"""
+    
+    actions = ['activate_leases', 'suspend_leases', 'process_payments', 'send_notifications']
+    
+    def activate_leases(self, request, queryset):
+        """Activate selected leases"""
+        count = queryset.filter(payment_status='PAID').update(status='ACTIVE')
+        self.message_user(
+            request,
+            f'{count} paid leases were successfully activated.',
+            messages.SUCCESS
+        )
+    activate_leases.short_description = 'Activate paid leases'
+    
+    def suspend_leases(self, request, queryset):
+        """Suspend selected leases"""
+        count = queryset.update(status='SUSPENDED')
+        self.message_user(
+            request,
+            f'{count} leases were successfully suspended.',
+            messages.WARNING
+        )
+    suspend_leases.short_description = 'Suspend selected leases'
+    
+    def process_payments(self, request, queryset):
+        """Mark payments as processed"""
+        count = queryset.filter(payment_status='PENDING').update(payment_status='PAID')
+        self.message_user(
+            request,
+            f'{count} payments were marked as processed.',
+            messages.SUCCESS
+        )
+    process_payments.short_description = 'Mark payments as processed'
+    
+    def send_notifications(self, request, queryset):
+        """Send notifications to users"""
+        # This would integrate with a notification system
+        count = queryset.count()
+        self.message_user(
+            request,
+            f'Notifications sent for {count} leases.',
+            messages.INFO
+        )
+    send_notifications.short_description = 'Send notifications'
+
+
+# Register the enhanced ModelLeasing admin
+admin.site.register(ModelLeasing, EnhancedModelLeasingAdmin)
+
+# Register other admin classes
+admin.site.register(TrainingJob, TrainingJobAdmin)
+admin.site.register(FnOStrategy, FnOStrategyAdmin)
+
+
+# Custom Admin Site with Marketplace Dashboard
+class ShareWiseAdminSite(admin.AdminSite):
+    """Custom admin site with enhanced marketplace features"""
+    
+    site_header = "ShareWise AI Marketplace Administration"
+    site_title = "ShareWise AI Admin"
+    index_title = "Marketplace Management Dashboard"
+    
+    def get_urls(self):
+        from django.urls import path
+        from .admin_views import (
+            MarketplaceDashboardView, marketplace_analytics_api,
+            export_marketplace_data, model_moderation_action
+        )
+        
+        urls = super().get_urls()
+        custom_urls = [
+            path('marketplace-dashboard/', MarketplaceDashboardView.as_view(), name='marketplace_dashboard'),
+            path('marketplace-analytics/', marketplace_analytics_api, name='marketplace_analytics'),
+            path('export-data/', export_marketplace_data, name='export_marketplace_data'),
+            path('moderate-model/', model_moderation_action, name='moderate_model'),
+        ]
+        return custom_urls + urls
+    
+    def index(self, request, extra_context=None):
+        """Override admin index to show marketplace dashboard link"""
+        extra_context = extra_context or {}
+        extra_context['marketplace_dashboard_url'] = '/admin/marketplace-dashboard/'
+        return super().index(request, extra_context)
+
+
+# Enhanced User Admin for marketplace management
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class MarketplaceUserAdmin(BaseUserAdmin):
+    """Enhanced user admin with marketplace statistics"""
+    
+    list_display = BaseUserAdmin.list_display + (
+        'models_created_count', 'models_leased_count', 'total_earned', 'total_spent'
+    )
+    
+    def models_created_count(self, obj):
+        return obj.created_models.count()
+    models_created_count.short_description = 'Models Created'
+    
+    def models_leased_count(self, obj):
+        return obj.leased_models.count()
+    models_leased_count.short_description = 'Models Leased'
+    
+    def total_earned(self, obj):
+        total = obj.created_models.aggregate(
+            total=Sum('leases__creator_earnings')
+        )['total'] or Decimal('0')
+        return f"₹{total}"
+    total_earned.short_description = 'Total Earned'
+    
+    def total_spent(self, obj):
+        total = obj.leased_models.aggregate(
+            total=Sum('lease_price')
+        )['total'] or Decimal('0')
+        return f"₹{total}"
+    total_spent.short_description = 'Total Spent'
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related(
+            'created_models', 'leased_models'
+        )
+
+# Re-register User with enhanced admin
+if admin.site.is_registered(User):
+    admin.site.unregister(User)
+admin.site.register(User, MarketplaceUserAdmin)
+
+
+# Add necessary imports
+from django.contrib import messages
+from django.http import HttpResponseRedirect, HttpResponse
+from django.db.models import Sum
+from decimal import Decimal
+import csv
+
+
 # Customize admin site header
-admin.site.site_header = "ShareWise AI Admin"
+admin.site.site_header = "ShareWise AI Marketplace Administration"
 admin.site.site_title = "ShareWise AI Admin Portal"
-admin.site.index_title = "Welcome to ShareWise AI Administration"
+admin.site.index_title = "Marketplace Management Dashboard"

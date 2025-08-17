@@ -35,13 +35,14 @@ def register_user(request):
                 'error': 'A user with this username already exists.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Create user but don't activate yet
+        # Create user as TENANT_ADMIN but don't activate yet
         user = User.objects.create_user(
             email=email,
             username=username,
             password=serializer.validated_data['password'],
             first_name=serializer.validated_data['first_name'],
             last_name=serializer.validated_data['last_name'],
+            role=User.Role.TENANT_ADMIN,  # Set as Tenant Admin by default
             is_active=False,  # User inactive until email verified
             email_verified=False
         )

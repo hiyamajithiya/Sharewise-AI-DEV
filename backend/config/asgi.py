@@ -21,13 +21,39 @@ django_asgi_app = get_asgi_application()
 # Import channels routing after Django setup
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
+from channels.security.websocket import AllowedHostsOriginValidator
+
+# Import routing modules
 import apps.market_data.routing
+
+# Import additional routing if available
+try:
+    import apps.trading.routing
+    TRADING_ROUTING_AVAILABLE = True
+except ImportError:
+    TRADING_ROUTING_AVAILABLE = False
+
+try:
+    import apps.ai_studio.routing
+    AI_STUDIO_ROUTING_AVAILABLE = True
+except ImportError:
+    AI_STUDIO_ROUTING_AVAILABLE = False
+
+# Build websocket URL patterns
+websocket_urlpatterns = []
+websocket_urlpatterns.extend(apps.market_data.routing.websocket_urlpatterns)
+
+if TRADING_ROUTING_AVAILABLE:
+    websocket_urlpatterns.extend(apps.trading.routing.websocket_urlpatterns)
+
+if AI_STUDIO_ROUTING_AVAILABLE:
+    websocket_urlpatterns.extend(apps.ai_studio.routing.websocket_urlpatterns)
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            apps.market_data.routing.websocket_urlpatterns
+    "websocket": AllowedHostsOriginValidator(
+        AuthMiddlewareStack(
+            URLRouter(websocket_urlpatterns)
         )
     ),
 })

@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from decimal import Decimal
-from .models import TradingSignal, TradingOrder, FuturesOptionsData
+from .models import (
+    TradingSignal, TradingOrder, FuturesOptionsData,
+    TradingStrategy, TradeApproval, AutomatedTradeExecution, PortfolioPosition
+)
 
 
 class TradingSignalSerializer(serializers.ModelSerializer):
@@ -394,3 +397,228 @@ class TradingDashboardSerializer(serializers.Serializer):
     recent_signals = TradingSignalSerializer(many=True)
     recent_orders = TradingOrderSerializer(many=True)
     fo_positions = FOPositionSerializer(many=True, required=False)
+
+
+# Trading Automation Serializers
+
+class TradingStrategySerializer(serializers.ModelSerializer):
+    """Serializer for trading strategies"""
+    win_rate = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = TradingStrategy
+        fields = [
+            'id', 'name', 'description', 'assigned_broker_account', 'ml_model',
+            'status', 'auto_execute', 'max_position_size', 'max_daily_loss', 
+            'max_open_positions', 'total_trades', 'winning_trades', 'total_pnl',
+            'created_at', 'updated_at', 'win_rate'
+        ]
+        read_only_fields = ['id', 'total_trades', 'winning_trades', 'total_pnl', 'created_at', 'updated_at']
+
+
+class TradingStrategyCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating trading strategies"""
+    
+    class Meta:
+        model = TradingStrategy
+        fields = [
+            'name', 'description', 'assigned_broker_account', 'ml_model',
+            'auto_execute', 'max_position_size', 'max_daily_loss', 'max_open_positions'
+        ]
+
+    def validate_max_position_size(self, value):
+        """Validate position size"""
+        if value < 1000:
+            raise serializers.ValidationError("Minimum position size is ₹1,000")
+        return value
+
+    def validate_max_daily_loss(self, value):
+        """Validate daily loss limit"""
+        if value < 100:
+            raise serializers.ValidationError("Minimum daily loss limit is ₹100")
+        return value
+
+
+class TradeApprovalSerializer(serializers.ModelSerializer):
+    """Serializer for trade approvals"""
+    signal_details = serializers.SerializerMethodField()
+    strategy_name = serializers.CharField(source='strategy.name', read_only=True)
+    time_remaining = serializers.ReadOnlyField()
+    is_expired = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = TradeApproval
+        fields = [
+            'id', 'status', 'proposed_quantity', 'proposed_price', 'proposed_broker_account',
+            'approved_quantity', 'approved_price', 'rejection_reason', 'expires_at',
+            'approved_at', 'executed_at', 'notification_sent', 'reminder_sent',
+            'created_at', 'updated_at', 'signal_details', 'strategy_name', 
+            'time_remaining', 'is_expired'
+        ]
+        read_only_fields = [
+            'id', 'status', 'proposed_quantity', 'proposed_price', 'proposed_broker_account',
+            'expires_at', 'approved_at', 'executed_at', 'notification_sent', 'reminder_sent',
+            'created_at', 'updated_at', 'time_remaining', 'is_expired'
+        ]
+
+    def get_signal_details(self, obj):
+        """Get signal details"""
+        signal = obj.signal
+        return {
+            'id': str(signal.id),
+            'symbol': signal.symbol,
+            'signal_type': signal.signal_type,
+            'instrument_type': signal.instrument_type,
+            'entry_price': float(signal.entry_price),
+            'target_price': float(signal.target_price) if signal.target_price else None,
+            'stop_loss': float(signal.stop_loss) if signal.stop_loss else None,
+            'confidence_score': float(signal.confidence_score),
+            'strategy_name': signal.strategy_name
+        }
+
+
+class TradeApprovalDecisionSerializer(serializers.Serializer):
+    """Serializer for trade approval decisions"""
+    action = serializers.ChoiceField(choices=['approve', 'reject'])
+    approved_quantity = serializers.IntegerField(min_value=1, required=False)
+    approved_price = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    rejection_reason = serializers.CharField(max_length=500, required=False)
+
+    def validate(self, data):
+        """Validate approval decision"""
+        action = data.get('action')
+        
+        if action == 'approve':
+            if not data.get('approved_quantity') and not data.get('approved_price'):
+                # Will use proposed values
+                pass
+        elif action == 'reject':
+            if not data.get('rejection_reason'):
+                raise serializers.ValidationError("Rejection reason is required when rejecting")
+        
+        return data
+
+
+class AutomatedTradeExecutionSerializer(serializers.ModelSerializer):
+    """Serializer for automated trade executions"""
+    signal_details = serializers.SerializerMethodField()
+    strategy_name = serializers.CharField(source='strategy.name', read_only=True)
+    is_position_open = serializers.ReadOnlyField()
+    entry_order_details = serializers.SerializerMethodField()
+    exit_orders_details = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = AutomatedTradeExecution
+        fields = [
+            'id', 'status', 'entry_executed_at', 'exit_executed_at', 'total_pnl',
+            'fees_paid', 'error_message', 'retry_count', 'created_at', 'updated_at',
+            'signal_details', 'strategy_name', 'is_position_open', 
+            'entry_order_details', 'exit_orders_details'
+        ]
+        read_only_fields = [
+            'id', 'status', 'entry_executed_at', 'exit_executed_at', 'total_pnl',
+            'fees_paid', 'error_message', 'retry_count', 'created_at', 'updated_at'
+        ]
+
+    def get_signal_details(self, obj):
+        """Get signal details"""
+        signal = obj.signal
+        return {
+            'id': str(signal.id),
+            'symbol': signal.symbol,
+            'signal_type': signal.signal_type,
+            'entry_price': float(signal.entry_price),
+            'confidence_score': float(signal.confidence_score)
+        }
+
+    def get_entry_order_details(self, obj):
+        """Get entry order details"""
+        if not obj.entry_order:
+            return None
+        
+        order = obj.entry_order
+        return {
+            'id': str(order.id),
+            'status': order.status,
+            'quantity': order.quantity,
+            'price': float(order.price) if order.price else None,
+            'average_price': float(order.average_price) if order.average_price else None,
+            'filled_quantity': order.filled_quantity
+        }
+
+    def get_exit_orders_details(self, obj):
+        """Get exit orders details"""
+        exit_orders = {}
+        
+        if obj.stop_loss_order:
+            exit_orders['stop_loss'] = {
+                'id': str(obj.stop_loss_order.id),
+                'status': obj.stop_loss_order.status,
+                'trigger_price': float(obj.stop_loss_order.trigger_price) if obj.stop_loss_order.trigger_price else None
+            }
+        
+        if obj.target_order:
+            exit_orders['target'] = {
+                'id': str(obj.target_order.id),
+                'status': obj.target_order.status,
+                'price': float(obj.target_order.price) if obj.target_order.price else None
+            }
+        
+        return exit_orders if exit_orders else None
+
+
+class PortfolioPositionSerializer(serializers.ModelSerializer):
+    """Serializer for portfolio positions"""
+    current_value = serializers.ReadOnlyField()
+    pnl_percentage = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = PortfolioPosition
+        fields = [
+            'id', 'symbol', 'instrument_type', 'position_type', 'total_quantity',
+            'available_quantity', 'average_price', 'current_price', 'unrealized_pnl',
+            'realized_pnl', 'broker_positions', 'last_updated', 'created_at',
+            'current_value', 'pnl_percentage'
+        ]
+        read_only_fields = [
+            'id', 'unrealized_pnl', 'realized_pnl', 'last_updated', 'created_at'
+        ]
+
+
+class AutomationEngineRequestSerializer(serializers.Serializer):
+    """Serializer for automation engine requests"""
+    signal_id = serializers.UUIDField()
+    
+    def validate_signal_id(self, value):
+        """Validate signal exists"""
+        from .models import TradingSignal
+        try:
+            TradingSignal.objects.get(id=value)
+        except TradingSignal.DoesNotExist:
+            raise serializers.ValidationError("Signal not found")
+        return value
+
+
+class AutomationStatsSerializer(serializers.Serializer):
+    """Serializer for automation statistics"""
+    total_strategies = serializers.IntegerField()
+    active_strategies = serializers.IntegerField()
+    total_executions_today = serializers.IntegerField()
+    successful_executions_today = serializers.IntegerField()
+    pending_approvals = serializers.IntegerField()
+    total_pnl_today = serializers.DecimalField(max_digits=15, decimal_places=2)
+    open_positions = serializers.IntegerField()
+    automation_success_rate = serializers.FloatField()
+    avg_execution_time = serializers.FloatField()
+
+
+class TradingSystemHealthSerializer(serializers.Serializer):
+    """Serializer for trading system health status"""
+    overall_status = serializers.ChoiceField(choices=['healthy', 'warning', 'critical'])
+    broker_connections = serializers.DictField()
+    market_data_status = serializers.CharField()
+    automation_engine_status = serializers.CharField()
+    last_signal_generated = serializers.DateTimeField(allow_null=True)
+    active_executions = serializers.IntegerField()
+    system_alerts = serializers.ListField()
+    uptime_percentage = serializers.FloatField()

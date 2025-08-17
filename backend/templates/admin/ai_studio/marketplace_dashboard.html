@@ -1,0 +1,524 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Marketplace Dashboard - {{ block.super }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+.dashboard-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: 300;
+}
+
+.dashboard-header p {
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1em;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    border-left: 4px solid #667eea;
+}
+
+.stat-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-change {
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+
+.stat-change.positive {
+    color: #10B981;
+}
+
+.stat-change.negative {
+    color: #EF4444;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.chart-container {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.chart-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.table-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.table-header {
+    background: #f8f9fa;
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.data-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+.data-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: 500;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.actions-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-success {
+    background: #10B981;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #0d9668;
+}
+
+.metric-highlight {
+    background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.chart-placeholder {
+    height: 300px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .actions-bar {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1>ShareWise AI Marketplace</h1>
+        <p>Comprehensive Analytics & Management Dashboard</p>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="actions-bar">
+        <a href="{% url 'admin:ai_studio_mlmodel_changelist' %}" class="btn btn-primary">Manage Models</a>
+        <a href="{% url 'admin:ai_studio_modelleasing_changelist' %}" class="btn btn-primary">Manage Leases</a>
+        <a href="{% url 'admin:ai_studio_trainingjob_changelist' %}" class="btn btn-secondary">Training Jobs</a>
+        <a href="?export=models" class="btn btn-success">Export Models</a>
+        <a href="?export=leases" class="btn btn-success">Export Leases</a>
+        <a href="?export=users" class="btn btn-success">Export Users</a>
+    </div>
+
+    <!-- Key Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_models }}</div>
+            <div class="stat-label">Total Models</div>
+            <div class="stat-change positive">+{{ models_this_week }} this week</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">{{ published_models }}</div>
+            <div class="stat-label">Published Models</div>
+            <div class="stat-change">{{ active_models }} currently active</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">{{ total_leases }}</div>
+            <div class="stat-label">Total Leases</div>
+            <div class="stat-change positive">+{{ leases_this_week }} this week</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">₹{{ total_revenue|floatformat:0 }}</div>
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-change">₹{{ platform_revenue|floatformat:0 }} platform share</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-change">{{ model_creators }} creators</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">{{ running_jobs }}</div>
+            <div class="stat-label">Active Training</div>
+            <div class="stat-change">{{ completed_jobs }} completed</div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-grid">
+        <div class="chart-container">
+            <div class="chart-title">Marketplace Activity Trends (Last 30 Days)</div>
+            <div class="chart-placeholder">
+                <div>
+                    Interactive charts showing daily models, leases, and revenue trends.<br>
+                    <em>Chart implementation would use Chart.js or similar library</em>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Model Type Distribution</div>
+            <div class="chart-placeholder">
+                <div>
+                    Pie chart showing distribution of model types:<br>
+                    • Technical Analysis<br>
+                    • Fundamental Analysis<br>
+                    • Sentiment Analysis<br>
+                    • F&O Strategies
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performing Models -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Top Performing Models</h3>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Creator</th>
+                    <th>Type</th>
+                    <th>Accuracy</th>
+                    <th>Sharpe Ratio</th>
+                    <th>Total Leases</th>
+                    <th>Earnings</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model in top_models %}
+                <tr>
+                    <td>
+                        <a href="{% url 'admin:ai_studio_mlmodel_change' model.id %}">
+                            {{ model.name|truncatechars:30 }}
+                        </a>
+                    </td>
+                    <td>{{ model.user.email }}</td>
+                    <td>{{ model.get_model_type_display }}</td>
+                    <td>{{ model.accuracy|floatformat:3 }}%</td>
+                    <td>{{ model.sharpe_ratio|floatformat:2 }}</td>
+                    <td>{{ model.lease_count }}</td>
+                    <td>₹{{ model.total_earnings|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #666;">No models available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent Leases -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Recent Leases</h3>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Model</th>
+                    <th>Lessee</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Start Date</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lease in recent_leases %}
+                <tr>
+                    <td>
+                        <a href="{% url 'admin:ai_studio_mlmodel_change' lease.model.id %}">
+                            {{ lease.model.name|truncatechars:25 }}
+                        </a>
+                    </td>
+                    <td>{{ lease.lessee.email }}</td>
+                    <td>₹{{ lease.lease_price }}</td>
+                    <td>
+                        <span class="status-badge {% if lease.status == 'ACTIVE' %}status-active{% elif lease.status == 'PENDING' %}status-pending{% else %}status-inactive{% endif %}">
+                            {{ lease.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ lease.start_date|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="status-badge {% if lease.payment_status == 'PAID' %}status-active{% else %}status-pending{% endif %}">
+                            {{ lease.get_payment_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #666;">No recent leases</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent Models -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Recently Created Models</h3>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Creator</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Published</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model in recent_models %}
+                <tr>
+                    <td>
+                        <a href="{% url 'admin:ai_studio_mlmodel_change' model.id %}">
+                            {{ model.name|truncatechars:25 }}
+                        </a>
+                    </td>
+                    <td>{{ model.user.email }}</td>
+                    <td>{{ model.get_model_type_display }}</td>
+                    <td>
+                        <span class="status-badge {% if model.status == 'TRAINED' %}status-active{% elif model.status == 'TRAINING' %}status-pending{% else %}status-inactive{% endif %}">
+                            {{ model.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if model.is_published %}
+                            <span class="status-badge status-active">Published</span>
+                        {% else %}
+                            <span class="status-badge status-inactive">Unpublished</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ model.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if not model.is_published and model.status == 'TRAINED' %}
+                            <button class="btn btn-success" onclick="moderateModel('{{ model.id }}', 'approve')">
+                                Approve
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #666;">No recent models</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- System Health Overview -->
+    <div class="metric-highlight">
+        <h3 style="margin: 0 0 10px 0;">System Health Overview</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div>
+                <strong>Training Jobs:</strong><br>
+                Running: {{ running_jobs }} | Failed: {{ failed_jobs }}
+            </div>
+            <div>
+                <strong>F&O Strategies:</strong><br>
+                Active: {{ active_fno_strategies }} / {{ total_fno_strategies }}
+            </div>
+            <div>
+                <strong>Revenue Share:</strong><br>
+                Platform: ₹{{ platform_revenue|floatformat:0 }} | Creators: ₹{{ creator_earnings|floatformat:0 }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function moderateModel(modelId, action) {
+    const reason = prompt('Please provide a reason for this action:');
+    if (reason === null) return;
+    
+    fetch('/admin/ai-studio/moderate-model/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `model_id=${modelId}&action=${action}&reason=${encodeURIComponent(reason)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+// Auto-refresh every 5 minutes
+setTimeout(() => {
+    location.reload();
+}, 300000);
+</script>
+{% endblock %}

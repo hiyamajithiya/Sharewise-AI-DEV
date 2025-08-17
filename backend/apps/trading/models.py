@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from apps.users.models import CustomUser
+from django.utils import timezone
 
 
 class TradingSignal(models.Model):
@@ -105,6 +106,22 @@ class TradingSignal(models.Model):
     
     market_data = models.JSONField(default=dict,
                                  help_text="Technical indicators, news sentiment")
+    
+    # Explainable AI (XAI) fields
+    ai_justification = models.TextField(blank=True,
+                                      help_text="Human-readable explanation of why this signal was generated")
+    
+    feature_importance = models.JSONField(default=dict,
+                                        help_text="SHAP feature importance values explaining the signal")
+    
+    shap_values = models.JSONField(default=dict,
+                                 help_text="SHAP values for each feature contributing to the decision")
+    
+    risk_reward_ratio = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
+                                          help_text="Risk to reward ratio for this signal")
+    
+    probability_explanation = models.JSONField(default=dict,
+                                             help_text="Breakdown of factors contributing to confidence score")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -377,3 +394,274 @@ class FuturesOptionsData(models.Model):
         """Calculate moneyness for options (requires current price)"""
         # This would need current underlying price to calculate ITM/OTM/ATM
         return None
+
+
+class TradingStrategy(models.Model):
+    """Trading strategies that can be assigned to specific broker accounts"""
+    
+    class Status(models.TextChoices):
+        ACTIVE = 'ACTIVE', 'Active'
+        PAUSED = 'PAUSED', 'Paused'
+        STOPPED = 'STOPPED', 'Stopped'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='trading_strategies')
+    
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    
+    # Strategy assignment
+    assigned_broker_account = models.CharField(max_length=100, blank=True, 
+                                             help_text="Broker account ID for trade execution")
+    
+    # ML Model reference (if using AI Studio model)
+    ml_model = models.ForeignKey('ai_studio.MLModel', on_delete=models.SET_NULL, 
+                               null=True, blank=True, related_name='trading_strategies')
+    
+    # Strategy settings
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PAUSED)
+    auto_execute = models.BooleanField(default=False, 
+                                     help_text="Auto-execute trades without user approval")
+    
+    # Risk management
+    max_position_size = models.DecimalField(max_digits=15, decimal_places=2, default=10000.00)
+    max_daily_loss = models.DecimalField(max_digits=15, decimal_places=2, default=5000.00)
+    max_open_positions = models.PositiveIntegerField(default=5)
+    
+    # Performance tracking
+    total_trades = models.IntegerField(default=0)
+    winning_trades = models.IntegerField(default=0)
+    total_pnl = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Trading Strategy'
+        verbose_name_plural = 'Trading Strategies'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} - {self.user.email}"
+    
+    @property
+    def win_rate(self):
+        if self.total_trades == 0:
+            return 0
+        return (self.winning_trades / self.total_trades) * 100
+
+
+class TradeApproval(models.Model):
+    """Trade approval workflow for signals requiring user confirmation"""
+    
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pending Approval'
+        APPROVED = 'APPROVED', 'Approved'
+        REJECTED = 'REJECTED', 'Rejected'
+        EXPIRED = 'EXPIRED', 'Expired'
+        EXECUTED = 'EXECUTED', 'Executed'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    signal = models.OneToOneField(TradingSignal, on_delete=models.CASCADE, related_name='approval')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='trade_approvals')
+    strategy = models.ForeignKey(TradingStrategy, on_delete=models.CASCADE, related_name='approvals')
+    
+    # Approval details
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    
+    # Proposed trade details
+    proposed_quantity = models.PositiveIntegerField()
+    proposed_price = models.DecimalField(max_digits=12, decimal_places=2)
+    proposed_broker_account = models.CharField(max_length=100)
+    
+    # User decision
+    approved_quantity = models.PositiveIntegerField(null=True, blank=True)
+    approved_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    rejection_reason = models.TextField(blank=True)
+    
+    # Timing
+    expires_at = models.DateTimeField()
+    approved_at = models.DateTimeField(null=True, blank=True)
+    executed_at = models.DateTimeField(null=True, blank=True)
+    
+    # Notifications
+    notification_sent = models.BooleanField(default=False)
+    reminder_sent = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Approval for {self.signal.symbol} - {self.status}"
+    
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+    @property
+    def time_remaining(self):
+        if self.is_expired:
+            return "Expired"
+        remaining = self.expires_at - timezone.now()
+        return f"{remaining.seconds // 60} minutes"
+
+
+class AutomatedTradeExecution(models.Model):
+    """Track automated trade executions and their lifecycle"""
+    
+    class ExecutionStatus(models.TextChoices):
+        QUEUED = 'QUEUED', 'Queued for Execution'
+        EXECUTING = 'EXECUTING', 'Executing'
+        COMPLETED = 'COMPLETED', 'Completed'
+        FAILED = 'FAILED', 'Failed'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    signal = models.ForeignKey(TradingSignal, on_delete=models.CASCADE, related_name='executions')
+    strategy = models.ForeignKey(TradingStrategy, on_delete=models.CASCADE, related_name='executions')
+    approval = models.ForeignKey(TradeApproval, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Execution details
+    status = models.CharField(max_length=20, choices=ExecutionStatus.choices, default=ExecutionStatus.QUEUED)
+    
+    # Entry order
+    entry_order = models.OneToOneField(TradingOrder, on_delete=models.SET_NULL, 
+                                     null=True, blank=True, related_name='entry_execution')
+    
+    # Exit orders (SL and Target)
+    stop_loss_order = models.OneToOneField(TradingOrder, on_delete=models.SET_NULL, 
+                                         null=True, blank=True, related_name='sl_execution')
+    target_order = models.OneToOneField(TradingOrder, on_delete=models.SET_NULL, 
+                                      null=True, blank=True, related_name='target_execution')
+    
+    # Execution results
+    entry_executed_at = models.DateTimeField(null=True, blank=True)
+    exit_executed_at = models.DateTimeField(null=True, blank=True)
+    
+    total_pnl = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    fees_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Error handling
+    error_message = models.TextField(blank=True)
+    retry_count = models.PositiveIntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Execution for {self.signal.symbol} - {self.status}"
+    
+    @property
+    def is_position_open(self):
+        """Check if position is still open"""
+        return (self.entry_order and self.entry_order.is_executed and 
+                not (self.stop_loss_order and self.stop_loss_order.is_executed) and
+                not (self.target_order and self.target_order.is_executed))
+
+
+class PortfolioPosition(models.Model):
+    """Aggregated portfolio positions across all brokers"""
+    
+    class PositionType(models.TextChoices):
+        LONG = 'LONG', 'Long Position'
+        SHORT = 'SHORT', 'Short Position'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='portfolio_positions')
+    
+    # Position details
+    symbol = models.CharField(max_length=50)
+    instrument_type = models.CharField(max_length=20)
+    position_type = models.CharField(max_length=10, choices=PositionType.choices)
+    
+    # Quantities
+    total_quantity = models.IntegerField(default=0)
+    available_quantity = models.IntegerField(default=0)  # Available for sale
+    
+    # Pricing
+    average_price = models.DecimalField(max_digits=12, decimal_places=2)
+    current_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    
+    # P&L
+    unrealized_pnl = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    realized_pnl = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    
+    # Broker allocation
+    broker_positions = models.JSONField(default=dict, 
+                                      help_text="Breakdown by broker account")
+    
+    # Metadata
+    last_updated = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'symbol', 'instrument_type']
+        ordering = ['-last_updated']
+    
+    def __str__(self):
+        return f"{self.symbol} - {self.total_quantity} ({self.position_type})"
+    
+    @property
+    def current_value(self):
+        """Calculate current market value"""
+        if self.current_price:
+            return self.total_quantity * self.current_price
+        return self.total_quantity * self.average_price
+    
+    @property
+    def pnl_percentage(self):
+        """Calculate P&L percentage"""
+        if self.average_price > 0:
+            return ((self.current_price or self.average_price) - self.average_price) / self.average_price * 100
+        return 0
+
+
+class LimitType(models.TextChoices):
+    """Types of usage limits"""
+    DAILY_SIGNALS = 'DAILY_SIGNALS', 'Daily Signal Generation'
+    MONTHLY_SIGNALS = 'MONTHLY_SIGNALS', 'Monthly Signal Generation'
+    DAILY_BACKTESTS = 'DAILY_BACKTESTS', 'Daily Backtests'
+    MONTHLY_BACKTESTS = 'MONTHLY_BACKTESTS', 'Monthly Backtests'
+    ACTIVE_STRATEGIES = 'ACTIVE_STRATEGIES', 'Active Strategies'
+    API_CALLS_DAILY = 'API_CALLS_DAILY', 'Daily API Calls'
+    PORTFOLIO_POSITIONS = 'PORTFOLIO_POSITIONS', 'Portfolio Positions'
+    DATA_EXPORT_MONTHLY = 'DATA_EXPORT_MONTHLY', 'Monthly Data Exports'
+
+
+class UsageTracker(models.Model):
+    """Track usage for each user and limit type"""
+    
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='usage_trackers')
+    limit_type = models.CharField(max_length=30, choices=LimitType.choices)
+    
+    # Usage counters
+    daily_count = models.PositiveIntegerField(default=0)
+    monthly_count = models.PositiveIntegerField(default=0)
+    
+    # Reset tracking
+    last_daily_reset = models.DateField(auto_now_add=True)
+    last_monthly_reset = models.DateField(auto_now_add=True)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['user', 'limit_type']
+        db_table = 'trading_usage_tracker'
+        verbose_name = 'Usage Tracker'
+        verbose_name_plural = 'Usage Trackers'
+        indexes = [
+            models.Index(fields=['user', 'limit_type']),
+            models.Index(fields=['last_daily_reset']),
+            models.Index(fields=['last_monthly_reset']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.limit_type}: {self.daily_count}/{self.monthly_count}"
