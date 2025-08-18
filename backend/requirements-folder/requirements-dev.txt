@@ -66,5 +66,5 @@ gitpython==3.1.43
 responses==0.25.3
 
 # Debugging
-pdb++==0.10.3
+pdbpp==0.10.3
 ipdb==0.13.13
