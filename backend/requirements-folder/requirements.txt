@@ -7,7 +7,7 @@ django-extensions==3.2.3
 django-environ==0.11.2
 
 # Database and ORM
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 django-postgres-extra==2.0.8
 
 # Async and Real-time
@@ -19,14 +19,14 @@ kombu==5.4.2
 django-celery-results==2.5.1
 
 # Machine Learning and Data Science
-numpy==1.26.4
+numpy==2.1.3
 pandas==2.2.3
 scikit-learn==1.5.2
 joblib==1.4.2
-shap==0.45.1
+shap==0.46.0
 
 # Advanced ML Libraries (Optional - for deep learning)
-torch==2.4.1
+torch==2.5.1
 pytorch-lightning==2.4.0
 optuna==3.6.1
 tensorboard==2.17.1
