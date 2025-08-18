@@ -61,6 +61,19 @@ const ThemedApp: React.FC = () => {
             <Route path="analytics" element={<Analytics />} />
             <Route path="custom-tools" element={<CustomTools />} />
             <Route path="settings" element={<Settings />} />
+            {/* Admin routes */}
+            <Route path="users" element={<Dashboard />} />
+            <Route path="trading-monitor" element={<Dashboard />} />
+            <Route path="support-center" element={<Dashboard />} />
+            <Route path="system-settings" element={<Settings />} />
+            {/* Support routes */}
+            <Route path="support-tickets" element={<Dashboard />} />
+            <Route path="user-assistance" element={<Dashboard />} />
+            <Route path="knowledge-base" element={<Dashboard />} />
+            {/* Sales routes */}
+            <Route path="leads" element={<Dashboard />} />
+            <Route path="sales-analytics" element={<Dashboard />} />
+            <Route path="demos" element={<Dashboard />} />
           </Route>
           
           {/* Catch all route */}

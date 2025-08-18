@@ -88,8 +88,15 @@ except (ImportError, redis.ConnectionError):
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        },
+        'sessions': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'session-cache',
         }
     }
+    # Use database-backed sessions when Redis is not available
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+    SESSION_CACHE_ALIAS = 'default'
     # Also fallback Channels to in-memory
     CHANNEL_LAYERS = {
         'default': {

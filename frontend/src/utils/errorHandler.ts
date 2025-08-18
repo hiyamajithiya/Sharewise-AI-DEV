@@ -119,9 +119,6 @@ export class ErrorHandler {
   }
 }
 
-// Export types for TypeScript users
-export type { EnhancedError };
-
 // Export helper functions
 export const {
   getUserMessage,

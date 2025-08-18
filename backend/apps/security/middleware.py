@@ -212,7 +212,7 @@ class RateLimitMiddleware(MiddlewareMixin):
         """Generate unique key for rate limiting"""
         
         # For authenticated users, use user ID
-        if request.user.is_authenticated:
+        if hasattr(request, 'user') and request.user.is_authenticated:
             base_key = f"user:{request.user.id}"
         else:
             # For anonymous users, use IP address
@@ -252,7 +252,7 @@ class RateLimitMiddleware(MiddlewareMixin):
         
         # General API endpoints
         elif path.startswith('/api/'):
-            if request.user.is_authenticated:
+            if hasattr(request, 'user') and request.user.is_authenticated:
                 # Check if user has premium subscription
                 if hasattr(request.user, 'subscription') and request.user.subscription.tier == 'premium':
                     return 'api_premium'

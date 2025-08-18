@@ -52,10 +52,16 @@ const Dashboard: React.FC = () => {
     try {
       const apiService = (await import('../services/api')).default;
       const roleData = await apiService.get('/users/roles/');
+      console.log('User role data:', roleData);
       setUserRole(roleData);
     } catch (error) {
       console.error('Failed to fetch user role:', error);
-      setUserRole({ permissions: { is_staff_member: false } });
+      // If the user is logged in as super admin, show the panel anyway
+      if (user?.role === 'SUPER_ADMIN') {
+        setUserRole({ permissions: { is_super_admin: true, is_staff_member: true } });
+      } else {
+        setUserRole({ permissions: { is_staff_member: false } });
+      }
     }
   };
 
@@ -95,7 +101,10 @@ const Dashboard: React.FC = () => {
   };
 
 
-  const canAccessRoleTesting = userRole?.permissions?.is_super_admin || userRole?.permissions?.is_support_team;
+  const canAccessRoleTesting = userRole?.permissions?.is_super_admin || 
+                                userRole?.permissions?.is_support_team || 
+                                user?.role === 'SUPER_ADMIN' ||
+                                user?.role === 'SUPPORT';
 
   useEffect(() => {
     fetchUserRole();
@@ -103,10 +112,13 @@ const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    console.log('Current user:', user);
+    console.log('User role:', userRole);
+    console.log('Can access role testing:', canAccessRoleTesting);
     if (canAccessRoleTesting) {
       fetchAllUsers();
     }
-  }, [canAccessRoleTesting]);
+  }, [canAccessRoleTesting, user, userRole]);
 
   const portfolioStats = {
     totalValue: 125000,
