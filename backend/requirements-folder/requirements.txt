@@ -7,9 +7,7 @@ django-extensions==4.1.0
 django-environ==0.12.0
 
 # Database and ORM
-# Switched to modern psycopg for better Python 3.13 compatibility
 psycopg==3.2.1
-# Updated to a version compatible with Django 5
 django-postgres-extra==2.0.9
 
 # Async and Real-time
@@ -28,8 +26,8 @@ joblib==1.5.1
 shap==0.48.0
 
 # Advanced ML Libraries (Optional - for deep learning)
-torch==2.6.0
-pytorch-lightning==2.4.0
+torch==2.2.2
+pytorch-lightning==2.2.2
 optuna==3.6.1
 tensorboard==2.18.0
 
@@ -101,7 +99,7 @@ openpyxl==3.1.5
 xlsxwriter==3.2.0
 
 # Mathematical and Scientific Computing
-scipy==1.16.1
+scipy==1.10.1
 matplotlib==3.9.2
 seaborn==0.13.2
 

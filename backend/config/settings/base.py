@@ -62,16 +62,16 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'apps.security.middleware.SecurityHeadersMiddleware',
-    'apps.security.middleware.IPBlockingMiddleware',
-    'apps.security.middleware.RateLimitMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'apps.security.middleware.InputValidationMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # <-- Move this up!
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.security.middleware.SecurityHeadersMiddleware',
+    'apps.security.middleware.IPBlockingMiddleware',
+    'apps.security.middleware.RateLimitMiddleware',
+    'apps.security.middleware.InputValidationMiddleware',
     'apps.audit.middleware.AuditMiddleware',
     'apps.audit.middleware.SecurityMiddleware',
 ]
@@ -129,8 +129,8 @@ CACHES = {
 }
 
 # Session Configuration
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'sessions'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_CACHE_ALIAS = 'default'
 SESSION_COOKIE_AGE = 86400  # 24 hours
 
 # Channels configuration with Redis fallback
