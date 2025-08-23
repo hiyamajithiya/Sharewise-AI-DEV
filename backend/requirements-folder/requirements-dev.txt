@@ -1,0 +1,70 @@
+# Development-only dependencies
+# Install with: pip install -r requirements-dev.txt
+
+# Include base requirements
+-r requirements.txt
+
+# Testing
+pytest-xdist
+pytest-mock
+pytest-html
+pytest-benchmark
+moto
+
+# Code Quality
+pylint
+mypy
+bandit
+safety
+
+# Documentation
+sphinx
+sphinx-rtd-theme
+mkdocs
+mkdocs-material
+
+# Database Tools
+django-debug-toolbar
+django-silk
+
+# Performance Profiling
+line-profiler
+memory-profiler
+py-spy
+
+# API Testing
+httpie
+requests-mock
+
+# Load Testing
+locust
+
+# Development Server
+django-livereload-server
+
+# Code Formatting
+autopep8
+
+# Import Sorting
+seed-isort-config
+
+# Environment Management
+python-dotenv
+
+# Jupyter for Data Analysis
+jupyter
+jupyterlab
+ipython
+
+# Database GUI
+pgcli
+
+# Git Hooks
+gitpython
+
+# Mock Services
+responses
+
+# Debugging
+pdbpp
+ipdb
