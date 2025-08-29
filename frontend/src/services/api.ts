@@ -261,7 +261,7 @@ class ApiService {
       throw new Error('No refresh token available');
     }
 
-    const response = await this.api.post('/auth/token/refresh/', {
+    const response = await this.api.post('/users/token/refresh/', {
       refresh: this.tokens.refresh,
     });
 
@@ -273,7 +273,7 @@ class ApiService {
   async logout(): Promise<void> {
     try {
       if (this.tokens?.refresh) {
-        await this.api.post('/auth/logout/', {
+        await this.api.post('/users/logout/', {
           refresh_token: this.tokens.refresh,
         });
       }
@@ -286,7 +286,7 @@ class ApiService {
 
   // User methods
   async getCurrentUser(): Promise<any> {
-    const response = await this.api.get('/users/me/');
+    const response = await this.api.get('/users/profile/');
     return response.data;
   }
 

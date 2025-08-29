@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/ai-studio/', include('apps.ai_studio.urls')),
     path('api/brokers/', include('apps.brokers.urls')),
     path('api/trading/', include('apps.trading.urls')),
+    path('api/portfolio/', include('apps.portfolios.urls')),
     path('api/market-data/', include('apps.market_data.urls')),
     path('api/audit/', include('apps.audit.urls')),
     path('api/system/', include('system_config.urls')),
