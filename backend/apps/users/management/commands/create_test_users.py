@@ -66,7 +66,7 @@ class Command(BaseCommand):
                 first_name='Sales',
                 last_name='Team',
                 role=User.Role.SALES,
-                subscription_tier=User.SubscriptionTier.BASIC,
+                subscription_tier=User.SubscriptionTier.PRO,
                 is_active=True,
                 email_verified=True
             )
@@ -88,7 +88,7 @@ class Command(BaseCommand):
                 first_name='Regular',
                 last_name='User',
                 role=User.Role.USER,
-                subscription_tier=User.SubscriptionTier.BASIC,
+                subscription_tier=User.SubscriptionTier.PRO,
                 is_active=True,
                 email_verified=True
             )

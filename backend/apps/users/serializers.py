@@ -123,7 +123,7 @@ class AdminUserCreationSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     role = serializers.ChoiceField(choices=CustomUser.Role.choices, default=CustomUser.Role.USER)
-    subscription_tier = serializers.ChoiceField(choices=CustomUser.SubscriptionTier.choices, default=CustomUser.SubscriptionTier.BASIC)
+    subscription_tier = serializers.ChoiceField(choices=CustomUser.SubscriptionTier.choices, default=CustomUser.SubscriptionTier.PRO)
     is_active = serializers.BooleanField(default=True)
     email_verified = serializers.BooleanField(default=True)
     

@@ -141,7 +141,22 @@ const CustomTools: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }
+    }}>
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -175,7 +190,14 @@ const CustomTools: React.FC = () => {
       </Alert>
 
       {/* Main Content Tabs */}
-      <Paper sx={{ mb: 3 }}>
+        <Paper sx={{ 
+          mb: 3,
+          borderRadius: '20px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        }}>
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
@@ -212,7 +234,13 @@ const CustomTools: React.FC = () => {
         <Grid container spacing={3}>
           {customTools.map((tool) => (
             <Grid item xs={12} md={6} lg={4} key={tool.id}>
-              <Card>
+              <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -266,7 +294,13 @@ const CustomTools: React.FC = () => {
           {/* Empty State */}
           {customTools.length === 0 && (
             <Grid item xs={12}>
-              <Card>
+              <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
                 <CardContent sx={{ textAlign: 'center', py: 6 }}>
                   <Build sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                   <Typography variant="h6" gutterBottom>
@@ -293,7 +327,13 @@ const CustomTools: React.FC = () => {
         {/* API Console */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
                   API Endpoints
@@ -338,7 +378,13 @@ const CustomTools: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
                   API Usage
@@ -393,7 +439,13 @@ const CustomTools: React.FC = () => {
         {/* Webhooks */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
                   Webhook Configuration
@@ -454,7 +506,13 @@ const CustomTools: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
                   Webhook Activity
@@ -649,7 +707,8 @@ const CustomTools: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

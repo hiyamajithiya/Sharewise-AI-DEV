@@ -7,7 +7,7 @@ export interface User {
   first_name: string;
   last_name: string;
   role: 'USER' | 'SALES' | 'SUPPORT' | 'SUPER_ADMIN';
-  subscription_tier: 'BASIC' | 'PRO' | 'ENTERPRISE';
+  subscription_tier: 'PRO' | 'ELITE';
   phone_number?: string;
   is_active: boolean;
   created_at: string;

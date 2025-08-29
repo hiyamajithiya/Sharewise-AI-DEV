@@ -5,7 +5,7 @@ import { CssBaseline } from '@mui/material';
 import { Provider, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor, RootState } from './store';
-import { getTheme } from './utils/theme';
+import { getModernTheme } from './utils/modernTheme';
 
 // Import pages
 import Login from './pages/Login';
@@ -21,6 +21,15 @@ import BrokerIntegration from './pages/BrokerIntegration';
 import AdvancedTrading from './pages/AdvancedTrading';
 import Analytics from './pages/Analytics';
 import CustomTools from './pages/CustomTools';
+import UserManagement from './pages/UserManagement';
+import TradingMonitor from './pages/TradingMonitor';
+import SupportCenter from './pages/SupportCenter';
+import SupportTickets from './pages/SupportTickets';
+import UserAssistance from './pages/UserAssistance';
+import KnowledgeBase from './pages/KnowledgeBase';
+import Leads from './pages/Leads';
+import SalesAnalytics from './pages/SalesAnalytics';
+import Demos from './pages/Demos';
 
 // Import components
 import Layout from './components/common/Layout';
@@ -36,7 +45,7 @@ import '@fontsource/inter/700.css';
 
 const ThemedApp: React.FC = () => {
   const themeMode = useSelector((state: RootState) => state.theme.mode);
-  const theme = getTheme(themeMode);
+  const theme = getModernTheme(themeMode);
 
   return (
     <ThemeProvider theme={theme}>
@@ -62,18 +71,18 @@ const ThemedApp: React.FC = () => {
             <Route path="custom-tools" element={<CustomTools />} />
             <Route path="settings" element={<Settings />} />
             {/* Admin routes */}
-            <Route path="users" element={<Dashboard />} />
-            <Route path="trading-monitor" element={<Dashboard />} />
-            <Route path="support-center" element={<Dashboard />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="trading-monitor" element={<TradingMonitor />} />
+            <Route path="support-center" element={<SupportCenter />} />
             <Route path="system-settings" element={<Settings />} />
             {/* Support routes */}
-            <Route path="support-tickets" element={<Dashboard />} />
-            <Route path="user-assistance" element={<Dashboard />} />
-            <Route path="knowledge-base" element={<Dashboard />} />
+            <Route path="support-tickets" element={<SupportTickets />} />
+            <Route path="user-assistance" element={<UserAssistance />} />
+            <Route path="knowledge-base" element={<KnowledgeBase />} />
             {/* Sales routes */}
-            <Route path="leads" element={<Dashboard />} />
-            <Route path="sales-analytics" element={<Dashboard />} />
-            <Route path="demos" element={<Dashboard />} />
+            <Route path="leads" element={<Leads />} />
+            <Route path="sales-analytics" element={<SalesAnalytics />} />
+            <Route path="demos" element={<Demos />} />
           </Route>
           
           {/* Catch all route */}

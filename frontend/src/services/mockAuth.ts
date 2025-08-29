@@ -5,7 +5,7 @@ export interface MockUser {
   email: string;
   first_name: string;
   last_name: string;
-  subscription_tier: 'BASIC' | 'PRO' | 'ELITE';
+  subscription_tier: 'PRO' | 'ELITE';
   is_verified: boolean;
 }
 
@@ -17,18 +17,6 @@ export interface MockAuthResponse {
 
 // Demo users with different subscription tiers
 const DEMO_USERS: Record<string, { password: string; user: MockUser }> = {
-  'demo@basic.com': {
-    password: 'demo123',
-    user: {
-      id: '1',
-      username: 'basic_user',
-      email: 'demo@basic.com',
-      first_name: 'Basic',
-      last_name: 'User',
-      subscription_tier: 'BASIC',
-      is_verified: true,
-    }
-  },
   'demo@pro.com': {
     password: 'demo123',
     user: {
@@ -54,18 +42,6 @@ const DEMO_USERS: Record<string, { password: string; user: MockUser }> = {
     }
   },
   // Also support username login
-  'basic_user': {
-    password: 'demo123',
-    user: {
-      id: '1',
-      username: 'basic_user',
-      email: 'demo@basic.com',
-      first_name: 'Basic',
-      last_name: 'User',
-      subscription_tier: 'BASIC',
-      is_verified: true,
-    }
-  },
   'pro_user': {
     password: 'demo123',
     user: {
@@ -100,7 +76,7 @@ export class MockAuthService {
     const userRecord = DEMO_USERS[usernameOrEmail.toLowerCase()];
     
     if (!userRecord || userRecord.password !== password) {
-      throw new Error('Invalid credentials. Try demo@basic.com, demo@pro.com, or demo@elite.com with password: demo123');
+      throw new Error('Invalid credentials. Try demo@pro.com or demo@elite.com with password: demo123');
     }
     
     // Generate mock tokens
@@ -139,8 +115,8 @@ export class MockAuthService {
       throw new Error('Invalid OTP code. Please enter a 6-digit code.');
     }
     
-    // Return basic user for verification demo
-    const mockUser = DEMO_USERS['demo@basic.com'];
+    // Return pro user for verification demo
+    const mockUser = DEMO_USERS['demo@pro.com'];
     const mockTokens = {
       access: `mock_access_token_verified_${Date.now()}`,
       refresh: `mock_refresh_token_verified_${Date.now()}`
@@ -154,7 +130,6 @@ export class MockAuthService {
   
   static getDemoCredentials(): Array<{ email: string; username: string; password: string; tier: string }> {
     return [
-      { email: 'demo@basic.com', username: 'basic_user', password: 'demo123', tier: 'Basic' },
       { email: 'demo@pro.com', username: 'pro_user', password: 'demo123', tier: 'Pro' },
       { email: 'demo@elite.com', username: 'elite_user', password: 'demo123', tier: 'Elite' }
     ];

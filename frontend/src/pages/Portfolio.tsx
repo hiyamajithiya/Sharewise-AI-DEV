@@ -208,34 +208,66 @@ const Portfolio: React.FC = () => {
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-              Portfolio Dashboard 💼
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {isTestingMode && selectedUser
-                ? `Testing portfolio for ${selectedUser.role} role - ${subscriptionTier} tier`
-                : `Your ${subscriptionTier} portfolio with ${holdings.length} holdings`
-              }
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Chip 
-              label={tierFeatures.label} 
-              color={tierFeatures.color as any} 
-              sx={{ fontWeight: 600, fontSize: '0.875rem' }} 
-            />
-            <IconButton onClick={handleMenuClick}>
-              <MoreVert />
-            </IconButton>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }
+    }}>
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+        {/* Header with glassmorphism */}
+        <Box sx={{ 
+          mb: 4,
+          p: 3,
+          borderRadius: '20px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box>
+              <Typography variant="h4" component="h1" sx={{ 
+                fontWeight: 700, 
+                mb: 1, 
+                color: 'white',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+              }}>
+                Portfolio Dashboard
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+                {isTestingMode && selectedUser
+                  ? `Testing portfolio for ${selectedUser.role} role - ${subscriptionTier} tier`
+                  : `Your ${subscriptionTier} portfolio with ${holdings.length} holdings`
+                }
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Chip 
+                label={tierFeatures.label} 
+                sx={{ 
+                  fontWeight: 600, 
+                  fontSize: '0.875rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                }} 
+              />
+              <IconButton onClick={handleMenuClick} sx={{ color: 'white' }}>
+                <MoreVert />
+              </IconButton>
+            </Box>
           </Box>
         </Box>
-        <Divider />
-      </Box>
 
       {/* Action Menu */}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
@@ -250,16 +282,24 @@ const Portfolio: React.FC = () => {
         </MenuItem>
       </Menu>
 
-      {/* Tier Limitations Alert */}
-      {subscriptionTier === 'BASIC' && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Typography variant="body2">
-            <strong>Basic Plan:</strong> Maximum {tierFeatures.maxHoldings} holdings, 
-            portfolio value up to ₹{tierFeatures.portfolioValue.toLocaleString()}.
-            <strong> Upgrade for advanced analytics and risk management!</strong>
-          </Typography>
-        </Alert>
-      )}
+        {/* Tier Limitations Alert */}
+        {subscriptionTier === 'BASIC' && (
+          <Box sx={{
+            mb: 3,
+            p: 2,
+            borderRadius: '15px',
+            background: 'rgba(59, 130, 246, 0.1)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(59, 130, 246, 0.2)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+          }}>
+            <Typography variant="body2" sx={{ color: 'white' }}>
+              <strong>Basic Plan:</strong> Maximum {tierFeatures.maxHoldings} holdings, 
+              portfolio value up to ₹{tierFeatures.portfolioValue.toLocaleString()}.
+              <strong> Upgrade for advanced analytics and risk management!</strong>
+            </Typography>
+          </Box>
+        )}
 
       {/* Portfolio Stats */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -270,48 +310,112 @@ const Portfolio: React.FC = () => {
         ))}
       </Grid>
 
-      {/* View Mode Tabs */}
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant={viewMode === 'holdings' ? 'contained' : 'outlined'}
-            onClick={() => setViewMode('holdings')}
-            startIcon={<PieChart />}
-          >
-            Holdings
-          </Button>
-          <Button
-            variant={viewMode === 'performance' ? 'contained' : 'outlined'}
-            onClick={() => setViewMode('performance')}
-            startIcon={<Timeline />}
-            disabled={!tierFeatures.advancedAnalytics}
-          >
-            Performance
-          </Button>
-          <Button
-            variant={viewMode === 'analysis' ? 'contained' : 'outlined'}
-            onClick={() => setViewMode('analysis')}
-            startIcon={<Assessment />}
-            disabled={!tierFeatures.riskAnalysis}
-          >
-            Risk Analysis
-          </Button>
+        {/* View Mode Tabs */}
+        <Box sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant={viewMode === 'holdings' ? 'contained' : 'outlined'}
+              onClick={() => setViewMode('holdings')}
+              startIcon={<PieChart />}
+              sx={{
+                ...(viewMode === 'holdings' ? {
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                } : {
+                  color: 'white',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                  },
+                })
+              }}
+            >
+              Holdings
+            </Button>
+            <Button
+              variant={viewMode === 'performance' ? 'contained' : 'outlined'}
+              onClick={() => setViewMode('performance')}
+              startIcon={<Timeline />}
+              disabled={!tierFeatures.advancedAnalytics}
+              sx={{
+                ...(viewMode === 'performance' ? {
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                } : {
+                  color: tierFeatures.advancedAnalytics ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                  borderColor: tierFeatures.advancedAnalytics ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    borderColor: tierFeatures.advancedAnalytics ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                    background: tierFeatures.advancedAnalytics ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  },
+                })
+              }}
+            >
+              Performance
+            </Button>
+            <Button
+              variant={viewMode === 'analysis' ? 'contained' : 'outlined'}
+              onClick={() => setViewMode('analysis')}
+              startIcon={<Assessment />}
+              disabled={!tierFeatures.riskAnalysis}
+              sx={{
+                ...(viewMode === 'analysis' ? {
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                } : {
+                  color: tierFeatures.riskAnalysis ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                  borderColor: tierFeatures.riskAnalysis ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    borderColor: tierFeatures.riskAnalysis ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                    background: tierFeatures.riskAnalysis ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  },
+                })
+              }}
+            >
+              Risk Analysis
+            </Button>
+          </Box>
         </Box>
-      </Box>
 
       <Grid container spacing={3}>
         {/* Main Content */}
         <Grid item xs={12} lg={8}>
           {viewMode === 'holdings' && (
-            <Paper sx={{ p: 3 }}>
+            <Paper sx={{ 
+              p: 3,
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
                   Your Holdings
                   <Badge badgeContent={holdings.length} color="primary" sx={{ ml: 2 }}>
-                    <PieChart />
+                    <PieChart sx={{ color: 'white' }} />
                   </Badge>
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
                   {tierFeatures.maxHoldings === -1 
                     ? 'Unlimited holdings' 
                     : `${holdings.length}/${tierFeatures.maxHoldings} holdings`}
@@ -322,13 +426,13 @@ const Portfolio: React.FC = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell><strong>Stock</strong></TableCell>
-                      <TableCell><strong>Quantity</strong></TableCell>
-                      <TableCell><strong>Avg Price</strong></TableCell>
-                      <TableCell><strong>Current Price</strong></TableCell>
-                      <TableCell><strong>Market Value</strong></TableCell>
-                      <TableCell><strong>P&L</strong></TableCell>
-                      <TableCell><strong>P&L %</strong></TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Stock</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Quantity</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Avg Price</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Current Price</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Market Value</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>P&L</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>P&L %</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -338,18 +442,18 @@ const Portfolio: React.FC = () => {
                         <TableRow key={holding.id} hover>
                           <TableCell>
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
                                 {holding.symbol}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                                 {holding.name}
                               </Typography>
                             </Box>
                           </TableCell>
-                          <TableCell>{holding.quantity}</TableCell>
-                          <TableCell>₹{holding.avgPrice.toLocaleString()}</TableCell>
-                          <TableCell>₹{holding.currentPrice.toLocaleString()}</TableCell>
-                          <TableCell>₹{metrics.marketValue.toLocaleString()}</TableCell>
+                          <TableCell sx={{ color: 'white' }}>{holding.quantity}</TableCell>
+                          <TableCell sx={{ color: 'white' }}>₹{holding.avgPrice.toLocaleString()}</TableCell>
+                          <TableCell sx={{ color: 'white' }}>₹{holding.currentPrice.toLocaleString()}</TableCell>
+                          <TableCell sx={{ color: 'white' }}>₹{metrics.marketValue.toLocaleString()}</TableCell>
                           <TableCell>
                             <Typography 
                               variant="body2" 
@@ -388,8 +492,15 @@ const Portfolio: React.FC = () => {
           )}
 
           {viewMode === 'performance' && (
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+            <Paper sx={{ 
+              p: 3,
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
                 Performance Analysis
               </Typography>
               {tierFeatures.advancedAnalytics ? (
@@ -405,27 +516,41 @@ const Portfolio: React.FC = () => {
                   }}
                 >
                   <Box sx={{ textAlign: 'center' }}>
-                    <Timeline sx={{ fontSize: 48, mb: 2 }} />
-                    <Typography variant="h6">Advanced Performance Charts</Typography>
-                    <Typography variant="body2">
+                    <Timeline sx={{ fontSize: 48, mb: 2, color: 'white' }} />
+                    <Typography variant="h6" sx={{ color: 'white' }}>Advanced Performance Charts</Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
                       Interactive performance tracking and portfolio analytics will be integrated here
                     </Typography>
                   </Box>
                 </Box>
               ) : (
-                <Alert severity="warning">
-                  <Typography variant="body2">
+                <Box sx={{
+                  p: 2,
+                  borderRadius: '15px',
+                  background: 'rgba(245, 158, 11, 0.1)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(245, 158, 11, 0.2)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                }}>
+                  <Typography variant="body2" sx={{ color: 'white' }}>
                     <strong>Upgrade to Pro or Elite</strong> to access advanced performance analytics, 
                     portfolio benchmarking, and historical performance tracking.
                   </Typography>
-                </Alert>
+                </Box>
               )}
             </Paper>
           )}
 
           {viewMode === 'analysis' && (
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+            <Paper sx={{ 
+              p: 3,
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
                 Risk Analysis & Recommendations
               </Typography>
               {tierFeatures.riskAnalysis ? (
@@ -441,20 +566,27 @@ const Portfolio: React.FC = () => {
                   }}
                 >
                   <Box sx={{ textAlign: 'center' }}>
-                    <Assessment sx={{ fontSize: 48, mb: 2 }} />
-                    <Typography variant="h6">Portfolio Risk Analysis</Typography>
-                    <Typography variant="body2">
+                    <Assessment sx={{ fontSize: 48, mb: 2, color: 'white' }} />
+                    <Typography variant="h6" sx={{ color: 'white' }}>Portfolio Risk Analysis</Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
                       Risk metrics, diversification analysis, and rebalancing recommendations
                     </Typography>
                   </Box>
                 </Box>
               ) : (
-                <Alert severity="warning">
-                  <Typography variant="body2">
+                <Box sx={{
+                  p: 2,
+                  borderRadius: '15px',
+                  background: 'rgba(245, 158, 11, 0.1)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(245, 158, 11, 0.2)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                }}>
+                  <Typography variant="body2" sx={{ color: 'white' }}>
                     <strong>Upgrade to Pro or Elite</strong> to access comprehensive risk analysis, 
                     portfolio diversification insights, and automated rebalancing alerts.
                   </Typography>
-                </Alert>
+                </Box>
               )}
             </Paper>
           )}
@@ -463,15 +595,23 @@ const Portfolio: React.FC = () => {
         {/* Sector Allocation & Insights */}
         <Grid item xs={12} lg={4}>
           {/* Sector Allocation */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+          <Paper sx={{ 
+            p: 3, 
+            mb: 3,
+            borderRadius: '20px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
               Sector Allocation
             </Typography>
             {sectorAllocation.map((sector, index) => (
               <Box key={sector.sector} sx={{ mb: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="body2">{sector.sector}</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  <Typography variant="body2" sx={{ color: 'white' }}>{sector.sector}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
                     {sector.percentage}%
                   </Typography>
                 </Box>
@@ -485,28 +625,36 @@ const Portfolio: React.FC = () => {
           </Paper>
 
           {/* Portfolio Insights */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+          <Paper sx={{ 
+            p: 3, 
+            mb: 3,
+            borderRadius: '20px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
               Portfolio Insights
             </Typography>
             
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ color: 'white' }}>
                   Well diversified across {sectorAllocation.length} sectors
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ color: 'white' }}>
                   Strong performance with +{portfolioData.totalPnLPercent}% returns
                 </Typography>
               </Box>
               {tierFeatures.rebalanceAlerts && (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <Warning color="warning" sx={{ mr: 1, fontSize: 20 }} />
-                  <Typography variant="body2">
+                  <Typography variant="body2" sx={{ color: 'white' }}>
                     Consider rebalancing IT sector allocation
                   </Typography>
                 </Box>
@@ -514,38 +662,94 @@ const Portfolio: React.FC = () => {
             </Box>
 
             {!tierFeatures.rebalanceAlerts && (
-              <Alert severity="info" sx={{ mt: 2 }}>
-                <Typography variant="body2">
+              <Box sx={{
+                mt: 2,
+                p: 2,
+                borderRadius: '15px',
+                background: 'rgba(59, 130, 246, 0.1)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+              }}>
+                <Typography variant="body2" sx={{ color: 'white' }}>
                   Upgrade for automated rebalancing alerts and portfolio optimization suggestions.
                 </Typography>
-              </Alert>
+              </Box>
             )}
           </Paper>
 
           {/* Quick Actions */}
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+          <Paper sx={{ 
+            p: 3,
+            borderRadius: '20px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
               Quick Actions
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Button variant="contained" fullWidth>
+              <Button 
+                variant="contained" 
+                fullWidth
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 12px 30px rgba(102, 126, 234, 0.4)',
+                  },
+                }}
+              >
                 Add Money
               </Button>
-              <Button variant="outlined" fullWidth>
+              <Button 
+                variant="outlined" 
+                fullWidth
+                sx={{
+                  color: 'white',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
                 Place Order
               </Button>
               <Button 
                 variant="outlined" 
                 fullWidth 
                 disabled={!tierFeatures.exportReports}
+                sx={{
+                  color: tierFeatures.exportReports ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                  borderColor: tierFeatures.exportReports ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '15px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    borderColor: tierFeatures.exportReports ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                    background: tierFeatures.exportReports ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  },
+                }}
               >
                 Download Report
               </Button>
             </Box>
           </Paper>
         </Grid>
-      </Grid>
-    </Container>
+        </Grid>
+      </Container>
+    </Box>
   );
 };
 

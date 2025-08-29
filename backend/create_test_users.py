@@ -34,7 +34,7 @@ def create_test_users():
             'last_name': 'Sales',
             'password': 'TestPass123',
             'role': 'SALES',
-            'subscription_tier': 'BASIC',
+            'subscription_tier': 'PRO',
             'is_active': True,
             'email_verified': True,
         },
@@ -47,7 +47,7 @@ def create_test_users():
             'last_name': 'Basic',
             'password': 'TestPass123',
             'role': 'USER',
-            'subscription_tier': 'BASIC',
+            'subscription_tier': 'PRO',
             'is_active': True,
             'email_verified': True,
         },
@@ -102,9 +102,7 @@ def create_test_users():
         
         # Update profile with additional details based on subscription tier
         profile = user.profile
-        if user_data['subscription_tier'] == 'BASIC':
-            profile.max_daily_loss = '5000.00'
-        elif user_data['subscription_tier'] == 'PRO':
+        if user_data['subscription_tier'] == 'PRO':
             profile.max_daily_loss = '15000.00'
         elif user_data['subscription_tier'] == 'ELITE':
             profile.max_daily_loss = '50000.00'

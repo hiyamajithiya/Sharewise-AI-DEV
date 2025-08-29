@@ -160,7 +160,7 @@ const Layout: React.FC = () => {
   };
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', color: 'white' }}>
       {/* Logo Section */}
       <Toolbar sx={{ px: 3, py: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -168,7 +168,7 @@ const Layout: React.FC = () => {
             sx={{
               width: 32,
               height: 32,
-              background: 'linear-gradient(135deg, #0052CC 0%, #1976D2 100%)',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
@@ -179,13 +179,13 @@ const Layout: React.FC = () => {
               S
             </Typography>
           </Box>
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700, color: '#0052CC' }}>
+          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700, color: 'white' }}>
             ShareWise AI
           </Typography>
         </Box>
       </Toolbar>
       
-      <Divider />
+      <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
       
       {/* Testing Mode Indicator */}
       {isTestingMode && selectedUser && (
@@ -200,7 +200,7 @@ const Layout: React.FC = () => {
       )}
       
       {/* Navigation Menu */}
-      <List sx={{ px: 2, py: 1, flex: 1 }}>
+      <List sx={{ px: 2, py: 1, flex: 1, color: 'white' }}>
         {currentMenuItems.map((item) => (
           <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
@@ -210,9 +210,19 @@ const Layout: React.FC = () => {
                 py: 1.5,
                 px: 2,
                 borderRadius: '12px',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                },
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  },
+                },
               }}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>
+              <ListItemIcon sx={{ minWidth: 40, color: 'white' }}>
                 {item.icon}
               </ListItemIcon>
               <ListItemText 
@@ -228,8 +238,8 @@ const Layout: React.FC = () => {
       </List>
 
       {/* Footer */}
-      <Box sx={{ p: 2, borderTop: '1px solid #E5E7EB' }}>
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', fontSize: '0.75rem' }}>
+      <Box sx={{ p: 2, borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}>
+        <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.8)' }}>
           v1.0.0 - Professional Trading
         </Typography>
       </Box>
@@ -244,10 +254,10 @@ const Layout: React.FC = () => {
         sx={{
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
-          backgroundColor: '#FFFFFF',
-          color: '#1A1A1A',
-          borderBottom: '1px solid #E5E7EB',
-          boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.05)',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          borderBottom: 'none',
+          boxShadow: '0px 2px 8px rgba(102, 126, 234, 0.3)',
         }}
       >
         <Toolbar sx={{ py: 1 }}>
@@ -259,7 +269,7 @@ const Layout: React.FC = () => {
             sx={{ 
               mr: 2, 
               display: { md: 'none' },
-              color: '#0052CC'
+              color: 'white'
             }}
           >
             <MenuIcon />
@@ -267,10 +277,10 @@ const Layout: React.FC = () => {
           
           {/* Page Title */}
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, color: '#1A1A1A' }}>
+            <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, color: 'white' }}>
               {currentMenuItems.find(item => item.path === location.pathname)?.text || 'Dashboard'}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
               {isTestingMode && selectedUser ? (
                 `Testing as ${selectedUser.role} - ${selectedUser.first_name} ${selectedUser.last_name}`
               ) : (
@@ -290,10 +300,9 @@ const Layout: React.FC = () => {
             <IconButton 
               size="large"
               sx={{ 
-                color: '#6B7280',
+                color: 'white',
                 '&:hover': {
-                  backgroundColor: 'rgba(0, 82, 204, 0.08)',
-                  color: '#0052CC'
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
                 }
               }}
             >
@@ -375,7 +384,7 @@ const Layout: React.FC = () => {
           </ListItemIcon>
           Profile
         </MenuItem>
-        <Divider />
+        <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />
@@ -401,6 +410,8 @@ const Layout: React.FC = () => {
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
+              background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)',
+              borderRight: 'none',
             },
           }}
         >
@@ -413,6 +424,8 @@ const Layout: React.FC = () => {
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
+              background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)',
+              borderRight: 'none',
             },
           }}
           open

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -7,9 +7,6 @@ import {
   TextField,
   Button,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
   MenuItem,
   FormControlLabel,
   Switch,
@@ -32,6 +29,7 @@ interface UserFormData {
   password: string;
   first_name: string;
   last_name: string;
+  mobile_number: string;
   role: string;
   subscription_tier: string;
   is_active: boolean;
@@ -45,8 +43,9 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
     password: '',
     first_name: '',
     last_name: '',
+    mobile_number: '',
     role: 'USER',
-    subscription_tier: 'BASIC',
+    subscription_tier: 'PRO',
     is_active: true,
     email_verified: true,
   });
@@ -54,6 +53,18 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Automatically set subscription tier to PRO for non-USER roles
+  useEffect(() => {
+    console.log('Role changed to:', formData.role);
+    if (formData.role !== 'USER') {
+      console.log('Setting subscription tier to PRO for non-USER role');
+      setFormData(prev => ({
+        ...prev,
+        subscription_tier: 'PRO'
+      }));
+    }
+  }, [formData.role]);
 
   const handleInputChange = (field: keyof UserFormData) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -120,8 +131,9 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
       password: '',
       first_name: '',
       last_name: '',
+      mobile_number: '',
       role: 'USER',
-      subscription_tier: 'BASIC',
+      subscription_tier: 'PRO',
       is_active: true,
       email_verified: true,
     });
@@ -139,7 +151,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
   ];
 
   const subscriptionOptions = [
-    { value: 'BASIC', label: 'Basic Plan' },
     { value: 'PRO', label: 'Pro Plan' },
     { value: 'ELITE', label: 'Elite Plan' },
   ];
@@ -218,7 +229,20 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                required
+                fullWidth
+                label="Mobile Number"
+                type="tel"
+                value={formData.mobile_number}
+                onChange={handleInputChange('mobile_number')}
+                disabled={loading}
+                helperText="Enter mobile number with country code"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
               <TextField
                 required
                 fullWidth
@@ -232,37 +256,40 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>Role</InputLabel>
-                <Select
-                  value={formData.role}
-                  onChange={handleSelectChange('role')}
-                  disabled={loading}
-                >
-                  {roleOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                fullWidth
+                label="Role"
+                value={formData.role}
+                onChange={handleInputChange('role')}
+                disabled={loading}
+                variant="outlined"
+              >
+                {roleOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>Subscription Tier</InputLabel>
-                <Select
-                  value={formData.subscription_tier}
-                  onChange={handleSelectChange('subscription_tier')}
-                  disabled={loading}
-                >
-                  {subscriptionOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                fullWidth
+                label="Subscription Tier"
+                value={formData.subscription_tier}
+                onChange={handleInputChange('subscription_tier')}
+                disabled={loading || formData.role !== 'USER'}
+                variant="outlined"
+                helperText={formData.role !== 'USER' ? 'Subscription tiers only apply to regular users' : 'Select subscription tier for this user'}
+              >
+                {subscriptionOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
 
             <Grid item xs={12} sm={6}>

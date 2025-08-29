@@ -52,6 +52,14 @@ const Settings: React.FC = () => {
   const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'notifications' | 'preferences' | 'subscription' | 'billing' | 'email'>('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [upgradeDialog, setUpgradeDialog] = useState(false);
+  const [passwordDialog, setPasswordDialog] = useState(false);
+  const [paymentDialog, setPaymentDialog] = useState(false);
+  const [notifications, setNotifications] = useState({
+    email: true,
+    push: true,
+    sms: true,
+    whatsapp: true
+  });
   
   const [formData, setFormData] = useState({
     firstName: 'John',
@@ -137,7 +145,26 @@ const Settings: React.FC = () => {
   const handleSave = () => {
     console.log('Saving settings:', formData);
     setIsEditing(false);
+    alert('Profile settings saved successfully!');
     // In real app, this would make API call
+  };
+
+  const handleNotificationToggle = (type: keyof typeof notifications) => {
+    setNotifications(prev => ({ ...prev, [type]: !prev[type] }));
+    console.log(`${type} notifications ${notifications[type] ? 'disabled' : 'enabled'}`);
+  };
+
+  const handleDownloadInvoice = (month: string) => {
+    console.log(`Downloading invoice for ${month}`);
+    alert(`Invoice for ${month} would be downloaded in a real application.`);
+  };
+
+  const handleUpdatePayment = () => {
+    setPaymentDialog(true);
+  };
+
+  const handleChangePassword = () => {
+    setPasswordDialog(true);
   };
 
   const settingsSections = [
@@ -151,15 +178,29 @@ const Settings: React.FC = () => {
   ];
 
   const renderProfileSettings = () => (
-    <Paper sx={{ p: 3 }}>
+      <Paper sx={{ 
+        p: 3,
+        borderRadius: '16px',
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
           Profile Information
         </Typography>
         <Button
           variant={isEditing ? 'contained' : 'outlined'}
           startIcon={isEditing ? <Save /> : <Edit />}
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
+          sx={{
+            color: isEditing ? 'white' : 'rgba(255, 255, 255, 0.9)',
+            borderColor: 'rgba(255, 255, 255, 0.3)',
+            '&:hover': {
+              borderColor: 'rgba(255, 255, 255, 0.5)',
+              backgroundColor: isEditing ? undefined : 'rgba(255, 255, 255, 0.1)',
+            },
+          }}
         >
           {isEditing ? 'Save Changes' : 'Edit Profile'}
         </Button>
@@ -170,10 +211,10 @@ const Settings: React.FC = () => {
           {effectiveUser?.first_name?.[0] || 'U'}
         </Avatar>
         <Box>
-          <Typography variant="h6">
+          <Typography variant="h6" sx={{ color: 'white' }}>
             {effectiveUser?.first_name || 'User'} {effectiveUser?.last_name || ''}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
             {effectiveUser?.email || 'user@example.com'}
           </Typography>
           <Chip 
@@ -193,6 +234,15 @@ const Settings: React.FC = () => {
             onChange={(e) => handleInputChange('firstName', e.target.value)}
             disabled={!isEditing}
             fullWidth
+            sx={{
+              '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
+              '& .MuiOutlinedInput-root': {
+                color: 'white',
+                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                '&.Mui-focused fieldset': { borderColor: 'white' },
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -227,39 +277,54 @@ const Settings: React.FC = () => {
   );
 
   const renderSecuritySettings = () => (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+      <Paper sx={{ 
+        p: 3,
+        borderRadius: '16px',
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
         Security Settings
       </Typography>
 
       <List>
         <ListItem>
-          <ListItemIcon>
+          <ListItemIcon sx={{ color: 'white' }}>
             <Lock />
           </ListItemIcon>
           <ListItemText
             primary="Change Password"
             secondary="Last changed 30 days ago"
+            sx={{
+              '& .MuiListItemText-primary': { color: 'white' },
+              '& .MuiListItemText-secondary': { color: 'rgba(255, 255, 255, 0.7)' },
+            }}
           />
           <ListItemSecondaryAction>
-            <Button variant="outlined" size="small">
+            <Button variant="outlined" size="small" onClick={handleChangePassword}>
               Change
             </Button>
           </ListItemSecondaryAction>
         </ListItem>
         
         <ListItem>
-          <ListItemIcon>
+          <ListItemIcon sx={{ color: 'white' }}>
             <Security />
           </ListItemIcon>
           <ListItemText
             primary="Two-Factor Authentication"
             secondary={tierFeatures.advancedSecurity ? "Enhanced 2FA enabled" : "Basic SMS verification"}
+            sx={{
+              '& .MuiListItemText-primary': { color: 'white' },
+              '& .MuiListItemText-secondary': { color: 'rgba(255, 255, 255, 0.7)' },
+            }}
           />
           <ListItemSecondaryAction>
             <Switch 
               checked={true}
               disabled={!tierFeatures.advancedSecurity}
+              onChange={(e) => console.log('2FA toggle:', e.target.checked)}
             />
           </ListItemSecondaryAction>
         </ListItem>
@@ -311,8 +376,14 @@ const Settings: React.FC = () => {
   );
 
   const renderNotificationSettings = () => (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+      <Paper sx={{ 
+        p: 3,
+        borderRadius: '16px',
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
         Notification Preferences
       </Typography>
 
@@ -323,7 +394,10 @@ const Settings: React.FC = () => {
             secondary="Trading signals, portfolio updates"
           />
           <ListItemSecondaryAction>
-            <Switch checked={true} />
+            <Switch 
+              checked={notifications.email} 
+              onChange={() => handleNotificationToggle('email')}
+            />
           </ListItemSecondaryAction>
         </ListItem>
         
@@ -333,7 +407,10 @@ const Settings: React.FC = () => {
             secondary="Mobile app notifications"
           />
           <ListItemSecondaryAction>
-            <Switch checked={true} />
+            <Switch 
+              checked={notifications.push}
+              onChange={() => handleNotificationToggle('push')}
+            />
           </ListItemSecondaryAction>
         </ListItem>
 
@@ -344,8 +421,9 @@ const Settings: React.FC = () => {
           />
           <ListItemSecondaryAction>
             <Switch 
-              checked={tierFeatures.advancedNotifications}
+              checked={notifications.sms && tierFeatures.advancedNotifications}
               disabled={!tierFeatures.advancedNotifications}
+              onChange={() => handleNotificationToggle('sms')}
             />
           </ListItemSecondaryAction>
         </ListItem>
@@ -357,8 +435,9 @@ const Settings: React.FC = () => {
           />
           <ListItemSecondaryAction>
             <Switch 
-              checked={tierFeatures.advancedNotifications}
+              checked={notifications.whatsapp && tierFeatures.advancedNotifications}
               disabled={!tierFeatures.advancedNotifications}
+              onChange={() => handleNotificationToggle('whatsapp')}
             />
           </ListItemSecondaryAction>
         </ListItem>
@@ -376,8 +455,14 @@ const Settings: React.FC = () => {
   );
 
   const renderPreferences = () => (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+      <Paper sx={{ 
+        p: 3,
+        borderRadius: '16px',
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
         App Preferences
       </Typography>
 
@@ -458,8 +543,14 @@ const Settings: React.FC = () => {
   );
 
   const renderSubscription = () => (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+      <Paper sx={{ 
+        p: 3,
+        borderRadius: '16px',
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
         Current Subscription
       </Typography>
 
@@ -573,8 +664,14 @@ const Settings: React.FC = () => {
   );
 
   const renderBilling = () => (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+      <Paper sx={{ 
+        p: 3,
+        borderRadius: '16px',
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
         Billing & Payments
       </Typography>
 
@@ -592,7 +689,7 @@ const Settings: React.FC = () => {
               </Typography>
             </Box>
           </Box>
-          <Button variant="outlined" size="small">
+          <Button variant="outlined" size="small" onClick={handleUpdatePayment}>
             Update Payment Method
           </Button>
         </CardContent>
@@ -612,6 +709,7 @@ const Settings: React.FC = () => {
               variant="outlined" 
               size="small"
               disabled={!tierFeatures.portfolioExport}
+              onClick={() => handleDownloadInvoice('January 2025')}
             >
               Download
             </Button>
@@ -627,6 +725,7 @@ const Settings: React.FC = () => {
               variant="outlined" 
               size="small"
               disabled={!tierFeatures.portfolioExport}
+              onClick={() => handleDownloadInvoice('January 2025')}
             >
               Download
             </Button>
@@ -654,15 +753,20 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: '#f5f7fa',
+      position: 'relative'
+    }}>
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1, color: '#1a1a1a' }}>
               Settings ⚙️
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{ color: '#6b7280' }}>
               {isTestingMode && selectedUser
                 ? `Testing settings for ${selectedUser.role} role - ${subscriptionTier} tier`
                 : `Manage your ${subscriptionTier} account settings and preferences`
@@ -671,8 +775,12 @@ const Settings: React.FC = () => {
           </Box>
           <Chip 
             label={tierFeatures.label} 
-            color={tierFeatures.color as any} 
-            sx={{ fontWeight: 600, fontSize: '0.875rem' }} 
+            sx={{ 
+              fontWeight: 600, 
+              fontSize: '0.875rem',
+              backgroundColor: tierFeatures.color === 'warning' ? '#ffa726' : tierFeatures.color === 'success' ? '#66bb6a' : '#42a5f5',
+              color: 'white'
+            }} 
           />
         </Box>
         <Divider />
@@ -681,20 +789,50 @@ const Settings: React.FC = () => {
       <Grid container spacing={3}>
         {/* Settings Navigation */}
         <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={{ 
+            p: 2,
+            borderRadius: '16px',
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          }}>
             <List component="nav">
               {settingsSections.map((section) => (
                 <ListItem
                   key={section.id}
-                  button
+                  component="button"
                   selected={activeSection === section.id}
-                  onClick={() => setActiveSection(section.id as any)}
-                  sx={{ borderRadius: 2, mb: 0.5 }}
+                  onClick={() => {
+                    console.log('Navigating to:', section.id);
+                    setActiveSection(section.id as any);
+                  }}
+                  sx={{ 
+                    borderRadius: 2, 
+                    mb: 0.5,
+                    cursor: 'pointer',
+                    color: '#374151',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    width: '100%',
+                    textAlign: 'left',
+                    '&.Mui-selected': {
+                      backgroundColor: '#e3f2fd',
+                      color: '#1976d2',
+                      '& .MuiListItemIcon-root': {
+                        color: '#1976d2',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                  }}
                 >
-                  <ListItemIcon sx={{ minWidth: 36 }}>
+                  <ListItemIcon sx={{ minWidth: 36, color: '#6b7280' }}>
                     {section.icon}
                   </ListItemIcon>
-                  <ListItemText primary={section.label} />
+                  <ListItemText 
+                    primary={section.label} 
+                  />
                 </ListItem>
               ))}
             </List>
@@ -720,12 +858,102 @@ const Settings: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setUpgradeDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setUpgradeDialog(false)}>
+          <Button variant="contained" onClick={() => {
+            setUpgradeDialog(false);
+            alert('Redirecting to payment gateway...');
+          }}>
             Proceed to Payment
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+
+      {/* Password Change Dialog */}
+      <Dialog open={passwordDialog} onClose={() => setPasswordDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Change Password</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              type="password"
+              label="Current Password"
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              type="password"
+              label="New Password"
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              type="password"
+              label="Confirm New Password"
+              margin="normal"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPasswordDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => {
+            setPasswordDialog(false);
+            alert('Password changed successfully!');
+          }}>
+            Change Password
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Payment Method Dialog */}
+      <Dialog open={paymentDialog} onClose={() => setPaymentDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Update Payment Method</DialogTitle>
+        <DialogContent>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            This is a demo. In a real application, this would integrate with payment processors.
+          </Alert>
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Card Number"
+              placeholder="**** **** **** 1234"
+              margin="normal"
+            />
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Expiry Date"
+                  placeholder="MM/YY"
+                  margin="normal"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="CVV"
+                  placeholder="123"
+                  margin="normal"
+                />
+              </Grid>
+            </Grid>
+            <TextField
+              fullWidth
+              label="Cardholder Name"
+              margin="normal"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPaymentDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => {
+            setPaymentDialog(false);
+            alert('Payment method updated successfully!');
+          }}>
+            Update Payment Method
+          </Button>
+        </DialogActions>
+      </Dialog>
+      </Container>
+    </Box>
   );
 };
 

@@ -99,27 +99,63 @@ const AdvancedTrading: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-          Advanced Trading 📈
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {isTestingMode && selectedUser
-            ? `Testing advanced trading features for ${selectedUser.role} role`
-            : 'Professional algorithmic trading, risk management, and portfolio optimization tools'
-          }
-        </Typography>
-      </Box>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }
+    }}>
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+        {/* Header with glassmorphism */}
+        <Box sx={{ 
+          mb: 4,
+          p: 3,
+          borderRadius: '20px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        }}>
+          <Typography variant="h4" component="h1" sx={{ 
+            fontWeight: 700, 
+            mb: 1, 
+            color: 'white',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+          }}>
+            Advanced Trading
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+            {isTestingMode && selectedUser
+              ? `Testing advanced trading features for ${selectedUser.role} role`
+              : 'Professional algorithmic trading, risk management, and portfolio optimization tools'
+            }
+          </Typography>
+        </Box>
 
-      {/* Elite Feature Notice */}
-      <Alert severity="info" sx={{ mb: 4 }}>
-        <Typography variant="body2">
-          <strong>🌟 Elite Feature:</strong> These advanced trading tools are available exclusively to Elite subscribers. 
-          Features include algorithmic trading, advanced risk management, custom indicators, and institutional-grade analytics.
-        </Typography>
-      </Alert>
+        {/* Elite Feature Notice */}
+        <Box sx={{
+          mb: 4,
+          p: 2,
+          borderRadius: '15px',
+          background: 'rgba(59, 130, 246, 0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(59, 130, 246, 0.2)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+        }}>
+          <Typography variant="body2" sx={{ color: 'white' }}>
+            <strong>🌟 Elite Feature:</strong> These advanced trading tools are available exclusively to Elite subscribers. 
+            Features include algorithmic trading, advanced risk management, custom indicators, and institutional-grade analytics.
+          </Typography>
+        </Box>
 
       {/* Risk Metrics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -136,14 +172,34 @@ const AdvancedTrading: React.FC = () => {
         ))}
       </Grid>
 
-      {/* Main Content Tabs */}
-      <Paper sx={{ mb: 3 }}>
+        {/* Main Content Tabs */}
+        <Paper sx={{ 
+          mb: 3,
+          borderRadius: '20px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        }}>
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{ 
+            borderBottom: 1, 
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            '& .MuiTab-root': {
+              color: 'rgba(255, 255, 255, 0.7)',
+              '&.Mui-selected': {
+                color: 'white',
+                fontWeight: 600,
+              },
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: 'white',
+            },
+          }}
         >
           <Tab
             icon={<Psychology />}
@@ -173,13 +229,34 @@ const AdvancedTrading: React.FC = () => {
         {/* Algorithmic Trading */}
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
                     Active Trading Algorithms
                   </Typography>
-                  <Button variant="contained" startIcon={<PlayArrow />}>
+                  <Button 
+                    variant="contained" 
+                    startIcon={<PlayArrow />}
+                    sx={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      borderRadius: '15px',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 12px 30px rgba(102, 126, 234, 0.4)',
+                      },
+                    }}
+                  >
                     Deploy New Strategy
                   </Button>
                 </Box>
@@ -188,19 +265,19 @@ const AdvancedTrading: React.FC = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Strategy Name</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell align="right">P&L (₹)</TableCell>
-                        <TableCell align="right">Trades</TableCell>
-                        <TableCell align="right">Win Rate</TableCell>
-                        <TableCell align="center">Actions</TableCell>
+                        <TableCell sx={{ color: 'white', fontWeight: 700 }}>Strategy Name</TableCell>
+                        <TableCell sx={{ color: 'white', fontWeight: 700 }}>Status</TableCell>
+                        <TableCell align="right" sx={{ color: 'white', fontWeight: 700 }}>P&L (₹)</TableCell>
+                        <TableCell align="right" sx={{ color: 'white', fontWeight: 700 }}>Trades</TableCell>
+                        <TableCell align="right" sx={{ color: 'white', fontWeight: 700 }}>Win Rate</TableCell>
+                        <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {algorithmicStrategies.map((strategy) => (
                         <TableRow key={strategy.id} hover>
                           <TableCell>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
                               {strategy.name}
                             </Typography>
                           </TableCell>
@@ -220,7 +297,7 @@ const AdvancedTrading: React.FC = () => {
                               {strategy.pnl >= 0 ? '+' : ''}₹{strategy.pnl.toLocaleString()}
                             </Typography>
                           </TableCell>
-                          <TableCell align="right">{strategy.trades}</TableCell>
+                          <TableCell align="right" sx={{ color: 'white' }}>{strategy.trades}</TableCell>
                           <TableCell align="right">
                             <Typography
                               variant="body2"
@@ -253,9 +330,15 @@ const AdvancedTrading: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} lg={4}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
                   Quick Deploy
                 </Typography>
 
@@ -315,9 +398,15 @@ const AdvancedTrading: React.FC = () => {
         {/* Risk Management */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
                   Position Risk Monitor
                 </Typography>
                 <Alert severity="warning" sx={{ mb: 2 }}>
@@ -344,9 +433,15 @@ const AdvancedTrading: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
                   Risk Limits
                 </Typography>
                 <Grid container spacing={2}>
@@ -450,9 +545,15 @@ const AdvancedTrading: React.FC = () => {
         {/* Portfolio Optimizer */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
                   Portfolio Optimization Engine
                 </Typography>
                 
@@ -494,9 +595,15 @@ const AdvancedTrading: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Card>
+            <Card sx={{
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
                   Optimization Settings
                 </Typography>
                 
@@ -538,7 +645,8 @@ const AdvancedTrading: React.FC = () => {
           </Grid>
         </Grid>
       </TabPanel>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

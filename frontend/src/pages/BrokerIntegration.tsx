@@ -120,19 +120,27 @@ const BrokerIntegration: React.FC = () => {
 
   // Helper component for guidelines
   const GuidelineBox = ({ title, children, icon = <Info /> }: { title: string, children: React.ReactNode, icon?: React.ReactNode }) => (
-    <Alert severity="info" sx={{ mb: 3 }}>
+    <Box sx={{
+      mb: 3,
+      p: 2,
+      borderRadius: '15px',
+      background: 'rgba(59, 130, 246, 0.1)',
+      backdropFilter: 'blur(20px)',
+      border: '1px solid rgba(59, 130, 246, 0.2)',
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+    }}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
         {icon}
         <Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: '#1976d2' }}>
             {title}
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: '#666' }}>
             {children}
           </Typography>
         </Box>
       </Box>
-    </Alert>
+    </Box>
   );
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
@@ -190,32 +198,70 @@ const BrokerIntegration: React.FC = () => {
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-              Broker Integration 🔗
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {isTestingMode && selectedUser
-                ? `Testing broker integrations for ${selectedUser.role} role`
-                : 'Connect your trading accounts and sync your portfolio data'
-              }
-            </Typography>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }
+    }}>
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+        {/* Header with glassmorphism */}
+        <Box sx={{ 
+          mb: 4,
+          p: 3,
+          borderRadius: '20px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box>
+              <Typography variant="h4" component="h1" sx={{ 
+                fontWeight: 700, 
+                mb: 1, 
+                color: 'white',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+              }}>
+                Broker Integration
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+                {isTestingMode && selectedUser
+                  ? `Testing broker integrations for ${selectedUser.role} role`
+                  : 'Connect your trading accounts and sync your portfolio data'
+                }
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              onClick={() => setConnectDialogOpen(true)}
+              startIcon={<Add />}
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '15px',
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 12px 30px rgba(102, 126, 234, 0.4)',
+                },
+              }}
+            >
+              Add Broker Account
+            </Button>
           </Box>
-          <Button
-            variant="contained"
-            onClick={() => setConnectDialogOpen(true)}
-            startIcon={<Add />}
-            sx={{ borderRadius: '8px' }}
-          >
-            Add Broker Account
-          </Button>
         </Box>
-        <Divider />
-      </Box>
 
       {/* Broker Stats */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -226,63 +272,109 @@ const BrokerIntegration: React.FC = () => {
         ))}
       </Grid>
 
-      {/* Getting Started Guide */}
-      {brokerAccounts.length === 0 && (
-        <Paper sx={{ p: 4, mb: 4, textAlign: 'center' }}>
-          <Typography variant="h6" gutterBottom>
-            Welcome to Broker Integration! 🎯
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Connect your broker accounts to enable automated trading and real-time portfolio sync.
-          </Typography>
-          <GuidelineBox title="Why Connect Your Broker?" icon={<Lightbulb />}>
-            • <strong>Automated Trading:</strong> Execute your strategies automatically without manual intervention<br/>
-            • <strong>Real-time Sync:</strong> Keep your portfolio data updated across all platforms<br/>
-            • <strong>Secure Connection:</strong> Bank-level encryption protects your trading credentials<br/>
-            • <strong>Paper Trading:</strong> Test strategies safely before going live
-          </GuidelineBox>
-          <Button
-            variant="contained"
-            onClick={() => setConnectDialogOpen(true)}
-            startIcon={<Add />}
-            size="large"
-            sx={{ borderRadius: '8px' }}
-          >
-            Connect Your First Broker
-          </Button>
-        </Paper>
-      )}
+        {/* Getting Started Guide */}
+        {brokerAccounts.length === 0 && (
+          <Paper sx={{ 
+            p: 4, 
+            mb: 4, 
+            textAlign: 'center',
+            borderRadius: '20px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>
+              Welcome to Broker Integration!
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3, color: 'rgba(255, 255, 255, 0.85)' }}>
+              Connect your broker accounts to enable automated trading and real-time portfolio sync.
+            </Typography>
+            <Box sx={{
+              mb: 3,
+              p: 2,
+              borderRadius: '15px',
+              background: 'rgba(59, 130, 246, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                <Lightbulb sx={{ color: 'white' }} />
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
+                    Why Connect Your Broker?
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'white' }}>
+                    • <strong>Automated Trading:</strong> Execute your strategies automatically without manual intervention<br/>
+                    • <strong>Real-time Sync:</strong> Keep your portfolio data updated across all platforms<br/>
+                    • <strong>Secure Connection:</strong> Bank-level encryption protects your trading credentials<br/>
+                    • <strong>Paper Trading:</strong> Test strategies safely before going live
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+            <Button
+              variant="contained"
+              onClick={() => setConnectDialogOpen(true)}
+              startIcon={<Add />}
+              size="large"
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '15px',
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 12px 30px rgba(102, 126, 234, 0.4)',
+                },
+              }}
+            >
+              Connect Your First Broker
+            </Button>
+          </Paper>
+        )}
 
       <Grid container spacing={3}>
         {/* Connected Accounts */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, height: '100%' }}>
+          <Paper sx={{ 
+            p: 3, 
+            height: '100%',
+            borderRadius: '20px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
                 Connected Accounts
               </Typography>
-              <IconButton onClick={() => console.log('Refreshing accounts...')}>
+              <IconButton onClick={() => console.log('Refreshing accounts...')} sx={{ color: 'white' }}>
                 <Refresh />
               </IconButton>
             </Box>
 
             {brokerAccounts.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                <AccountBalance sx={{ fontSize: 48, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>No broker accounts connected</Typography>
-                <Typography variant="body2">Connect your first broker to get started</Typography>
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <AccountBalance sx={{ fontSize: 48, mb: 2, color: 'rgba(255, 255, 255, 0.7)' }} />
+                <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>No broker accounts connected</Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>Connect your first broker to get started</Typography>
               </Box>
             ) : (
               <List>
                 {brokerAccounts.map((account) => (
                   <ListItem key={account.id} sx={{ px: 0 }}>
                     <ListItemIcon>
-                      <AccountBalance color="primary" />
+                      <AccountBalance sx={{ color: 'white' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600, color: 'white' }}>
                             {account.brokerName}
                           </Typography>
                           <Chip 
@@ -294,17 +386,17 @@ const BrokerIntegration: React.FC = () => {
                       }
                       secondary={
                         <Box>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
                             Account: {account.accountId} • Balance: ₹{account.balance.toLocaleString()}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                             Last synced: {account.lastSync}
                           </Typography>
                         </Box>
                       }
                     />
                     <ListItemSecondaryAction>
-                      <IconButton edge="end" onClick={() => console.log('Account settings')}>
+                      <IconButton edge="end" onClick={() => console.log('Account settings')} sx={{ color: 'white' }}>
                         <Settings />
                       </IconButton>
                     </ListItemSecondaryAction>
@@ -317,8 +409,16 @@ const BrokerIntegration: React.FC = () => {
 
         {/* Available Brokers */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+          <Paper sx={{ 
+            p: 3, 
+            height: '100%',
+            borderRadius: '20px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
               Available Brokers
             </Typography>
 
@@ -331,9 +431,14 @@ const BrokerIntegration: React.FC = () => {
                       height: '100%',
                       cursor: broker.status === 'Available' ? 'pointer' : 'default',
                       opacity: broker.status === 'Coming Soon' ? 0.6 : 1,
+                      borderRadius: '15px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
                       '&:hover': broker.status === 'Available' ? {
-                        boxShadow: 2,
-                        transform: 'translateY(-2px)'
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
                       } : {}
                     }}
                     onClick={() => {
@@ -345,10 +450,10 @@ const BrokerIntegration: React.FC = () => {
                   >
                     <CardContent sx={{ textAlign: 'center' }}>
                       <Typography variant="h4" sx={{ mb: 1 }}>{broker.logo}</Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'white' }}>
                         {broker.name}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.85)' }}>
                         {broker.description}
                       </Typography>
                       <Box sx={{ mb: 2 }}>
@@ -358,7 +463,11 @@ const BrokerIntegration: React.FC = () => {
                             label={feature} 
                             size="small" 
                             variant="outlined" 
-                            sx={{ m: 0.25 }}
+                            sx={{ 
+                              m: 0.25,
+                              color: 'white',
+                              borderColor: 'rgba(255, 255, 255, 0.3)',
+                            }}
                           />
                         ))}
                       </Box>
@@ -374,10 +483,24 @@ const BrokerIntegration: React.FC = () => {
             </Grid>
           </Paper>
         </Grid>
-      </Grid>
+        </Grid>
 
-      {/* Broker Connection Dialog */}
-      <Dialog open={connectDialogOpen} onClose={resetDialog} maxWidth="md" fullWidth>
+          {/* Broker Connection Dialog */}
+        <Dialog 
+          open={connectDialogOpen} 
+          onClose={resetDialog} 
+          maxWidth="md" 
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }
+          }}
+        >
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Link color="primary" />
@@ -549,7 +672,8 @@ const BrokerIntegration: React.FC = () => {
           )}
         </DialogActions>
       </Dialog>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 
