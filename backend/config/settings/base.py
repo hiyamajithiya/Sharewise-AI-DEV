@@ -47,13 +47,13 @@ LOCAL_APPS = [
     'apps.market_data',
     'apps.audit',
     'apps.security',
+    'apps.subscriptions',
     'system_config',
     # Add other apps as they are created
     # 'apps.strategies',
     # 'apps.portfolios',
     # 'apps.analytics',
     # 'apps.notifications',
-    # 'apps.subscriptions',
     # 'apps.admin_portal',
 ]
 
@@ -346,6 +346,21 @@ CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
 # Rate Limiting Configuration
 RATELIMIT_ENABLE = True
 RATELIMIT_USE_CACHE = 'default'
+
+# Payment Gateway Configuration
+RAZORPAY_KEY_ID = env('RAZORPAY_KEY_ID', default='')
+RAZORPAY_KEY_SECRET = env('RAZORPAY_KEY_SECRET', default='')
+RAZORPAY_WEBHOOK_SECRET = env('RAZORPAY_WEBHOOK_SECRET', default='')
+
+# Stripe Configuration (Alternative)
+STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY', default='')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
+
+# Subscription Configuration
+SUBSCRIPTION_GRACE_PERIOD_DAYS = 3
+SUBSCRIPTION_TRIAL_DAYS = 7
+ENABLE_FREE_TIER = True
 
 # CORS Security Enhancement
 ALLOWED_CORS_ORIGINS = [
