@@ -34,7 +34,6 @@ import {
   VideoCall,
   Add,
   Edit,
-  Delete,
   Refresh,
   Computer,
   PhoneAndroid,
@@ -180,7 +179,7 @@ const Demos: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -211,16 +210,16 @@ const Demos: React.FC = () => {
             >
               Customer Demos
             </Typography>
-            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 400 }}>
+            <Typography variant="h6" sx={{ color: '#374151', fontWeight: 400 }}>
               Schedule and manage product demonstrations
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                color: 'white',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                color: '#1F2937',
                 '&:hover': { background: 'rgba(255,255,255,0.2)' },
               }}
             >
@@ -232,8 +231,8 @@ const Demos: React.FC = () => {
               onClick={() => setOpenDialog(true)}
               sx={{
                 background: 'rgba(255,255,255,0.2)',
-                backdropFilter: 'blur(10px)',
-                color: 'white',
+                
+                color: '#1F2937',
                 '&:hover': {
                   background: 'rgba(255,255,255,0.3)',
                 },
@@ -249,22 +248,22 @@ const Demos: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(33, 150, 243, 0.3)', mr: 2 }}>
-                    <Schedule sx={{ color: 'white' }} />
+                    <Schedule sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {demoStats.totalScheduled}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Scheduled
                     </Typography>
                   </Box>
@@ -276,22 +275,22 @@ const Demos: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <CheckCircle sx={{ color: 'white' }} />
+                    <CheckCircle sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {demoStats.totalCompleted}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Completed
                     </Typography>
                   </Box>
@@ -303,22 +302,22 @@ const Demos: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(156, 39, 176, 0.3)', mr: 2 }}>
-                    <ModelTraining sx={{ color: 'white' }} />
+                    <ModelTraining sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {demoStats.conversionRate}%
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Conversion
                     </Typography>
                   </Box>
@@ -330,22 +329,22 @@ const Demos: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(255, 193, 7, 0.3)', mr: 2 }}>
-                    <Person sx={{ color: 'white' }} />
+                    <Person sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {demoStats.avgRating}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Avg Rating
                     </Typography>
                   </Box>
@@ -360,9 +359,9 @@ const Demos: React.FC = () => {
           <Grid item xs={12} lg={8}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
                 height: 600,
               }}
@@ -373,8 +372,8 @@ const Demos: React.FC = () => {
                   onChange={handleTabChange}
                   sx={{
                     px: 2,
-                    '& .MuiTab-root': { color: 'rgba(255,255,255,0.7)' },
-                    '& .Mui-selected': { color: 'white' },
+                    '& .MuiTab-root': { color: '#6B7280' },
+                    '& .Mui-selected': { color: '#1F2937' },
                     '& .MuiTabs-indicator': { backgroundColor: 'white' },
                   }}
                 >
@@ -391,17 +390,17 @@ const Demos: React.FC = () => {
                         <ListItem sx={{ px: 0, alignItems: 'flex-start' }}>
                           <ListItemAvatar>
                             <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>
-                              <Person sx={{ color: 'white' }} />
+                              <Person sx={{ color: '#1F2937' }} />
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText
                             primary={
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                                 <Box>
-                                  <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                                  <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                     {demo.customerName} - {demo.company}
                                   </Typography>
-                                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                  <Typography variant="body2" sx={{ color: '#374151' }}>
                                     {demo.type} • {demo.duration} minutes
                                   </Typography>
                                 </Box>
@@ -416,35 +415,35 @@ const Demos: React.FC = () => {
                               <Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
                                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <AccessTime sx={{ fontSize: '1rem', color: 'rgba(255,255,255,0.6)' }} />
-                                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                    <AccessTime sx={{ fontSize: '1rem', color: '#9CA3AF' }} />
+                                    <Typography variant="caption" sx={{ color: '#374151' }}>
                                       {demo.date} at {demo.time}
                                     </Typography>
                                   </Box>
                                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                     {getPlatformIcon(demo.platform)}
-                                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                    <Typography variant="caption" sx={{ color: '#374151' }}>
                                       {demo.platform}
                                     </Typography>
                                   </Box>
                                 </Box>
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                   Assigned to: {demo.assignedTo}
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mt: 0.5 }}>
+                                <Typography variant="body2" sx={{ color: '#6B7280', mt: 0.5 }}>
                                   {demo.notes}
                                 </Typography>
                               </Box>
                             }
                           />
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2 }}>
-                            <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                            <IconButton size="small" sx={{ color: '#6B7280' }}>
                               <PlayArrow />
                             </IconButton>
-                            <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                            <IconButton size="small" sx={{ color: '#6B7280' }}>
                               <Edit />
                             </IconButton>
-                            <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                            <IconButton size="small" sx={{ color: '#6B7280' }}>
                               <Cancel />
                             </IconButton>
                           </Box>
@@ -471,10 +470,10 @@ const Demos: React.FC = () => {
                             primary={
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                                 <Box>
-                                  <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                                  <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                     {demo.customerName} - {demo.company}
                                   </Typography>
-                                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                  <Typography variant="body2" sx={{ color: '#374151' }}>
                                     {demo.type} • {demo.duration} minutes
                                   </Typography>
                                 </Box>
@@ -488,19 +487,19 @@ const Demos: React.FC = () => {
                             secondary={
                               <Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                  <Typography variant="caption" sx={{ color: '#374151' }}>
                                     {demo.date} at {demo.time}
                                   </Typography>
                                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                    <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                       Rating: {demo.rating}/5 ⭐
                                     </Typography>
                                   </Box>
                                 </Box>
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                   Conducted by: {demo.assignedTo}
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mt: 0.5 }}>
+                                <Typography variant="body2" sx={{ color: '#6B7280', mt: 0.5 }}>
                                   Feedback: {demo.feedback}
                                 </Typography>
                               </Box>
@@ -522,15 +521,15 @@ const Demos: React.FC = () => {
           <Grid item xs={12} lg={4}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
                 height: 600,
               }}
             >
               <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Demo Types
                 </Typography>
                 
@@ -539,9 +538,9 @@ const Demos: React.FC = () => {
                     <Grid item xs={12} key={index}>
                       <Card
                         sx={{
-                          background: 'rgba(255,255,255,0.05)',
+                          background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                           backdropFilter: 'blur(5px)',
-                          border: '1px solid rgba(255,255,255,0.1)',
+                          border: '1px solid #e0e0e0',
                           borderRadius: '12px',
                         }}
                       >
@@ -552,10 +551,10 @@ const Demos: React.FC = () => {
                                 <ModelTraining sx={{ fontSize: '1.2rem' }} />
                               </Avatar>
                               <Box>
-                                <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                                <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                   {type.name}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                   {type.duration}
                                 </Typography>
                               </Box>
@@ -564,7 +563,7 @@ const Demos: React.FC = () => {
                               label={type.count}
                               sx={{
                                 bgcolor: type.color,
-                                color: 'white',
+                                color: '#1F2937',
                                 fontWeight: 600,
                               }}
                             />
@@ -585,8 +584,15 @@ const Demos: React.FC = () => {
           onClose={() => setOpenDialog(false)}
           maxWidth="md"
           fullWidth
+          PaperProps={{
+            sx: {
+              background: 'rgba(255, 255, 255, 0.1)',
+              
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+            }
+          }}
         >
-          <DialogTitle>Schedule New Demo</DialogTitle>
+          <DialogTitle sx={{ color: '#1F2937' }}>Schedule New Demo</DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 2 }}>
               <Grid container spacing={2}>
@@ -596,6 +602,12 @@ const Demos: React.FC = () => {
                     label="Customer Name"
                     variant="outlined"
                     required
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -604,6 +616,12 @@ const Demos: React.FC = () => {
                     label="Company"
                     variant="outlined"
                     required
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -613,14 +631,26 @@ const Demos: React.FC = () => {
                     variant="outlined"
                     type="email"
                     required
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
-                    <InputLabel>Demo Type</InputLabel>
+                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Demo Type</InputLabel>
                     <Select
                       label="Demo Type"
                       defaultValue="product"
+                      sx={{
+                        color: '#1F2937',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                        '& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.7)' }
+                      }}
                     >
                       <MenuItem value="product">Product Demo</MenuItem>
                       <MenuItem value="technical">Technical Demo</MenuItem>
@@ -635,7 +665,15 @@ const Demos: React.FC = () => {
                     label="Date"
                     variant="outlined"
                     type="date"
-                    InputLabelProps={{ shrink: true }}
+                    InputLabelProps={{ 
+                      shrink: true,
+                      sx: { color: 'rgba(255, 255, 255, 0.7)' }
+                    }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                     required
                   />
                 </Grid>
@@ -645,16 +683,30 @@ const Demos: React.FC = () => {
                     label="Time"
                     variant="outlined"
                     type="time"
-                    InputLabelProps={{ shrink: true }}
+                    InputLabelProps={{ 
+                      shrink: true,
+                      sx: { color: 'rgba(255, 255, 255, 0.7)' }
+                    }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                     required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
-                    <InputLabel>Platform</InputLabel>
+                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Platform</InputLabel>
                     <Select
                       label="Platform"
                       defaultValue="zoom"
+                      sx={{
+                        color: '#1F2937',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                        '& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.7)' }
+                      }}
                     >
                       <MenuItem value="zoom">Zoom</MenuItem>
                       <MenuItem value="teams">Microsoft Teams</MenuItem>
@@ -665,10 +717,16 @@ const Demos: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
-                    <InputLabel>Assigned To</InputLabel>
+                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Assigned To</InputLabel>
                     <Select
                       label="Assigned To"
                       defaultValue="sarah"
+                      sx={{
+                        color: '#1F2937',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                        '& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.7)' }
+                      }}
                     >
                       <MenuItem value="sarah">Sarah Connor</MenuItem>
                       <MenuItem value="mike">Mike Johnson</MenuItem>
@@ -685,14 +743,31 @@ const Demos: React.FC = () => {
                     rows={3}
                     variant="outlined"
                     placeholder="Key topics to cover, customer interests, etc."
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                      '& .MuiOutlinedInput-input::placeholder': {
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        opacity: 1
+                      }
+                    }}
                   />
                 </Grid>
               </Grid>
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-            <Button variant="contained" onClick={() => setOpenDialog(false)}>
+            <Button onClick={() => setOpenDialog(false)} sx={{ color: '#1F2937' }}>Cancel</Button>
+            <Button 
+              variant="contained" 
+              onClick={() => setOpenDialog(false)}
+              sx={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
+                color: '#1F2937'
+              }}
+            >
               Schedule Demo
             </Button>
           </DialogActions>

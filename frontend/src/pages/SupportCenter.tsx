@@ -108,7 +108,7 @@ const SupportCenter: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -139,18 +139,18 @@ const SupportCenter: React.FC = () => {
             >
               Support Center
             </Typography>
-            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 400 }}>
+            <Typography variant="h6" sx={{ color: '#374151', fontWeight: 400 }}>
               Comprehensive customer support management
             </Typography>
           </Box>
           <IconButton
             sx={{
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
+              background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+              
               '&:hover': { background: 'rgba(255,255,255,0.2)' },
             }}
           >
-            <Refresh sx={{ color: 'white' }} />
+            <Refresh sx={{ color: '#1F2937' }} />
           </IconButton>
         </Box>
 
@@ -159,22 +159,22 @@ const SupportCenter: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(244, 67, 54, 0.3)', mr: 2 }}>
-                    <PriorityHigh sx={{ color: 'white' }} />
+                    <PriorityHigh sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {supportMetrics.openTickets}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Open Tickets
                     </Typography>
                   </Box>
@@ -186,22 +186,22 @@ const SupportCenter: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <TrendingUp sx={{ color: 'white' }} />
+                    <TrendingUp sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {supportMetrics.resolvedToday}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Resolved Today
                     </Typography>
                   </Box>
@@ -213,22 +213,22 @@ const SupportCenter: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(33, 150, 243, 0.3)', mr: 2 }}>
-                    <Schedule sx={{ color: 'white' }} />
+                    <Schedule sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {supportMetrics.avgResponseTime}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Avg Response
                     </Typography>
                   </Box>
@@ -240,22 +240,22 @@ const SupportCenter: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <Assessment sx={{ color: 'white' }} />
+                    <Assessment sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {supportMetrics.satisfaction}%
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Satisfaction
                     </Typography>
                   </Box>
@@ -282,45 +282,47 @@ const SupportCenter: React.FC = () => {
           <Grid item xs={12} lg={8}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
-                height: 'fit-content',
+                height: 450,
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <CardContent>
+              <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
                     Recent Support Tickets
                   </Typography>
                   <Button
                     variant="outlined"
                     sx={{
                       borderColor: 'rgba(255,255,255,0.3)',
-                      color: 'white',
+                      color: '#1F2937',
                       '&:hover': {
                         borderColor: 'rgba(255,255,255,0.5)',
-                        background: 'rgba(255,255,255,0.1)',
+                        background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                       },
                     }}
                   >
                     View All
                   </Button>
                 </Box>
-                <List>
+                <List sx={{ flex: 1, overflow: 'auto' }}>
                   {recentTickets.map((ticket, index) => (
                     <Box key={ticket.id}>
                       <ListItem sx={{ px: 0 }}>
                         <ListItemAvatar>
                           <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>
-                            <Person sx={{ color: 'white' }} />
+                            <Person sx={{ color: '#1F2937' }} />
                           </Avatar>
                         </ListItemAvatar>
                         <ListItemText
                           primary={
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                              <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                              <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                 {ticket.title}
                               </Typography>
                               <Chip
@@ -337,10 +339,10 @@ const SupportCenter: React.FC = () => {
                           }
                           secondary={
                             <Box>
-                              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                              <Typography variant="body2" sx={{ color: '#374151' }}>
                                 {ticket.id} • {ticket.user} • Assigned to {ticket.assignedTo}
                               </Typography>
-                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                              <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                 {ticket.createdAt}
                               </Typography>
                             </Box>
@@ -361,25 +363,27 @@ const SupportCenter: React.FC = () => {
           <Grid item xs={12} lg={4}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
-                height: 'fit-content',
+                height: 450,
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+              <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Support Channels
                 </Typography>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} sx={{ flex: 1, overflow: 'auto' }}>
                   {supportChannels.map((channel) => (
                     <Grid item xs={12} key={channel.name}>
                       <Card
                         sx={{
-                          background: 'rgba(255,255,255,0.05)',
-                          backdropFilter: 'blur(10px)',
-                          border: '1px solid rgba(255,255,255,0.1)',
+                          background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                          
+                          border: '1px solid #e0e0e0',
                           borderRadius: '12px',
                         }}
                       >
@@ -389,7 +393,7 @@ const SupportCenter: React.FC = () => {
                               <Avatar sx={{ bgcolor: channel.color, width: 36, height: 36, mr: 2 }}>
                                 {channel.icon}
                               </Avatar>
-                              <Typography variant="body1" sx={{ color: 'white', fontWeight: 500 }}>
+                              <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 500 }}>
                                 {channel.name}
                               </Typography>
                             </Box>
@@ -397,7 +401,7 @@ const SupportCenter: React.FC = () => {
                               label={channel.count}
                               sx={{
                                 bgcolor: channel.color,
-                                color: 'white',
+                                color: '#1F2937',
                                 fontWeight: 600,
                               }}
                             />

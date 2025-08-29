@@ -129,6 +129,7 @@ const Layout: React.FC = () => {
   const { isTestingMode, selectedUser } = testingState;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
 
   // Get effective user and menu items
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
@@ -144,6 +145,14 @@ const Layout: React.FC = () => {
 
   const handleProfileMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleNotificationMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationAnchorEl(event.currentTarget);
+  };
+
+  const handleNotificationMenuClose = () => {
+    setNotificationAnchorEl(null);
   };
 
   const handleLogout = async () => {
@@ -299,6 +308,7 @@ const Layout: React.FC = () => {
             {/* Notifications */}
             <IconButton 
               size="large"
+              onClick={handleNotificationMenuOpen}
               sx={{ 
                 color: 'white',
                 '&:hover': {
@@ -391,6 +401,99 @@ const Layout: React.FC = () => {
           </ListItemIcon>
           Logout
         </MenuItem>
+      </Menu>
+
+      {/* Notifications Menu */}
+      <Menu
+        id="notification-menu"
+        anchorEl={notificationAnchorEl}
+        open={Boolean(notificationAnchorEl)}
+        onClose={handleNotificationMenuClose}
+        onClick={handleNotificationMenuClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            minWidth: 320,
+            maxHeight: 400,
+          },
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
+            Notifications
+          </Typography>
+        </Box>
+        
+        {/* Sample notifications for Super Admin */}
+        <MenuItem onClick={handleNotificationMenuClose}>
+          <ListItemIcon>
+            <Badge color="success" variant="dot">
+              <AccountCircle fontSize="small" />
+            </Badge>
+          </ListItemIcon>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              New user registered
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#6B7280' }}>
+              John Doe joined the platform • 2 min ago
+            </Typography>
+          </Box>
+        </MenuItem>
+
+        <MenuItem onClick={handleNotificationMenuClose}>
+          <ListItemIcon>
+            <Badge color="warning" variant="dot">
+              <AdminPanelSettings fontSize="small" />
+            </Badge>
+          </ListItemIcon>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              System maintenance scheduled
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#6B7280' }}>
+              Planned downtime at 2:00 AM UTC • 1 hour ago
+            </Typography>
+          </Box>
+        </MenuItem>
+
+        <MenuItem onClick={handleNotificationMenuClose}>
+          <ListItemIcon>
+            <Badge color="primary" variant="dot">
+              <Support fontSize="small" />
+            </Badge>
+          </ListItemIcon>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              Support ticket resolved
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#6B7280' }}>
+              Ticket #1234 closed successfully • 3 hours ago
+            </Typography>
+          </Box>
+        </MenuItem>
+
+        <MenuItem onClick={handleNotificationMenuClose}>
+          <ListItemIcon>
+            <Badge color="error" variant="dot">
+              <Notifications fontSize="small" />
+            </Badge>
+          </ListItemIcon>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              API rate limit warning
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#6B7280' }}>
+              High API usage detected • 5 hours ago
+            </Typography>
+          </Box>
+        </MenuItem>
+
       </Menu>
 
       {/* Sidebar */}

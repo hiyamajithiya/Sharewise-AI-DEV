@@ -249,25 +249,25 @@ const Dashboard: React.FC = () => {
           borderRadius: '16px',
           border: 'none',
           boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
-          mb: 4, 
-          p: 3 
+          mb: 3, 
+          p: 2.5 
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar sx={{ ...styles.roleAvatar, mr: 3 }}>
-              <AdminPanelSettings sx={{ fontSize: 30, color: 'white' }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <Avatar sx={{ ...styles.roleAvatar, width: 50, height: 50, mr: 2.5 }}>
+              <AdminPanelSettings sx={{ fontSize: 26, color: 'white' }} />
             </Avatar>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" sx={{ 
+              <Typography variant="h5" sx={{ 
                 fontWeight: 800, 
                 color: 'white',
                 textShadow: '1px 1px 3px rgba(0,0,0,0.2)',
-                mb: 0.5 
+                mb: 0.3 
               }}>
                 Super Admin Control Center
               </Typography>
-              <Typography variant="body1" sx={{ 
+              <Typography variant="body2" sx={{ 
                 color: 'rgba(255, 255, 255, 0.95)',
-                fontSize: '1.1rem'
+                fontSize: '0.95rem'
               }}>
                 Complete system oversight and management capabilities
               </Typography>
@@ -278,8 +278,9 @@ const Dashboard: React.FC = () => {
                 backgroundColor: 'rgba(255, 255, 255, 0.25)',
                 color: 'white',
                 fontWeight: 700,
-                fontSize: '0.9rem',
-                border: '2px solid rgba(255, 255, 255, 0.4)'
+                fontSize: '0.8rem',
+                border: '2px solid rgba(255, 255, 255, 0.4)',
+                height: '26px'
               }} 
             />
           </Box>
@@ -287,7 +288,7 @@ const Dashboard: React.FC = () => {
       </Fade>
 
       {/* Stats Grid */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
         {[
           {
             title: "Total Users",
@@ -366,7 +367,7 @@ const Dashboard: React.FC = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Slide direction="right" in timeout={800}>
-            <Card sx={{ ...styles.glassCard, p: 4, height: '100%' }}>
+            <Card sx={{ ...styles.glassCard, p: 3, height: '350px' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <Box sx={{
                   p: 2,
@@ -381,13 +382,13 @@ const Dashboard: React.FC = () => {
                 </Typography>
               </Box>
               
-              <Typography variant="body1" sx={{ color: '#6B7280', mb: 3, lineHeight: 1.6 }}>
+              <Typography variant="body2" sx={{ color: '#6B7280', mb: 2, lineHeight: 1.5 }}>
                 Complete access to all system features, user management, analytics, and configuration settings.
               </Typography>
               
               {systemInfo && (
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#374151' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, color: '#1F2937' }}>
                     User Distribution
                   </Typography>
                   {[
@@ -396,13 +397,13 @@ const Dashboard: React.FC = () => {
                     { label: 'Support Team', count: systemInfo.support_team || 0, color: '#F59E0B' },
                     { label: 'Super Admins', count: systemInfo.super_admins || 0, color: '#EF4444' }
                   ].map((item, idx) => (
-                    <Box key={idx} sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                    <Box key={idx} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Box sx={{
-                        width: 12,
-                        height: 12,
+                        width: 10,
+                        height: 10,
                         borderRadius: '50%',
                         backgroundColor: item.color,
-                        mr: 2,
+                        mr: 1.5,
                         boxShadow: `0 2px 4px ${item.color}40`
                       }} />
                       <Typography variant="body2" sx={{ flex: 1, fontWeight: 500, color: '#374151' }}>
@@ -414,7 +415,9 @@ const Dashboard: React.FC = () => {
                         sx={{ 
                           backgroundColor: `${item.color}15`,
                           color: item.color,
-                          fontWeight: 600
+                          fontWeight: 600,
+                          height: '20px',
+                          fontSize: '0.75rem'
                         }}
                       />
                     </Box>
@@ -427,7 +430,7 @@ const Dashboard: React.FC = () => {
 
         <Grid item xs={12} md={6}>
           <Slide direction="left" in timeout={1000}>
-            <Card sx={{ ...styles.glassCard, p: 4, height: '100%' }}>
+            <Card sx={{ ...styles.glassCard, p: 3, height: '350px' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <Box sx={{
                   p: 2,
@@ -444,16 +447,16 @@ const Dashboard: React.FC = () => {
               
               {systemInfo?.recent_registrations_7d !== undefined ? (
                 <Box>
-                  <Typography variant="body1" sx={{ color: '#6B7280', mb: 3 }}>
+                  <Typography variant="body2" sx={{ color: '#6B7280', mb: 2 }}>
                     New user registrations overview
                   </Typography>
                   
-                  <Box sx={{ mb: 3 }}>
+                  <Box sx={{ mb: 2 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: '#374151' }}>
                         Last 24 hours
                       </Typography>
-                      <Typography variant="h4" sx={{ 
+                      <Typography variant="h5" sx={{ 
                         color: '#667eea', 
                         fontWeight: 800,
                         textShadow: '0 2px 4px rgba(102, 126, 234, 0.2)'
@@ -465,12 +468,12 @@ const Dashboard: React.FC = () => {
                       variant="determinate" 
                       value={Math.min((systemInfo.recent_registrations_24h / 10) * 100, 100)}
                       sx={{ 
-                        height: 8, 
-                        borderRadius: 4,
+                        height: 6, 
+                        borderRadius: 3,
                         backgroundColor: '#E5E7EB',
                         '& .MuiLinearProgress-bar': {
                           background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-                          borderRadius: 4
+                          borderRadius: 3
                         }
                       }}
                     />
@@ -481,7 +484,7 @@ const Dashboard: React.FC = () => {
                       <Typography variant="body2" sx={{ fontWeight: 600, color: '#374151' }}>
                         Last 7 days
                       </Typography>
-                      <Typography variant="h4" sx={{ 
+                      <Typography variant="h5" sx={{ 
                         color: '#10B981', 
                         fontWeight: 800,
                         textShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
@@ -493,12 +496,12 @@ const Dashboard: React.FC = () => {
                       variant="determinate" 
                       value={Math.min((systemInfo.recent_registrations_7d / 50) * 100, 100)}
                       sx={{ 
-                        height: 8, 
-                        borderRadius: 4,
+                        height: 6, 
+                        borderRadius: 3,
                         backgroundColor: '#E5E7EB',
                         '& .MuiLinearProgress-bar': {
                           background: 'linear-gradient(90deg, #10B981 0%, #059F80 100%)',
-                          borderRadius: 4
+                          borderRadius: 3
                         }
                       }}
                     />
@@ -507,13 +510,13 @@ const Dashboard: React.FC = () => {
               ) : (
                 <Box sx={{ 
                   textAlign: 'center', 
-                  py: 4,
+                  py: 3,
                   background: 'linear-gradient(135deg, #F3F4F615 0%, #E5E7EB15 100%)',
                   borderRadius: '15px',
                   border: '1px dashed #D1D5DB'
                 }}>
-                  <Analytics sx={{ fontSize: 48, color: '#9CA3AF', mb: 2 }} />
-                  <Typography variant="body1" sx={{ color: '#6B7280' }}>
+                  <Analytics sx={{ fontSize: 36, color: '#9CA3AF', mb: 1 }} />
+                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
                     Activity analytics will appear here
                   </Typography>
                 </Box>
@@ -685,11 +688,11 @@ const Dashboard: React.FC = () => {
                         }}>
                           {feature.icon}
                         </Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600, color: '#374151' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
                           {feature.title}
                         </Typography>
                       </Box>
-                      <Typography variant="body2" sx={{ color: '#6B7280', lineHeight: 1.5 }}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
                         {feature.desc}
                       </Typography>
                     </Box>
@@ -863,11 +866,11 @@ const Dashboard: React.FC = () => {
                         }}>
                           {feature.icon}
                         </Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600, color: '#374151' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
                           {feature.title}
                         </Typography>
                       </Box>
-                      <Typography variant="body2" sx={{ color: '#6B7280', lineHeight: 1.5 }}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
                         {feature.desc}
                       </Typography>
                     </Box>
@@ -1186,7 +1189,7 @@ const Dashboard: React.FC = () => {
                   <Typography variant="h6" sx={{ color: '#667eea', fontWeight: 600, mb: 1 }}>
                     Interactive Market Charts
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                     Real-time market data and advanced analytics coming soon
                   </Typography>
                 </Box>
@@ -1221,7 +1224,7 @@ const Dashboard: React.FC = () => {
             <Typography variant="h5" sx={{ fontWeight: 600, color: '#667eea', mb: 1 }}>
               Loading Dashboard
             </Typography>
-            <Typography variant="body2" sx={{ color: '#6B7280' }}>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
               Preparing your personalized trading experience...
             </Typography>
           </Card>
@@ -1237,12 +1240,12 @@ const Dashboard: React.FC = () => {
           <>
             {/* Modern Header */}
             <Fade in timeout={400}>
-              <Card sx={{ ...styles.glassCard, mb: 4, p: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Card sx={{ ...styles.glassCard, mb: 3, p: 2.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box>
-                    <Typography variant="h3" component="h1" sx={{ 
+                    <Typography variant="h4" component="h1" sx={{ 
                       fontWeight: 800, 
-                      mb: 1,
+                      mb: 0.5,
                       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                       backgroundClip: 'text',
                       WebkitBackgroundClip: 'text',
@@ -1251,7 +1254,7 @@ const Dashboard: React.FC = () => {
                     }}>
                       Welcome back, {getEffectiveUser()?.first_name || 'Trader'}!
                     </Typography>
-                    <Typography variant="body1" sx={{ color: '#6B7280', fontSize: '1.1rem', lineHeight: 1.6 }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280', fontSize: '1rem', lineHeight: 1.4 }}>
                       Here's what's happening with your trading portfolio today
                     </Typography>
                   </Box>

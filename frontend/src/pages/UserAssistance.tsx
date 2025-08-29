@@ -129,7 +129,7 @@ const UserAssistance: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -159,7 +159,7 @@ const UserAssistance: React.FC = () => {
           >
             User Assistance
           </Typography>
-          <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 400 }}>
+          <Typography variant="h6" sx={{ color: '#374151', fontWeight: 400 }}>
             Real-time user support and assistance platform
           </Typography>
         </Box>
@@ -169,22 +169,22 @@ const UserAssistance: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <Chat sx={{ color: 'white' }} />
+                    <Chat sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {assistanceMetrics.activeChats}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Active Chats
                     </Typography>
                   </Box>
@@ -196,22 +196,22 @@ const UserAssistance: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(33, 150, 243, 0.3)', mr: 2 }}>
-                    <LiveHelp sx={{ color: 'white' }} />
+                    <LiveHelp sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {assistanceMetrics.avgResponseTime}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Response Time
                     </Typography>
                   </Box>
@@ -223,22 +223,22 @@ const UserAssistance: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(255, 193, 7, 0.3)', mr: 2 }}>
-                    <QuestionAnswer sx={{ color: 'white' }} />
+                    <QuestionAnswer sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {assistanceMetrics.satisfaction}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Satisfaction
                     </Typography>
                   </Box>
@@ -250,22 +250,22 @@ const UserAssistance: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(156, 39, 176, 0.3)', mr: 2 }}>
-                    <Help sx={{ color: 'white' }} />
+                    <Help sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {assistanceMetrics.resolvedToday}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Resolved Today
                     </Typography>
                   </Box>
@@ -280,9 +280,9 @@ const UserAssistance: React.FC = () => {
           <Grid item xs={12} lg={8}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
                 height: 600,
                 display: 'flex',
@@ -295,8 +295,8 @@ const UserAssistance: React.FC = () => {
                   onChange={handleTabChange}
                   sx={{
                     px: 2,
-                    '& .MuiTab-root': { color: 'rgba(255,255,255,0.7)' },
-                    '& .Mui-selected': { color: 'white' },
+                    '& .MuiTab-root': { color: '#6B7280' },
+                    '& .Mui-selected': { color: '#1F2937' },
                     '& .MuiTabs-indicator': { backgroundColor: 'white' },
                   }}
                 >
@@ -322,7 +322,7 @@ const UserAssistance: React.FC = () => {
                           ),
                           sx: {
                             backgroundColor: 'rgba(255,255,255,0.05)',
-                            color: 'white',
+                            color: '#1F2937',
                             '& .MuiOutlinedInput-notchedOutline': {
                               borderColor: 'rgba(255,255,255,0.2)',
                             },
@@ -351,7 +351,7 @@ const UserAssistance: React.FC = () => {
                             <ListItemText
                               primary={
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                                  <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                     {chat.user}
                                   </Typography>
                                   {chat.unread > 0 && (
@@ -360,7 +360,7 @@ const UserAssistance: React.FC = () => {
                                       size="small"
                                       sx={{
                                         backgroundColor: '#f44336',
-                                        color: 'white',
+                                        color: '#1F2937',
                                         height: 20,
                                         minWidth: 20,
                                         '& .MuiChip-label': { px: 0.5, fontSize: '0.75rem' },
@@ -371,20 +371,20 @@ const UserAssistance: React.FC = () => {
                               }
                               secondary={
                                 <Box>
-                                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                  <Typography variant="body2" sx={{ color: '#374151' }}>
                                     {chat.lastMessage}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                  <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                     {chat.timestamp}
                                   </Typography>
                                 </Box>
                               }
                             />
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                              <IconButton size="small" sx={{ color: 'white' }}>
+                              <IconButton size="small" sx={{ color: '#1F2937' }}>
                                 <VideoCall />
                               </IconButton>
-                              <IconButton size="small" sx={{ color: 'white' }}>
+                              <IconButton size="small" sx={{ color: '#1F2937' }}>
                                 <Phone />
                               </IconButton>
                             </Box>
@@ -407,7 +407,7 @@ const UserAssistance: React.FC = () => {
                         InputProps={{
                           sx: {
                             backgroundColor: 'rgba(255,255,255,0.05)',
-                            color: 'white',
+                            color: '#1F2937',
                             '& .MuiOutlinedInput-notchedOutline': {
                               borderColor: 'rgba(255,255,255,0.2)',
                             },
@@ -417,7 +417,7 @@ const UserAssistance: React.FC = () => {
                       <IconButton
                         sx={{
                           backgroundColor: 'rgba(255,255,255,0.1)',
-                          color: 'white',
+                          color: '#1F2937',
                           '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
                         }}
                       >
@@ -433,14 +433,14 @@ const UserAssistance: React.FC = () => {
                       <Grid item xs={12} sm={6} key={index}>
                         <Card
                           sx={{
-                            background: 'rgba(255,255,255,0.05)',
+                            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                             backdropFilter: 'blur(5px)',
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            border: '1px solid #e0e0e0',
                             borderRadius: '12px',
                             cursor: 'pointer',
                             transition: 'all 0.3s ease',
                             '&:hover': {
-                              background: 'rgba(255,255,255,0.1)',
+                              background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                               transform: 'translateY(-2px)',
                             },
                           }}
@@ -457,7 +457,7 @@ const UserAssistance: React.FC = () => {
                             >
                               {action.icon}
                             </Avatar>
-                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                            <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
                               {action.title}
                             </Typography>
                           </CardContent>
@@ -474,15 +474,15 @@ const UserAssistance: React.FC = () => {
           <Grid item xs={12} lg={4}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
                 height: 600,
               }}
             >
               <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Frequent Issues
                 </Typography>
                 <List sx={{ maxHeight: 500, overflow: 'auto' }}>
@@ -492,7 +492,7 @@ const UserAssistance: React.FC = () => {
                         <ListItemText
                           primary={
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                              <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                              <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                 {issue.title}
                               </Typography>
                               <Chip
@@ -500,14 +500,14 @@ const UserAssistance: React.FC = () => {
                                 size="small"
                                 sx={{
                                   backgroundColor: 'rgba(255,255,255,0.2)',
-                                  color: 'white',
+                                  color: '#1F2937',
                                 }}
                               />
                             </Box>
                           }
                           secondary={
                             <Box>
-                              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1 }}>
+                              <Typography variant="body2" sx={{ color: '#374151', mb: 1 }}>
                                 {issue.description}
                               </Typography>
                               <Chip

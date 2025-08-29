@@ -28,7 +28,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Divider,
 } from '@mui/material';
 import {
   AccountBalance,
@@ -123,19 +122,19 @@ const BrokerIntegration: React.FC = () => {
     <Box sx={{
       mb: 3,
       p: 2,
-      borderRadius: '15px',
-      background: 'rgba(59, 130, 246, 0.1)',
-      backdropFilter: 'blur(20px)',
-      border: '1px solid rgba(59, 130, 246, 0.2)',
+      borderRadius: '16px',
+      background: 'rgba(255, 255, 255, 0.1)',
+      
+      border: '1px solid rgba(255, 255, 255, 0.2)',
       boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
     }}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-        {icon}
+        <Box sx={{ color: '#1F2937' }}>{icon}</Box>
         <Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: '#1976d2' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: '#1F2937' }}>
             {title}
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666' }}>
+          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
             {children}
           </Typography>
         </Box>
@@ -200,7 +199,7 @@ const BrokerIntegration: React.FC = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#f5f7fa',
       position: 'relative',
       '&::before': {
         content: '""',
@@ -220,7 +219,7 @@ const BrokerIntegration: React.FC = () => {
           p: 3,
           borderRadius: '20px',
           background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
+          
           border: '1px solid rgba(255, 255, 255, 0.2)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
         }}>
@@ -229,7 +228,7 @@ const BrokerIntegration: React.FC = () => {
               <Typography variant="h4" component="h1" sx={{ 
                 fontWeight: 700, 
                 mb: 1, 
-                color: 'white',
+                color: '#1F2937',
                 textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
               }}>
                 Broker Integration
@@ -246,7 +245,7 @@ const BrokerIntegration: React.FC = () => {
               onClick={() => setConnectDialogOpen(true)}
               startIcon={<Add />}
               sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: '#f5f7fa',
                 borderRadius: '15px',
                 textTransform: 'none',
                 fontWeight: 600,
@@ -278,13 +277,13 @@ const BrokerIntegration: React.FC = () => {
             p: 4, 
             mb: 4, 
             textAlign: 'center',
-            borderRadius: '20px',
+            borderRadius: '16px',
             background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
+            
             border: '1px solid rgba(255, 255, 255, 0.2)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>
+            <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>
               Welcome to Broker Integration!
             </Typography>
             <Typography variant="body1" sx={{ mb: 3, color: 'rgba(255, 255, 255, 0.85)' }}>
@@ -293,19 +292,19 @@ const BrokerIntegration: React.FC = () => {
             <Box sx={{
               mb: 3,
               p: 2,
-              borderRadius: '15px',
-              background: 'rgba(59, 130, 246, 0.1)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
+              borderRadius: '16px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
             }}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                <Lightbulb sx={{ color: 'white' }} />
+                <Lightbulb sx={{ color: '#1F2937' }} />
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: '#1F2937' }}>
                     Why Connect Your Broker?
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'white' }}>
+                  <Typography variant="body2" sx={{ color: '#1F2937' }}>
                     • <strong>Automated Trading:</strong> Execute your strategies automatically without manual intervention<br/>
                     • <strong>Real-time Sync:</strong> Keep your portfolio data updated across all platforms<br/>
                     • <strong>Secure Connection:</strong> Bank-level encryption protects your trading credentials<br/>
@@ -320,7 +319,7 @@ const BrokerIntegration: React.FC = () => {
               startIcon={<Add />}
               size="large"
               sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: '#f5f7fa',
                 borderRadius: '15px',
                 textTransform: 'none',
                 fontWeight: 600,
@@ -343,17 +342,17 @@ const BrokerIntegration: React.FC = () => {
           <Paper sx={{ 
             p: 3, 
             height: '100%',
-            borderRadius: '20px',
+            borderRadius: '16px',
             background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
+            
             border: '1px solid rgba(255, 255, 255, 0.2)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
                 Connected Accounts
               </Typography>
-              <IconButton onClick={() => console.log('Refreshing accounts...')} sx={{ color: 'white' }}>
+              <IconButton onClick={() => console.log('Refreshing accounts...')} sx={{ color: '#1F2937' }}>
                 <Refresh />
               </IconButton>
             </Box>
@@ -361,7 +360,7 @@ const BrokerIntegration: React.FC = () => {
             {brokerAccounts.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 4 }}>
                 <AccountBalance sx={{ fontSize: 48, mb: 2, color: 'rgba(255, 255, 255, 0.7)' }} />
-                <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>No broker accounts connected</Typography>
+                <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>No broker accounts connected</Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>Connect your first broker to get started</Typography>
               </Box>
             ) : (
@@ -369,12 +368,12 @@ const BrokerIntegration: React.FC = () => {
                 {brokerAccounts.map((account) => (
                   <ListItem key={account.id} sx={{ px: 0 }}>
                     <ListItemIcon>
-                      <AccountBalance sx={{ color: 'white' }} />
+                      <AccountBalance sx={{ color: '#1F2937' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 600, color: 'white' }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>
                             {account.brokerName}
                           </Typography>
                           <Chip 
@@ -396,7 +395,7 @@ const BrokerIntegration: React.FC = () => {
                       }
                     />
                     <ListItemSecondaryAction>
-                      <IconButton edge="end" onClick={() => console.log('Account settings')} sx={{ color: 'white' }}>
+                      <IconButton edge="end" onClick={() => console.log('Account settings')} sx={{ color: '#1F2937' }}>
                         <Settings />
                       </IconButton>
                     </ListItemSecondaryAction>
@@ -412,13 +411,13 @@ const BrokerIntegration: React.FC = () => {
           <Paper sx={{ 
             p: 3, 
             height: '100%',
-            borderRadius: '20px',
+            borderRadius: '16px',
             background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
+            
             border: '1px solid rgba(255, 255, 255, 0.2)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
               Available Brokers
             </Typography>
 
@@ -431,12 +430,12 @@ const BrokerIntegration: React.FC = () => {
                       height: '100%',
                       cursor: broker.status === 'Available' ? 'pointer' : 'default',
                       opacity: broker.status === 'Coming Soon' ? 0.6 : 1,
-                      borderRadius: '15px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '16px',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
                       '&:hover': broker.status === 'Available' ? {
-                        background: 'rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.15)',
                         transform: 'translateY(-2px)',
                         boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
                       } : {}
@@ -450,7 +449,7 @@ const BrokerIntegration: React.FC = () => {
                   >
                     <CardContent sx={{ textAlign: 'center' }}>
                       <Typography variant="h4" sx={{ mb: 1 }}>{broker.logo}</Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'white' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: '#1F2937' }}>
                         {broker.name}
                       </Typography>
                       <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.85)' }}>
@@ -465,7 +464,7 @@ const BrokerIntegration: React.FC = () => {
                             variant="outlined" 
                             sx={{ 
                               m: 0.25,
-                              color: 'white',
+                              color: '#1F2937',
                               borderColor: 'rgba(255, 255, 255, 0.3)',
                             }}
                           />
@@ -495,7 +494,7 @@ const BrokerIntegration: React.FC = () => {
             sx: {
               borderRadius: '20px',
               background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }

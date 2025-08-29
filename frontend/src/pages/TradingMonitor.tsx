@@ -32,6 +32,36 @@ import {
 } from '@mui/icons-material';
 
 const TradingMonitor: React.FC = () => {
+  const handleRefreshData = () => {
+    // Simulate data refresh for trading monitor
+    console.log('Refreshing trading monitor data...');
+    
+    // Show loading state briefly
+    const refreshStartTime = Date.now();
+    
+    // Simulate API call delay for refreshing all data
+    setTimeout(() => {
+      const refreshDuration = Date.now() - refreshStartTime;
+      console.log(`Trading monitor data refreshed in ${refreshDuration}ms`);
+      
+      // In a real application, this would:
+      // 1. Fetch updated system metrics from the backend
+      // 2. Refresh active strategies data
+      // 3. Get latest system alerts
+      // 4. Update user counts and trading volumes
+      // 5. Refresh system health status
+      
+      // For now, we'll just log the refresh action
+      console.log('Updated data:', {
+        systemMetrics: 'Refreshed system metrics',
+        activeStrategies: 'Updated strategy performance',
+        alerts: 'Fetched latest system alerts',
+        timestamp: new Date().toISOString()
+      });
+      
+    }, 1000);
+  };
+
   // Mock data for trading monitoring
   const systemMetrics = {
     totalUsers: 2847,
@@ -73,21 +103,16 @@ const TradingMonitor: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#f5f7fa',
-        position: 'relative',
-      }}
-    >
-      <Box sx={{ position: 'relative', zIndex: 1, p: 3 }}>
+    <Box sx={{ backgroundColor: '#f5f7fa', minHeight: '100vh', p: 3 }}>
         {/* Header */}
         <Box 
           sx={{ 
             mb: 4, 
             p: 3,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'white',
+            border: '1px solid #e0e0e0',
             borderRadius: '16px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             display: 'flex', 
             justifyContent: 'space-between', 
             alignItems: 'center' 
@@ -98,24 +123,25 @@ const TradingMonitor: React.FC = () => {
               variant="h4"
               sx={{
                 fontWeight: 700,
-                color: 'white',
+                color: '#1F2937',
                 mb: 1,
               }}
             >
               Trading Monitor
             </Typography>
-            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 400 }}>
+            <Typography variant="h6" sx={{ color: '#6B7280', fontWeight: 400 }}>
               Real-time system monitoring and trading oversight
             </Typography>
           </Box>
           <IconButton
+            onClick={handleRefreshData}
             sx={{
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              '&:hover': { background: 'rgba(255,255,255,0.2)' },
+              background: '#f3f4f6',
+              border: '1px solid #e5e7eb',
+              '&:hover': { background: '#e5e7eb' },
             }}
           >
-            <Refresh sx={{ color: 'white' }} />
+            <Refresh sx={{ color: '#374151' }} />
           </IconButton>
         </Box>
 
@@ -124,22 +150,22 @@ const TradingMonitor: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white',
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', mr: 2 }}>
+                  <Avatar sx={{ bgcolor: '#3B82F6', mr: 2 }}>
                     <People sx={{ color: 'white' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {systemMetrics.totalUsers.toLocaleString()}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Total Users
                     </Typography>
                   </Box>
@@ -151,22 +177,22 @@ const TradingMonitor: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white',
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
+                  <Avatar sx={{ bgcolor: '#10B981', mr: 2 }}>
                     <TrendingUp sx={{ color: 'white' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {systemMetrics.activeTraders.toLocaleString()}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Active Traders
                     </Typography>
                   </Box>
@@ -178,22 +204,22 @@ const TradingMonitor: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white',
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'rgba(33, 150, 243, 0.3)', mr: 2 }}>
+                  <Avatar sx={{ bgcolor: '#3B82F6', mr: 2 }}>
                     <AccountBalance sx={{ color: 'white' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {systemMetrics.totalVolume}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Daily Volume
                     </Typography>
                   </Box>
@@ -205,22 +231,22 @@ const TradingMonitor: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white',
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
+                  <Avatar sx={{ bgcolor: '#10B981', mr: 2 }}>
                     <MonitorHeart sx={{ color: 'white' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {systemMetrics.systemHealth}%
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       System Health
                     </Typography>
                   </Box>
@@ -231,9 +257,9 @@ const TradingMonitor: React.FC = () => {
                   sx={{
                     height: 8,
                     borderRadius: 4,
-                    bgcolor: 'rgba(255,255,255,0.1)',
+                    bgcolor: '#f3f4f6',
                     '& .MuiLinearProgress-bar': {
-                      bgcolor: '#4caf50',
+                      bgcolor: '#10B981',
                     },
                   }}
                 />
@@ -247,31 +273,63 @@ const TradingMonitor: React.FC = () => {
           <Grid item xs={12} lg={8}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white',
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
-                height: 'fit-content',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                height: 400,
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+              <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Active Trading Strategies
                 </Typography>
-                <TableContainer component={Paper} sx={{ background: 'rgba(255,255,255,0.05)' }}>
+                <TableContainer 
+                  component={Paper} 
+                  sx={{ 
+                    background: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '12px',
+                    boxShadow: 'none',
+                    flex: 1,
+                    overflow: 'auto',
+                  }}
+                >
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ 
+                          color: '#374151', 
+                          fontWeight: 600,
+                          borderBottom: '1px solid #e5e7eb',
+                          backgroundColor: '#f9fafb',
+                        }}>
                           Strategy Name
                         </TableCell>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ 
+                          color: '#374151', 
+                          fontWeight: 600,
+                          borderBottom: '1px solid #e5e7eb',
+                          backgroundColor: '#f9fafb',
+                        }}>
                           Users
                         </TableCell>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ 
+                          color: '#374151', 
+                          fontWeight: 600,
+                          borderBottom: '1px solid #e5e7eb',
+                          backgroundColor: '#f9fafb',
+                        }}>
                           Performance
                         </TableCell>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ 
+                          color: '#374151', 
+                          fontWeight: 600,
+                          borderBottom: '1px solid #e5e7eb',
+                          backgroundColor: '#f9fafb',
+                        }}>
                           Status
                         </TableCell>
                       </TableRow>
@@ -279,18 +337,28 @@ const TradingMonitor: React.FC = () => {
                     <TableBody>
                       {activeStrategies.map((strategy) => (
                         <TableRow key={strategy.id}>
-                          <TableCell sx={{ color: 'white' }}>{strategy.name}</TableCell>
-                          <TableCell sx={{ color: 'white' }}>{strategy.users}</TableCell>
-                          <TableCell>
+                          <TableCell sx={{ 
+                            color: '#1F2937',
+                            borderBottom: '1px solid #f3f4f6',
+                          }}>
+                            {strategy.name}
+                          </TableCell>
+                          <TableCell sx={{ 
+                            color: '#1F2937',
+                            borderBottom: '1px solid #f3f4f6',
+                          }}>
+                            {strategy.users}
+                          </TableCell>
+                          <TableCell sx={{ borderBottom: '1px solid #f3f4f6' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               {strategy.performance > 0 ? (
-                                <TrendingUp sx={{ color: '#4caf50', mr: 1 }} />
+                                <TrendingUp sx={{ color: '#10B981', mr: 1 }} />
                               ) : (
-                                <TrendingDown sx={{ color: '#f44336', mr: 1 }} />
+                                <TrendingDown sx={{ color: '#EF4444', mr: 1 }} />
                               )}
                               <Typography
                                 sx={{
-                                  color: strategy.performance > 0 ? '#4caf50' : '#f44336',
+                                  color: strategy.performance > 0 ? '#10B981' : '#EF4444',
                                   fontWeight: 600,
                                 }}
                               >
@@ -299,7 +367,7 @@ const TradingMonitor: React.FC = () => {
                               </Typography>
                             </Box>
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ borderBottom: '1px solid #f3f4f6' }}>
                             <Chip
                               label={strategy.status.toUpperCase()}
                               color={getStatusColor(strategy.status) as any}
@@ -319,35 +387,52 @@ const TradingMonitor: React.FC = () => {
           <Grid item xs={12} lg={4}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white',
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
-                height: 'fit-content',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                height: 400,
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+              <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Recent Alerts
                 </Typography>
-                <Box>
+                <Box sx={{ flex: 1, overflow: 'auto' }}>
                   {recentAlerts.map((alert, index) => (
                     <Box key={alert.id}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+                      <Box 
+                        sx={{ 
+                          display: 'flex', 
+                          alignItems: 'flex-start', 
+                          mb: 2,
+                          p: 2,
+                          borderRadius: '12px',
+                          background: '#f9fafb',
+                          border: '1px solid #f3f4f6',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: '#f3f4f6',
+                            border: '1px solid #e5e7eb',
+                          },
+                        }}
+                      >
                         <Box sx={{ mr: 2, mt: 0.5 }}>
                           {getAlertIcon(alert.type)}
                         </Box>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="body2" sx={{ color: 'white', mb: 0.5 }}>
+                          <Typography variant="body2" sx={{ color: '#1F2937', mb: 0.5, fontWeight: 500 }}>
                             {alert.message}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                          <Typography variant="caption" sx={{ color: '#6B7280' }}>
                             {alert.time}
                           </Typography>
                         </Box>
                       </Box>
                       {index < recentAlerts.length - 1 && (
-                        <Divider sx={{ bgcolor: 'rgba(255,255,255,0.1)', mb: 2 }} />
+                        <Box sx={{ height: 8 }} />
                       )}
                     </Box>
                   ))}
@@ -356,7 +441,6 @@ const TradingMonitor: React.FC = () => {
             </Card>
           </Grid>
         </Grid>
-      </Box>
     </Box>
   );
 };

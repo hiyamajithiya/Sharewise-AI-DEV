@@ -92,23 +92,50 @@ const VerifyEmail: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper
-          elevation={3}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: '#f5f7fa',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 4,
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(255,255,255,0.06) 0%, transparent 50%)
+          `,
+          pointerEvents: 'none',
+        },
+      }}
+    >
+      <Container component="main" maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+        <Box
           sx={{
             padding: 4,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             width: '100%',
+            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            
+            border: '1px solid #e0e0e0',
+            borderRadius: '16px',
           }}
         >
           {/* Header */}
@@ -124,21 +151,23 @@ const VerifyEmail: React.FC = () => {
                 sx={{
                   width: 48,
                   height: 48,
-                  background: 'linear-gradient(135deg, #0052CC 0%, #1976D2 100%)',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  
                   borderRadius: '12px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   mb: 2,
-                  boxShadow: '0px 4px 8px rgba(0, 82, 204, 0.2)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
                 }}
               >
-                <EmailIcon sx={{ color: 'white', fontSize: 24 }} />
+                <EmailIcon sx={{ color: '#1F2937', fontSize: 24 }} />
               </Box>
-              <Typography component="h1" variant="h4" sx={{ fontWeight: 700, color: '#0052CC', mb: 0 }}>
+              <Typography component="h1" variant="h4" sx={{ fontWeight: 700, color: '#1F2937', mb: 0 }}>
                 Verify Email
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#374151' }}>
                 Check your inbox for verification code
               </Typography>
             </Box>
@@ -167,13 +196,13 @@ const VerifyEmail: React.FC = () => {
 
           {/* Email info */}
           <Box sx={{ textAlign: 'center', mb: 4, width: '100%' }}>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+            <Typography variant="body1" sx={{ color: '#374151', mb: 1 }}>
               We sent a 6-digit verification code to:
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#0052CC', mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937', mb: 2 }}>
               {email}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: '#6B7280' }}>
               The code expires in 10 minutes
             </Typography>
           </Box>
@@ -196,6 +225,7 @@ const VerifyEmail: React.FC = () => {
                   fontWeight: 600,
                   letterSpacing: '0.5rem',
                   fontFamily: 'monospace',
+                  color: '#1F2937',
                 },
               }}
               placeholder="000000"
@@ -203,8 +233,30 @@ const VerifyEmail: React.FC = () => {
                 mb: 3,
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '12px',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(5px)',
+                  border: '1px solid #e0e0e0',
                   '& fieldset': {
                     borderWidth: '2px',
+                    borderColor: 'rgba(255,255,255,0.2)',
+                  },
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.15)',
+                    '& fieldset': {
+                      borderColor: 'rgba(255,255,255,0.3)',
+                    },
+                  },
+                  '&.Mui-focused': {
+                    backgroundColor: 'rgba(255,255,255,0.15)',
+                    '& fieldset': {
+                      borderColor: 'rgba(255,255,255,0.4)',
+                    },
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#6B7280',
+                  '&.Mui-focused': {
+                    color: '#1F2937',
                   },
                 },
               }}
@@ -220,13 +272,17 @@ const VerifyEmail: React.FC = () => {
                 borderRadius: '8px',
                 fontWeight: 600,
                 mb: 3,
-                background: 'linear-gradient(135deg, #0052CC 0%, #1976D2 100%)',
+                fontSize: '1rem',
+                textTransform: 'none',
+                background: '#f5f7fa',
+                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #003884 0%, #1565C0 100%)',
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
                 },
                 '&:disabled': {
-                  background: '#E5E7EB',
-                  color: '#9CA3AF',
+                  background: 'rgba(255,255,255,0.2)',
+                  color: 'rgba(255,255,255,0.5)',
                 },
               }}
             >
@@ -239,12 +295,12 @@ const VerifyEmail: React.FC = () => {
 
             {/* Resend section */}
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography variant="body2" sx={{ color: '#374151', mb: 1 }}>
                 Didn't receive the code?
               </Typography>
               
               {resendTimer > 0 ? (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: '#6B7280' }}>
                   Resend available in {resendTimer}s
                 </Typography>
               ) : (
@@ -252,25 +308,35 @@ const VerifyEmail: React.FC = () => {
                   variant="outlined"
                   onClick={handleResendCode}
                   disabled={resendLoading}
-                  startIcon={resendLoading ? <CircularProgress size={16} /> : <Refresh />}
-                  sx={{ borderRadius: '8px' }}
+                  startIcon={resendLoading ? <CircularProgress size={16} sx={{ color: '#6B7280' }} /> : <Refresh />}
+                  sx={{ 
+                    borderRadius: '8px',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    color: 'rgba(255,255,255,0.9)',
+                    '&:hover': {
+                      borderColor: 'rgba(255,255,255,0.5)',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      color: '#1F2937',
+                    },
+                  }}
                 >
                   {resendLoading ? 'Sending...' : 'Resend Code'}
                 </Button>
               )}
             </Box>
           </Box>
-        </Paper>
-
-        {/* Help text */}
-        <Box sx={{ mt: 4, textAlign: 'center', maxWidth: 600 }}>
-          <Typography variant="body2" color="text.secondary">
-            If you continue to have trouble receiving the verification code, 
-            please check your spam folder or contact our support team.
-          </Typography>
         </Box>
-      </Box>
-    </Container>
+
+          {/* Help text */}
+          <Box sx={{ mt: 4, textAlign: 'center', maxWidth: 600 }}>
+            <Typography variant="body2" sx={{ color: '#6B7280' }}>
+              If you continue to have trouble receiving the verification code, 
+              please check your spam folder or contact our support team.
+            </Typography>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

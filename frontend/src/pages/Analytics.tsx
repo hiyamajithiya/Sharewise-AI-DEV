@@ -56,8 +56,16 @@ function TabPanel({ children, value, index }: TabPanelProps) {
       role="tabpanel"
       hidden={value !== index}
       id={`analytics-tabpanel-${index}`}
+      style={{ 
+        flex: 1, 
+        overflow: 'auto', 
+        display: value === index ? 'block' : 'none',
+        height: '100%',
+        margin: 0,
+        padding: 0
+      }}
     >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 1.5, height: '100%', overflow: 'auto', m: 0 }}>{children}</Box>}
     </div>
   );
 }
@@ -67,6 +75,84 @@ const Analytics: React.FC = () => {
   const { isTestingMode, selectedUser } = testingState;
   const [tabValue, setTabValue] = useState(0);
   const [timeframe, setTimeframe] = useState('1M');
+
+  const handleExportData = () => {
+    // Create comprehensive analytics data
+    const analyticsData = {
+      title: 'ShareWise AI Analytics Export',
+      exportedAt: new Date().toISOString(),
+      timeframe: timeframe,
+      performanceMetrics: performanceMetrics.map(metric => ({
+        title: metric.title,
+        value: metric.value,
+        change: metric.change,
+        color: metric.color
+      })),
+      topStrategies: topPerformingStrategies.map(strategy => ({
+        name: strategy.name,
+        returns: strategy.returns,
+        trades: strategy.trades,
+        winRate: strategy.winRate,
+        sharpe: strategy.sharpe
+      })),
+      riskAnalytics: riskAnalytics.map(risk => ({
+        metric: risk.metric,
+        value: risk.value,
+        status: risk.status,
+        description: risk.description
+      })),
+      summary: {
+        totalPortfolioValue: '₹2,45,670',
+        overallWinRate: '68.2%',
+        sharpeRatio: '1.47',
+        maxDrawdown: '12.3%',
+        topPerformingStrategy: 'NIFTY Momentum (+34.2%)'
+      }
+    };
+
+    // Convert to JSON and create downloadable file
+    const dataStr = JSON.stringify(analyticsData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `sharewise-analytics-${timeframe.toLowerCase()}-${new Date().getTime()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+    
+    console.log(`Analytics data exported for ${timeframe} timeframe`);
+  };
+
+  const handleRefreshData = () => {
+    // Simulate data refresh
+    console.log('Refreshing analytics data...');
+    
+    // Show loading state briefly
+    const refreshStartTime = Date.now();
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      const refreshDuration = Date.now() - refreshStartTime;
+      console.log(`Analytics data refreshed in ${refreshDuration}ms`);
+      
+      // In a real app, this would trigger a Redux action or API call
+      // to fetch the latest data from the backend
+      
+      // Force a re-render by updating the timeframe briefly
+      const currentTimeframe = timeframe;
+      setTimeframe('REFRESHING');
+      setTimeout(() => {
+        setTimeframe(currentTimeframe);
+      }, 100);
+      
+    }, 800);
+  };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -207,30 +293,34 @@ const Analytics: React.FC = () => {
 
   return (
     <Box sx={{ 
-      minHeight: '100vh',
+      height: '100vh',
       background: '#f5f7fa',
-      position: 'relative'
+      position: 'relative',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
     }}>
-      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
-        {/* Header with glassmorphism */}
+      <Container maxWidth="xl" sx={{ py: 2, position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Header */}
         <Box sx={{ 
-          mb: 4,
-          p: 3,
+          mb: 2,
+          p: 2,
           borderRadius: '16px',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          flexShrink: 0,
         }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
             <Box>
               <Typography variant="h4" component="h1" sx={{ 
                 fontWeight: 700, 
                 mb: 1, 
-                color: 'white',
-                textShadow: '1px 1px 3px rgba(0,0,0,0.2)',
+                color: '#1F2937',
               }}>
                 Advanced Analytics
               </Typography>
-              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.95)' }}>
+              <Typography variant="body1" sx={{ color: '#6B7280' }}>
                 {isTestingMode && selectedUser
                   ? `Testing advanced analytics for ${selectedUser.role} role`
                   : 'Comprehensive performance analysis, risk metrics, and trading insights'
@@ -241,13 +331,18 @@ const Analytics: React.FC = () => {
               <FormControl size="small" sx={{ 
                 minWidth: 120,
                 height: '40px',
-                '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
+                '& .MuiInputLabel-root': { color: '#6B7280' },
                 '& .MuiOutlinedInput-root': {
                   height: '40px',
-                  color: 'white',
-                  '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                  '&.Mui-focused fieldset': { borderColor: 'white' },
+                  color: '#1F2937',
+                  backgroundColor: 'white',
+                  border: '1px solid #e0e0e0',
+                  '& fieldset': { borderColor: '#e0e0e0' },
+                  '&:hover fieldset': { borderColor: '#d1d5db' },
+                  '&.Mui-focused fieldset': { borderColor: '#667eea' },
+                },
+                '& .MuiSelect-icon': {
+                  color: '#6B7280',
                 },
               }}>
                 <InputLabel>Timeframe</InputLabel>
@@ -267,22 +362,31 @@ const Analytics: React.FC = () => {
               <Button 
                 variant="outlined" 
                 startIcon={<Download />}
+                onClick={handleExportData}
                 sx={{
                   height: '40px',
-                  color: 'white',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  color: '#1F2937',
+                  borderColor: '#e0e0e0',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
                   '&:hover': {
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                    borderColor: '#d1d5db',
                     background: 'rgba(255, 255, 255, 0.1)',
                   },
                 }}
               >
                 Export
               </Button>
-              <IconButton sx={{ color: 'white' }}>
+              <IconButton 
+                onClick={handleRefreshData}
+                sx={{ 
+                  color: '#1F2937',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  }
+                }}
+              >
                 <Refresh />
               </IconButton>
             </Box>
@@ -291,13 +395,14 @@ const Analytics: React.FC = () => {
 
       {/* Elite Feature Notice */}
         <Box sx={{
-          mb: 4,
-          p: 2,
+          mb: 2,
+          p: 1.5,
           borderRadius: '15px',
           background: 'rgba(59, 130, 246, 0.1)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(59, 130, 246, 0.2)',
           boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+          flexShrink: 0,
         }}>
         <Typography variant="body2">
           <strong>🌟 Elite Analytics:</strong> Advanced performance metrics, risk analysis, attribution analysis, 
@@ -306,7 +411,7 @@ const Analytics: React.FC = () => {
       </Box>
 
       {/* Performance Overview */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 2, flexShrink: 0 }}>
         {performanceMetrics.map((metric, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <StatCard
@@ -323,11 +428,15 @@ const Analytics: React.FC = () => {
 
       {/* Main Content Tabs */}
         <Paper sx={{ 
-          mb: 3,
+          mb: 2,
           borderRadius: '16px',
           background: 'white',
           border: '1px solid #e0e0e0',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}>
         <Tabs
           value={tabValue}
@@ -337,15 +446,29 @@ const Analytics: React.FC = () => {
           sx={{ 
             borderBottom: 1, 
             borderColor: 'divider',
+            minHeight: 40,
+            height: 40,
+            flexShrink: 0,
+            '& .MuiTabs-root': {
+              minHeight: 40,
+            },
             '& .MuiTab-root': {
-              color: '#6b7280',
+              color: '#6B7280',
               fontWeight: 600,
+              minHeight: 40,
+              height: 40,
+              py: 0,
+              px: 2,
+              fontSize: '0.875rem',
             },
             '& .Mui-selected': {
-              color: '#1976d2',
+              color: '#667eea',
             },
             '& .MuiTabs-indicator': {
-              backgroundColor: '#1976d2',
+              backgroundColor: '#667eea',
+            },
+            '& .MuiTabs-flexContainer': {
+              height: 40,
             },
           }}
         >
@@ -370,10 +493,7 @@ const Analytics: React.FC = () => {
             iconPosition="start"
           />
         </Tabs>
-      </Paper>
-
-      {/* Tab Content */}
-      <TabPanel value={tabValue} index={0}>
+        <TabPanel value={tabValue} index={0}>
         {/* Performance Analysis */}
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>
@@ -383,9 +503,9 @@ const Analytics: React.FC = () => {
               border: '1px solid #e0e0e0',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
                     Portfolio Performance Chart
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
@@ -397,7 +517,7 @@ const Analytics: React.FC = () => {
 
                 <Box 
                   sx={{ 
-                    height: 300, 
+                    height: 200, 
                     backgroundColor: 'grey.100', 
                     borderRadius: 2, 
                     display: 'flex', 
@@ -411,10 +531,9 @@ const Analytics: React.FC = () => {
                   </Typography>
                 </Box>
 
-                <Alert severity="success">
-                  <Typography variant="body2">
-                    <strong>Outstanding Performance:</strong> Your portfolio has outperformed NIFTY 50 by 8.3% 
-                    over the selected period with 23% lower volatility.
+                <Alert severity="success" sx={{ py: 1 }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                    <strong>Outstanding Performance:</strong> Portfolio outperformed NIFTY 50 by 8.3% with 23% lower volatility.
                   </Typography>
                 </Alert>
               </CardContent>
@@ -428,33 +547,33 @@ const Analytics: React.FC = () => {
               border: '1px solid #e0e0e0',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
                   Top Performing Strategies
                 </Typography>
 
                 {topPerformingStrategies.map((strategy, index) => (
-                  <Box key={index} sx={{ mb: 3, p: 2, bgcolor: 'rgba(255, 255, 255, 0.15)', borderRadius: 2 }}>
+                  <Box key={index} sx={{ mb: 2, p: 1.5, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1F2937' }}>
                         {strategy.name}
                       </Typography>
-                      <Typography variant="h6" sx={{ color: '#00e676', fontWeight: 700, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+                      <Typography variant="h6" sx={{ color: '#10b981', fontWeight: 700 }}>
                         +{strategy.returns}%
                       </Typography>
                     </Box>
                     <Grid container spacing={1}>
                       <Grid item xs={4}>
-                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Trades</Typography>
-                        <Typography variant="body2" sx={{ color: 'white' }}>{strategy.trades}</Typography>
+                        <Typography variant="caption" sx={{ color: '#6B7280' }}>Trades</Typography>
+                        <Typography variant="body2" sx={{ color: '#1F2937' }}>{strategy.trades}</Typography>
                       </Grid>
                       <Grid item xs={4}>
-                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Win Rate</Typography>
-                        <Typography variant="body2" sx={{ color: 'white' }}>{strategy.winRate}%</Typography>
+                        <Typography variant="caption" sx={{ color: '#6B7280' }}>Win Rate</Typography>
+                        <Typography variant="body2" sx={{ color: '#1F2937' }}>{strategy.winRate}%</Typography>
                       </Grid>
                       <Grid item xs={4}>
-                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Sharpe</Typography>
-                        <Typography variant="body2" sx={{ color: 'white' }}>{strategy.sharpe}</Typography>
+                        <Typography variant="caption" sx={{ color: '#6B7280' }}>Sharpe</Typography>
+                        <Typography variant="body2" sx={{ color: '#1F2937' }}>{strategy.sharpe}</Typography>
                       </Grid>
                     </Grid>
                   </Box>
@@ -465,7 +584,7 @@ const Analytics: React.FC = () => {
         </Grid>
       </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
+        <TabPanel value={tabValue} index={1}>
         {/* Risk Analytics */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
@@ -475,8 +594,8 @@ const Analytics: React.FC = () => {
               border: '1px solid #e0e0e0',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
                   Risk Metrics Overview
                 </Typography>
 
@@ -484,24 +603,24 @@ const Analytics: React.FC = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>Risk Metric</TableCell>
-                        <TableCell align="right" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>Value</TableCell>
-                        <TableCell align="center" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>Status</TableCell>
+                        <TableCell sx={{ color: '#1F2937', fontWeight: 600 }}>Risk Metric</TableCell>
+                        <TableCell align="right" sx={{ color: '#1F2937', fontWeight: 600 }}>Value</TableCell>
+                        <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600 }}>Status</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {riskAnalytics.map((item, index) => (
                         <TableRow key={index} hover>
                           <TableCell>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
                               {item.metric}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                            <Typography variant="caption" sx={{ color: '#6B7280' }}>
                               {item.description}
                             </Typography>
                           </TableCell>
                           <TableCell align="right">
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
                               {item.value}
                             </Typography>
                           </TableCell>
@@ -528,13 +647,13 @@ const Analytics: React.FC = () => {
               border: '1px solid #e0e0e0',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
                   Risk Concentration
                 </Typography>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" gutterBottom sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                  <Typography variant="body2" gutterBottom sx={{ color: '#374151' }}>
                     Sector Concentration: Banking (35%)
                   </Typography>
                   <LinearProgress 
@@ -544,7 +663,7 @@ const Analytics: React.FC = () => {
                     sx={{ height: 8, borderRadius: 4, mb: 2 }}
                   />
                   
-                  <Typography variant="body2" gutterBottom sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                  <Typography variant="body2" gutterBottom sx={{ color: '#374151' }}>
                     Single Stock Exposure: Max 8.5%
                   </Typography>
                   <LinearProgress 
@@ -554,7 +673,7 @@ const Analytics: React.FC = () => {
                     sx={{ height: 8, borderRadius: 4, mb: 2 }}
                   />
                   
-                  <Typography variant="body2" gutterBottom sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                  <Typography variant="body2" gutterBottom sx={{ color: '#374151' }}>
                     Market Cap Bias: Large Cap (72%)
                   </Typography>
                   <LinearProgress 
@@ -565,10 +684,9 @@ const Analytics: React.FC = () => {
                   />
                 </Box>
 
-                <Alert severity="warning">
-                  <Typography variant="body2">
-                    <strong>High Sector Concentration:</strong> Consider diversifying beyond banking sector 
-                    to reduce concentration risk.
+                <Alert severity="warning" sx={{ py: 1 }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                    <strong>High Sector Concentration:</strong> Consider diversifying beyond banking sector.
                   </Typography>
                 </Alert>
               </CardContent>
@@ -577,33 +695,42 @@ const Analytics: React.FC = () => {
         </Grid>
       </TabPanel>
 
-      <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={2}>
         {/* Attribution Analysis */}
-        <Card>
+        <Card sx={{
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          borderRadius: '16px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        }}>
           <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
               Performance Attribution Analysis
             </Typography>
             
-            <Alert severity="info" sx={{ mb: 3 }}>
-              <Typography variant="body2">
-                <strong>Coming Soon:</strong> Detailed attribution analysis showing how much of your returns 
-                came from asset allocation, security selection, timing, and interaction effects.
+            <Alert severity="info" sx={{ mb: 2, py: 1 }}>
+              <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                <strong>Coming Soon:</strong> Detailed attribution analysis showing returns breakdown.
               </Typography>
             </Alert>
 
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                <Card variant="outlined">
+                <Card sx={{
+                  background: 'white',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                }}>
                   <CardContent sx={{ textAlign: 'center' }}>
                     <AccountBalance sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
                       Asset Allocation
                     </Typography>
-                    <Typography variant="h4" sx={{ my: 1, color: '#00e676', fontWeight: 700, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+                    <Typography variant="h4" sx={{ my: 1, color: '#10b981', fontWeight: 700 }}>
                       +2.3%
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Sector/Asset mix contribution
                     </Typography>
                   </CardContent>
@@ -611,16 +738,21 @@ const Analytics: React.FC = () => {
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <Card variant="outlined">
+                <Card sx={{
+                  background: 'white',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                }}>
                   <CardContent sx={{ textAlign: 'center' }}>
                     <Timeline sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
                       Security Selection
                     </Typography>
-                    <Typography variant="h4" sx={{ my: 1, color: '#00e676', fontWeight: 700, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+                    <Typography variant="h4" sx={{ my: 1, color: '#10b981', fontWeight: 700 }}>
                       +5.7%
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Stock picking effectiveness
                     </Typography>
                   </CardContent>
@@ -628,16 +760,21 @@ const Analytics: React.FC = () => {
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <Card variant="outlined">
+                <Card sx={{
+                  background: 'white',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                }}>
                   <CardContent sx={{ textAlign: 'center' }}>
                     <Speed sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
                       Market Timing
                     </Typography>
                     <Typography variant="h4" color="error.main" sx={{ my: 1 }}>
                       -0.8%
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Entry/exit timing impact
                     </Typography>
                   </CardContent>
@@ -648,7 +785,7 @@ const Analytics: React.FC = () => {
         </Card>
       </TabPanel>
 
-      <TabPanel value={tabValue} index={3}>
+        <TabPanel value={tabValue} index={3}>
         {/* Custom Reports */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
@@ -658,8 +795,8 @@ const Analytics: React.FC = () => {
               border: '1px solid #e0e0e0',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
                   Custom Report Builder
                 </Typography>
                 
@@ -725,10 +862,10 @@ const Analytics: React.FC = () => {
                     startIcon={<Visibility />}
                     onClick={handlePreviewReport}
                     sx={{
-                      color: 'white',
-                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                      color: '#1F2937',
+                      borderColor: '#e0e0e0',
                       '&:hover': {
-                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        borderColor: '#d1d5db',
                         background: 'rgba(255, 255, 255, 0.1)',
                       },
                     }}
@@ -747,30 +884,30 @@ const Analytics: React.FC = () => {
               border: '1px solid #e0e0e0',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
                   Scheduled Reports
                 </Typography>
 
                 <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: 'white' }}>Daily Performance Summary</Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                  <Typography variant="subtitle2" sx={{ color: '#1F2937' }}>Daily Performance Summary</Typography>
+                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
                     Last sent: Today 6:00 AM
                   </Typography>
                   <Chip label="Active" size="small" sx={{ mt: 1, backgroundColor: '#00e676', color: 'black', fontWeight: 600 }} />
                 </Box>
 
                 <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: 'white' }}>Weekly Risk Report</Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                  <Typography variant="subtitle2" sx={{ color: '#1F2937' }}>Weekly Risk Report</Typography>
+                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
                     Last sent: Monday 8:00 AM
                   </Typography>
                   <Chip label="Active" size="small" sx={{ mt: 1, backgroundColor: '#00e676', color: 'black', fontWeight: 600 }} />
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" sx={{ color: 'white' }}>Monthly Attribution</Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                  <Typography variant="subtitle2" sx={{ color: '#1F2937' }}>Monthly Attribution</Typography>
+                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
                     Next: 1st of next month
                   </Typography>
                   <Chip label="Scheduled" color="info" size="small" sx={{ mt: 1 }} />
@@ -783,7 +920,8 @@ const Analytics: React.FC = () => {
             </Card>
           </Grid>
         </Grid>
-      </TabPanel>
+        </TabPanel>
+      </Paper>
       </Container>
     </Box>
   );

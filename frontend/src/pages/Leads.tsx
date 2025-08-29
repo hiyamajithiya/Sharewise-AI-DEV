@@ -35,7 +35,6 @@ import {
   Email,
   Phone,
   MoreVert,
-  Add,
   FilterList,
   Search,
   Business,
@@ -46,7 +45,6 @@ import {
 
 const Leads: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedLead, setSelectedLead] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
   // Mock data for leads management
@@ -146,21 +144,19 @@ const Leads: React.FC = () => {
     }
   };
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, leadId: string) => {
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-    setSelectedLead(leadId);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedLead(null);
   };
 
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -191,7 +187,7 @@ const Leads: React.FC = () => {
             >
               Lead Management
             </Typography>
-            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 400 }}>
+            <Typography variant="h6" sx={{ color: '#374151', fontWeight: 400 }}>
               Track and manage sales prospects and opportunities
             </Typography>
           </Box>
@@ -201,8 +197,8 @@ const Leads: React.FC = () => {
             onClick={() => setOpenDialog(true)}
             sx={{
               background: 'rgba(255,255,255,0.2)',
-              backdropFilter: 'blur(10px)',
-              color: 'white',
+              
+              color: '#1F2937',
               '&:hover': {
                 background: 'rgba(255,255,255,0.3)',
               },
@@ -217,22 +213,22 @@ const Leads: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(33, 150, 243, 0.3)', mr: 2 }}>
-                    <People sx={{ color: 'white' }} />
+                    <People sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {leadStats.total}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Total Leads
                     </Typography>
                   </Box>
@@ -244,22 +240,22 @@ const Leads: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(255, 152, 0, 0.3)', mr: 2 }}>
-                    <Assignment sx={{ color: 'white' }} />
+                    <Assignment sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {leadStats.qualified}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Qualified
                     </Typography>
                   </Box>
@@ -271,22 +267,22 @@ const Leads: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <TrendingUp sx={{ color: 'white' }} />
+                    <TrendingUp sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {leadStats.converted}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Converted
                     </Typography>
                   </Box>
@@ -298,22 +294,22 @@ const Leads: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <AttachMoney sx={{ color: 'white' }} />
+                    <AttachMoney sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       ${(leadStats.totalValue / 1000).toFixed(0)}K
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Pipeline Value
                     </Typography>
                   </Box>
@@ -326,30 +322,30 @@ const Leads: React.FC = () => {
         {/* Leads Table */}
         <Card
           sx={{
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
+            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            
+            border: '1px solid #e0e0e0',
             borderRadius: '16px',
           }}
         >
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
                 Sales Pipeline
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton
                   sx={{
-                    color: 'rgba(255,255,255,0.7)',
-                    '&:hover': { color: 'white', bgcolor: 'rgba(255,255,255,0.1)' },
+                    color: '#6B7280',
+                    '&:hover': { color: '#1F2937', bgcolor: 'rgba(255,255,255,0.1)' },
                   }}
                 >
                   <Search />
                 </IconButton>
                 <IconButton
                   sx={{
-                    color: 'rgba(255,255,255,0.7)',
-                    '&:hover': { color: 'white', bgcolor: 'rgba(255,255,255,0.1)' },
+                    color: '#6B7280',
+                    '&:hover': { color: '#1F2937', bgcolor: 'rgba(255,255,255,0.1)' },
                   }}
                 >
                   <FilterList />
@@ -357,18 +353,18 @@ const Leads: React.FC = () => {
               </Box>
             </Box>
 
-            <TableContainer component={Paper} sx={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+            <TableContainer component={Paper} sx={{ background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderRadius: '12px' }}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Lead</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Company</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Status</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Stage</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Value</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Probability</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Next Followup</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Actions</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Lead</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Company</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Status</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Stage</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Value</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Probability</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Next Followup</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -380,10 +376,10 @@ const Leads: React.FC = () => {
                             {lead.name.split(' ').map(n => n[0]).join('')}
                           </Avatar>
                           <Box>
-                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                            <Typography variant="body2" sx={{ color: '#1F2937', fontWeight: 600 }}>
                               {lead.name}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                            <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                               {lead.position}
                             </Typography>
                           </Box>
@@ -391,8 +387,8 @@ const Leads: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Business sx={{ fontSize: '1rem', color: 'rgba(255,255,255,0.6)', mr: 1 }} />
-                          <Typography variant="body2" sx={{ color: 'white' }}>
+                          <Business sx={{ fontSize: '1rem', color: '#9CA3AF', mr: 1 }} />
+                          <Typography variant="body2" sx={{ color: '#1F2937' }}>
                             {lead.company}
                           </Typography>
                         </Box>
@@ -411,7 +407,7 @@ const Leads: React.FC = () => {
                           color={getStageColor(lead.stage) as any}
                         />
                       </TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 600 }}>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 600 }}>
                         ${lead.value.toLocaleString()}
                       </TableCell>
                       <TableCell>
@@ -429,23 +425,23 @@ const Leads: React.FC = () => {
                               },
                             }}
                           />
-                          <Typography variant="caption" sx={{ color: 'white', minWidth: '30px' }}>
+                          <Typography variant="caption" sx={{ color: '#1F2937', minWidth: '30px' }}>
                             {lead.probability}%
                           </Typography>
                         </Box>
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Schedule sx={{ fontSize: '1rem', color: 'rgba(255,255,255,0.6)', mr: 1 }} />
-                          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                          <Schedule sx={{ fontSize: '1rem', color: '#9CA3AF', mr: 1 }} />
+                          <Typography variant="body2" sx={{ color: '#374151' }}>
                             {lead.nextFollowup ? new Date(lead.nextFollowup).toLocaleDateString() : 'None'}
                           </Typography>
                         </Box>
                       </TableCell>
                       <TableCell>
                         <IconButton
-                          onClick={(e) => handleMenuClick(e, lead.id)}
-                          sx={{ color: 'rgba(255,255,255,0.7)' }}
+                          onClick={handleMenuClick}
+                          sx={{ color: '#6B7280' }}
                         >
                           <MoreVert />
                         </IconButton>
@@ -488,8 +484,15 @@ const Leads: React.FC = () => {
           onClose={() => setOpenDialog(false)}
           maxWidth="md"
           fullWidth
+          PaperProps={{
+            sx: {
+              background: 'rgba(255, 255, 255, 0.1)',
+              
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+            }
+          }}
         >
-          <DialogTitle>Add New Lead</DialogTitle>
+          <DialogTitle sx={{ color: '#1F2937' }}>Add New Lead</DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 2 }}>
               <Grid container spacing={2}>
@@ -499,6 +502,12 @@ const Leads: React.FC = () => {
                     label="Full Name"
                     variant="outlined"
                     required
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -508,6 +517,12 @@ const Leads: React.FC = () => {
                     variant="outlined"
                     type="email"
                     required
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -515,6 +530,12 @@ const Leads: React.FC = () => {
                     fullWidth
                     label="Phone"
                     variant="outlined"
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -523,6 +544,12 @@ const Leads: React.FC = () => {
                     label="Company"
                     variant="outlined"
                     required
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -530,14 +557,26 @@ const Leads: React.FC = () => {
                     fullWidth
                     label="Position"
                     variant="outlined"
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
-                    <InputLabel>Source</InputLabel>
+                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Source</InputLabel>
                     <Select
                       label="Source"
                       defaultValue="website"
+                      sx={{
+                        color: '#1F2937',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                        '& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.7)' }
+                      }}
                     >
                       <MenuItem value="website">Website</MenuItem>
                       <MenuItem value="referral">Referral</MenuItem>
@@ -553,14 +592,26 @@ const Leads: React.FC = () => {
                     label="Estimated Value ($)"
                     variant="outlined"
                     type="number"
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
-                    <InputLabel>Assigned To</InputLabel>
+                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Assigned To</InputLabel>
                     <Select
                       label="Assigned To"
                       defaultValue="sarah"
+                      sx={{
+                        color: '#1F2937',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                        '& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.7)' }
+                      }}
                     >
                       <MenuItem value="sarah">Sarah Connor</MenuItem>
                       <MenuItem value="mike">Mike Johnson</MenuItem>
@@ -576,14 +627,27 @@ const Leads: React.FC = () => {
                     multiline
                     rows={3}
                     variant="outlined"
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
               </Grid>
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-            <Button variant="contained" onClick={() => setOpenDialog(false)}>
+            <Button onClick={() => setOpenDialog(false)} sx={{ color: '#1F2937' }}>Cancel</Button>
+            <Button 
+              variant="contained" 
+              onClick={() => setOpenDialog(false)}
+              sx={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
+                color: '#1F2937'
+              }}
+            >
               Add Lead
             </Button>
           </DialogActions>

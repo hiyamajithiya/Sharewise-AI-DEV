@@ -10,10 +10,6 @@ import {
   TextField,
   InputAdornment,
   Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -157,7 +153,7 @@ const KnowledgeBase: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -188,7 +184,7 @@ const KnowledgeBase: React.FC = () => {
             >
               Knowledge Base
             </Typography>
-            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 400 }}>
+            <Typography variant="h6" sx={{ color: '#374151', fontWeight: 400 }}>
               Comprehensive help center and documentation
             </Typography>
           </Box>
@@ -197,8 +193,8 @@ const KnowledgeBase: React.FC = () => {
             startIcon={<Add />}
             sx={{
               background: 'rgba(255,255,255,0.2)',
-              backdropFilter: 'blur(10px)',
-              color: 'white',
+              
+              color: '#1F2937',
               '&:hover': {
                 background: 'rgba(255,255,255,0.3)',
               },
@@ -213,22 +209,22 @@ const KnowledgeBase: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(33, 150, 243, 0.3)', mr: 2 }}>
-                    <Article sx={{ color: 'white' }} />
+                    <Article sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {kbMetrics.totalArticles}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Total Articles
                     </Typography>
                   </Box>
@@ -240,22 +236,22 @@ const KnowledgeBase: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <Visibility sx={{ color: 'white' }} />
+                    <Visibility sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {kbMetrics.totalViews.toLocaleString()}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Total Views
                     </Typography>
                   </Box>
@@ -267,22 +263,22 @@ const KnowledgeBase: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(255, 193, 7, 0.3)', mr: 2 }}>
-                    <ThumbUp sx={{ color: 'white' }} />
+                    <ThumbUp sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {kbMetrics.avgRating}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Avg Rating
                     </Typography>
                   </Box>
@@ -294,22 +290,22 @@ const KnowledgeBase: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(156, 39, 176, 0.3)', mr: 2 }}>
-                    <School sx={{ color: 'white' }} />
+                    <School sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {kbMetrics.newThisWeek}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       New This Week
                     </Typography>
                   </Box>
@@ -322,9 +318,9 @@ const KnowledgeBase: React.FC = () => {
         {/* Search and Categories */}
         <Card
           sx={{
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
+            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            
+            border: '1px solid #e0e0e0',
             borderRadius: '16px',
             mb: 4,
           }}
@@ -345,7 +341,7 @@ const KnowledgeBase: React.FC = () => {
                   ),
                   sx: {
                     backgroundColor: 'rgba(255,255,255,0.05)',
-                    color: 'white',
+                    color: '#1F2937',
                     '& .MuiOutlinedInput-notchedOutline': {
                       borderColor: 'rgba(255,255,255,0.2)',
                     },
@@ -366,7 +362,7 @@ const KnowledgeBase: React.FC = () => {
                       background: selectedCategory === category.id 
                         ? 'rgba(255,255,255,0.2)' 
                         : 'rgba(255,255,255,0.05)',
-                      backdropFilter: 'blur(10px)',
+                      
                       border: selectedCategory === category.id 
                         ? '2px solid rgba(255,255,255,0.3)' 
                         : '1px solid rgba(255,255,255,0.1)',
@@ -391,10 +387,10 @@ const KnowledgeBase: React.FC = () => {
                       >
                         {category.icon}
                       </Avatar>
-                      <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, mb: 0.5 }}>
+                      <Typography variant="body2" sx={{ color: '#1F2937', fontWeight: 600, mb: 0.5 }}>
                         {category.name}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                      <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                         {category.count} items
                       </Typography>
                     </CardContent>
@@ -410,14 +406,14 @@ const KnowledgeBase: React.FC = () => {
           <Grid item xs={12} lg={8}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Featured Articles & Tutorials
                 </Typography>
                 
@@ -426,13 +422,13 @@ const KnowledgeBase: React.FC = () => {
                     <Grid item xs={12} key={article.id}>
                       <Card
                         sx={{
-                          background: 'rgba(255,255,255,0.05)',
+                          background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                           backdropFilter: 'blur(5px)',
-                          border: '1px solid rgba(255,255,255,0.1)',
+                          border: '1px solid #e0e0e0',
                           borderRadius: '12px',
                           transition: 'all 0.3s ease',
                           '&:hover': {
-                            background: 'rgba(255,255,255,0.1)',
+                            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                             transform: 'translateY(-2px)',
                           },
                         }}
@@ -444,7 +440,7 @@ const KnowledgeBase: React.FC = () => {
                                 {getTypeIcon(article.type)}
                               </Avatar>
                               <Box>
-                                <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                                <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                   {article.title}
                                 </Typography>
                                 <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
@@ -453,7 +449,7 @@ const KnowledgeBase: React.FC = () => {
                                     size="small"
                                     sx={{
                                       backgroundColor: 'rgba(255,255,255,0.2)',
-                                      color: 'white',
+                                      color: '#1F2937',
                                       fontSize: '0.7rem',
                                     }}
                                   />
@@ -467,7 +463,7 @@ const KnowledgeBase: React.FC = () => {
                                     size="small"
                                     sx={{
                                       backgroundColor: 'rgba(255,255,255,0.1)',
-                                      color: 'white',
+                                      color: '#1F2937',
                                       fontSize: '0.7rem',
                                     }}
                                   />
@@ -475,41 +471,41 @@ const KnowledgeBase: React.FC = () => {
                               </Box>
                             </Box>
                             <Box sx={{ display: 'flex', gap: 1 }}>
-                              <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                              <IconButton size="small" sx={{ color: '#6B7280' }}>
                                 <BookmarkBorder />
                               </IconButton>
-                              <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                              <IconButton size="small" sx={{ color: '#6B7280' }}>
                                 <Edit />
                               </IconButton>
                             </Box>
                           </Box>
                           
-                          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mb: 2 }}>
+                          <Typography variant="body2" sx={{ color: '#374151', mb: 2 }}>
                             {article.description}
                           </Typography>
                           
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Box sx={{ display: 'flex', gap: 2 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <Visibility sx={{ fontSize: '1rem', color: 'rgba(255,255,255,0.6)' }} />
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                <Visibility sx={{ fontSize: '1rem', color: '#9CA3AF' }} />
+                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                   {article.views}
                                 </Typography>
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <ThumbUp sx={{ fontSize: '1rem', color: 'rgba(255,255,255,0.6)' }} />
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                <ThumbUp sx={{ fontSize: '1rem', color: '#9CA3AF' }} />
+                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                   {article.likes}
                                 </Typography>
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <Comment sx={{ fontSize: '1rem', color: 'rgba(255,255,255,0.6)' }} />
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                <Comment sx={{ fontSize: '1rem', color: '#9CA3AF' }} />
+                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                   {article.comments}
                                 </Typography>
                               </Box>
                             </Box>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                            <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                               Updated: {article.lastUpdated}
                             </Typography>
                           </Box>
@@ -526,14 +522,14 @@ const KnowledgeBase: React.FC = () => {
           <Grid item xs={12} lg={4}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Popular FAQs
                 </Typography>
                 
@@ -542,20 +538,20 @@ const KnowledgeBase: React.FC = () => {
                     <Accordion
                       key={index}
                       sx={{
-                        background: 'rgba(255,255,255,0.05)',
+                        background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                         backdropFilter: 'blur(5px)',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        border: '1px solid #e0e0e0',
                         borderRadius: '8px',
                         mb: 1,
                         '&:before': { display: 'none' },
                         '& .MuiAccordionSummary-root': {
-                          color: 'white',
+                          color: '#1F2937',
                           '& .MuiAccordionSummary-expandIconWrapper': {
-                            color: 'white',
+                            color: '#1F2937',
                           },
                         },
                         '& .MuiAccordionDetails-root': {
-                          color: 'rgba(255,255,255,0.8)',
+                          color: '#374151',
                         },
                       }}
                     >
@@ -569,7 +565,7 @@ const KnowledgeBase: React.FC = () => {
                             size="small"
                             sx={{
                               backgroundColor: 'rgba(255,255,255,0.2)',
-                              color: 'white',
+                              color: '#1F2937',
                               fontSize: '0.7rem',
                             }}
                           />

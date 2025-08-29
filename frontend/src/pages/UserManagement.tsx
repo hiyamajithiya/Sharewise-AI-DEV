@@ -412,7 +412,7 @@ const UserManagement: React.FC = () => {
     return (
       <Box sx={{ 
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
@@ -421,12 +421,12 @@ const UserManagement: React.FC = () => {
           p: 4,
           borderRadius: '20px',
           background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
+          
           border: '1px solid rgba(255, 255, 255, 0.2)',
           textAlign: 'center'
         }}>
           <LinearProgress sx={{ mb: 2, borderRadius: '10px' }} />
-          <Typography sx={{ color: 'white' }}>Loading user data...</Typography>
+          <Typography sx={{ color: '#1F2937' }}>Loading user data...</Typography>
         </Box>
       </Box>
     );
@@ -434,42 +434,34 @@ const UserManagement: React.FC = () => {
 
   return (
     <Box sx={{ 
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      height: '100vh',
+      background: '#f5f7fa',
       position: 'relative',
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)',
-        pointerEvents: 'none',
-      }
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
     }}>
-      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+      <Container maxWidth="xl" sx={{ py: 2, position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header */}
         <Box sx={{ 
-          mb: 4,
-          p: 3,
-          borderRadius: '20px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          mb: 2,
+          p: 2,
+          borderRadius: '16px',
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          flexShrink: 0,
         }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
             <Box>
               <Typography variant="h4" component="h1" sx={{ 
                 fontWeight: 700, 
                 mb: 1, 
-                color: 'white',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+                color: '#1F2937',
               }}>
                 User Management 👥
               </Typography>
-              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+              <Typography variant="body1" sx={{ color: '#6B7280' }}>
                 {isTestingMode && testingUser
                   ? `Testing user management for ${testingUser.role} role`
                   : 'Manage users, roles, and permissions across the platform'
@@ -481,12 +473,11 @@ const UserManagement: React.FC = () => {
               startIcon={<PersonAdd />}
               onClick={handleAddUser}
               sx={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: '1px solid #667eea',
                 color: 'white',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.2) 100%)',
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
                 },
               }}
             >
@@ -496,7 +487,7 @@ const UserManagement: React.FC = () => {
         </Box>
 
         {/* Statistics Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2, flexShrink: 0 }}>
           {getUserStats().map((stat, index) => (
             <Grid item xs={12} sm={6} lg={3} key={index}>
               <StatCard {...stat} />
@@ -506,13 +497,13 @@ const UserManagement: React.FC = () => {
 
         {/* Filters and Search */}
         <Paper sx={{ 
-          mb: 3,
-          p: 3,
-          borderRadius: '20px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          mb: 2,
+          p: 2,
+          borderRadius: '16px',
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          flexShrink: 0,
         }}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={4}>
@@ -523,26 +514,29 @@ const UserManagement: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
-                  startAdornment: <Search sx={{ color: 'rgba(255, 255, 255, 0.7)', mr: 1 }} />,
+                  startAdornment: <Search sx={{ color: '#6B7280', mr: 1 }} />,
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& input': {
+                      color: '#1F2937',
+                    },
                     '& fieldset': {
-                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                      borderColor: '#e0e0e0',
                     },
                     '&:hover fieldset': {
-                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      borderColor: '#d1d5db',
                     },
                     '&.Mui-focused fieldset': {
-                      borderColor: 'rgba(255, 255, 255, 0.7)',
+                      borderColor: '#667eea',
                     },
                   },
                   '& .MuiOutlinedInput-input': {
-                    color: 'white !important',
                     '&::placeholder': {
-                      color: 'rgba(255, 255, 255, 0.7)',
+                      color: '#9CA3AF',
                       opacity: 1,
                     },
                   },
@@ -553,9 +547,9 @@ const UserManagement: React.FC = () => {
               <FormControl fullWidth variant="outlined">
                 <InputLabel 
                   sx={{ 
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: '#6B7280',
                     '&.Mui-focused': {
-                      color: 'rgba(255, 255, 255, 0.9)',
+                      color: '#667eea',
                     },
                   }}
                 >
@@ -566,19 +560,21 @@ const UserManagement: React.FC = () => {
                   label="Role"
                   onChange={(e) => setRoleFilter(e.target.value)}
                   sx={{
-                    color: 'white',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                    color: '#1F2937',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
                     },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                    '&:hover fieldset': {
+                      borderColor: '#d1d5db',
                     },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.7)',
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
                     },
                     '& .MuiSelect-icon': {
-                      color: 'rgba(255, 255, 255, 0.7)',
+                      color: '#6B7280',
                     },
                   }}
                 >
@@ -594,9 +590,9 @@ const UserManagement: React.FC = () => {
               <FormControl fullWidth variant="outlined">
                 <InputLabel 
                   sx={{ 
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: '#6B7280',
                     '&.Mui-focused': {
-                      color: 'rgba(255, 255, 255, 0.9)',
+                      color: '#667eea',
                     },
                   }}
                 >
@@ -607,19 +603,21 @@ const UserManagement: React.FC = () => {
                   label="Status"
                   onChange={(e) => setStatusFilter(e.target.value)}
                   sx={{
-                    color: 'white',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                    color: '#1F2937',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
                     },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                    '&:hover fieldset': {
+                      borderColor: '#d1d5db',
                     },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.7)',
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
                     },
                     '& .MuiSelect-icon': {
-                      color: 'rgba(255, 255, 255, 0.7)',
+                      color: '#6B7280',
                     },
                   }}
                 >
@@ -638,10 +636,10 @@ const UserManagement: React.FC = () => {
                   startIcon={<FilterList />}
                   onClick={() => console.log('Filters clicked')}
                   sx={{
-                    color: 'white',
-                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    color: '#1F2937',
+                    borderColor: '#e0e0e0',
                     '&:hover': {
-                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      borderColor: '#d1d5db',
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     },
                   }}
@@ -653,10 +651,10 @@ const UserManagement: React.FC = () => {
                   startIcon={<Download />}
                   onClick={handleExport}
                   sx={{
-                    color: 'white',
-                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    color: '#1F2937',
+                    borderColor: '#e0e0e0',
                     '&:hover': {
-                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      borderColor: '#d1d5db',
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     },
                   }}
@@ -668,10 +666,10 @@ const UserManagement: React.FC = () => {
                   startIcon={<Upload />}
                   onClick={handleImport}
                   sx={{
-                    color: 'white',
-                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    color: '#1F2937',
+                    borderColor: '#e0e0e0',
                     '&:hover': {
-                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      borderColor: '#d1d5db',
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     },
                   }}
@@ -685,40 +683,139 @@ const UserManagement: React.FC = () => {
 
         {/* Users Table */}
         <Paper sx={{ 
-          borderRadius: '20px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          overflow: 'hidden'
+          borderRadius: '16px',
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          overflow: 'hidden',
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
         }}>
-          <Box sx={{ p: 3, borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
+          <Box sx={{ 
+            p: 2, 
+            borderBottom: '1px solid #e0e0e0', 
+            flexShrink: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
             <Typography variant="h6" sx={{ 
               fontWeight: 600, 
-              color: 'white',
-              textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
+              color: '#1F2937',
             }}>
               Users ({filteredUsers.length})
             </Typography>
+            {filteredUsers.length > 10 && (
+              <Typography variant="body2" sx={{ 
+                color: '#6B7280',
+                fontSize: '0.875rem',
+                fontStyle: 'italic'
+              }}>
+                Scroll to view more users
+              </Typography>
+            )}
           </Box>
           
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ 
+            flex: 1, 
+            overflow: 'auto',
+            maxHeight: 'calc(100vh - 400px)', // Ensures table doesn't exceed viewport
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#f1f1f1',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#c1c1c1',
+              borderRadius: '4px',
+              '&:hover': {
+                background: '#a8a8a8',
+              },
+            },
+          }}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ color: 'white', fontWeight: 600 }}>User</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 600 }}>Role</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 600 }}>Subscription</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 600 }}>Status</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 600 }}>Last Login</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 600 }}>Portfolio</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 600 }}>Actions</TableCell>
+                  <TableCell sx={{ 
+                    color: '#1F2937', 
+                    fontWeight: 600,
+                    backgroundColor: 'white',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>User</TableCell>
+                  <TableCell sx={{ 
+                    color: '#1F2937', 
+                    fontWeight: 600,
+                    backgroundColor: 'white',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>Role</TableCell>
+                  <TableCell sx={{ 
+                    color: '#1F2937', 
+                    fontWeight: 600,
+                    backgroundColor: 'white',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>Subscription</TableCell>
+                  <TableCell sx={{ 
+                    color: '#1F2937', 
+                    fontWeight: 600,
+                    backgroundColor: 'white',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>Status</TableCell>
+                  <TableCell sx={{ 
+                    color: '#1F2937', 
+                    fontWeight: 600,
+                    backgroundColor: 'white',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>Last Login</TableCell>
+                  <TableCell sx={{ 
+                    color: '#1F2937', 
+                    fontWeight: 600,
+                    backgroundColor: 'white',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>Portfolio</TableCell>
+                  <TableCell sx={{ 
+                    color: '#1F2937', 
+                    fontWeight: 600,
+                    backgroundColor: 'white',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    borderBottom: '1px solid #e0e0e0'
+                  }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id} hover sx={{ '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}>
-                    <TableCell>
+                  <TableRow 
+                    key={user.id} 
+                    hover 
+                    sx={{ 
+                      '&:hover': { backgroundColor: '#f8fafc' },
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <TableCell sx={{ py: 2 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar sx={{ 
                           bgcolor: 'primary.main',
@@ -728,52 +825,52 @@ const UserManagement: React.FC = () => {
                           {user.first_name[0]}
                         </Avatar>
                         <Box>
-                          <Typography sx={{ fontWeight: 600, color: 'white' }}>
+                          <Typography sx={{ fontWeight: 600, color: '#1F2937' }}>
                             {user.first_name} {user.last_name}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280' }}>
                             {user.email}
                           </Typography>
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {getRoleIcon(user.role)}
-                        <Typography sx={{ color: 'white' }}>{user.role}</Typography>
+                        <Typography sx={{ color: '#1F2937' }}>{user.role}</Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Chip 
                         label={user.subscription_tier} 
                         color={user.subscription_tier === 'ELITE' ? 'warning' : user.subscription_tier === 'PRO' ? 'success' : 'default'}
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <Chip 
                         label={user.status} 
                         color={getStatusColor(user.status) as any}
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                    <TableCell sx={{ py: 2 }}>
+                      <Typography sx={{ color: '#1F2937' }}>
                         {new Date(user.last_login).toLocaleDateString()}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                    <TableCell sx={{ py: 2 }}>
+                      <Typography sx={{ color: '#1F2937' }}>
                         ₹{user.portfolio_value.toLocaleString()}
                       </Typography>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 2 }}>
                       <IconButton
                         onClick={(e) => {
                           setSelectedUser(user);
                           setActionMenuAnchor(e.currentTarget);
                         }}
-                        sx={{ color: 'white' }}
+                        sx={{ color: '#1F2937' }}
                       >
                         <MoreVert />
                       </IconButton>
@@ -814,13 +911,14 @@ const UserManagement: React.FC = () => {
           fullWidth
           PaperProps={{
             sx: {
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'white',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+              border: '1px solid #e0e0e0',
+              borderRadius: '16px',
             }
           }}
         >
-          <DialogTitle sx={{ color: 'white' }}>
+          <DialogTitle sx={{ color: '#1F2937' }}>
             {selectedUser ? 'Edit User' : 'Add New User'}
           </DialogTitle>
           <DialogContent>
@@ -830,11 +928,17 @@ const UserManagement: React.FC = () => {
                 label="First Name"
                 value={newUser.first_name}
                 onChange={(e) => setNewUser({...newUser, first_name: e.target.value})}
-                InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
-                InputProps={{ sx: { color: 'white' } }}
+                InputLabelProps={{ sx: { color: '#6B7280' } }}
+                InputProps={{ sx: { color: '#1F2937' } }}
                 sx={{
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': { borderColor: '#e0e0e0' },
+                    '&:hover fieldset': { borderColor: '#d1d5db' },
+                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                  }
                 }}
               />
               <TextField
@@ -842,11 +946,17 @@ const UserManagement: React.FC = () => {
                 label="Last Name"
                 value={newUser.last_name}
                 onChange={(e) => setNewUser({...newUser, last_name: e.target.value})}
-                InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
-                InputProps={{ sx: { color: 'white' } }}
+                InputLabelProps={{ sx: { color: '#6B7280' } }}
+                InputProps={{ sx: { color: '#1F2937' } }}
                 sx={{
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': { borderColor: '#e0e0e0' },
+                    '&:hover fieldset': { borderColor: '#d1d5db' },
+                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                  }
                 }}
               />
               <TextField
@@ -855,22 +965,32 @@ const UserManagement: React.FC = () => {
                 type="email"
                 value={newUser.email}
                 onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
-                InputProps={{ sx: { color: 'white' } }}
+                InputLabelProps={{ sx: { color: '#6B7280' } }}
+                InputProps={{ sx: { color: '#1F2937' } }}
                 sx={{
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': { borderColor: '#e0e0e0' },
+                    '&:hover fieldset': { borderColor: '#d1d5db' },
+                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                  }
                 }}
               />
               <FormControl fullWidth>
-                <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Role</InputLabel>
+                <InputLabel sx={{ color: '#6B7280' }}>Role</InputLabel>
                 <Select
                   value={newUser.role}
                   onChange={(e) => setNewUser({...newUser, role: e.target.value})}
                   sx={{
-                    color: 'white',
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    color: '#1F2937',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': { borderColor: '#e0e0e0' },
+                    '&:hover fieldset': { borderColor: '#d1d5db' },
+                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
                   }}
                 >
                   <MenuItem value="USER">User</MenuItem>
@@ -880,14 +1000,18 @@ const UserManagement: React.FC = () => {
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Subscription Tier</InputLabel>
+                <InputLabel sx={{ color: '#6B7280' }}>Subscription Tier</InputLabel>
                 <Select
                   value={newUser.subscription_tier}
                   onChange={(e) => setNewUser({...newUser, subscription_tier: e.target.value})}
                   sx={{
-                    color: 'white',
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    color: '#1F2937',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': { borderColor: '#e0e0e0' },
+                    '&:hover fieldset': { borderColor: '#d1d5db' },
+                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
                   }}
                 >
                   <MenuItem value="PRO">Pro</MenuItem>
@@ -902,7 +1026,7 @@ const UserManagement: React.FC = () => {
                   value={newUser.password}
                   onChange={(e) => setNewUser({...newUser, password: e.target.value})}
                   InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
-                  InputProps={{ sx: { color: 'white' } }}
+                  InputProps={{ sx: { color: '#1F2937' } }}
                   sx={{
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
                     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
@@ -912,15 +1036,18 @@ const UserManagement: React.FC = () => {
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setUserDialogOpen(false)} sx={{ color: 'white' }}>
+            <Button onClick={() => setUserDialogOpen(false)} sx={{ color: '#1F2937' }}>
               Cancel
             </Button>
             <Button 
               onClick={handleSaveUser} 
               variant="contained"
               sx={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
-                color: 'white'
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                }
               }}
             >
               {selectedUser ? 'Update' : 'Add'} User
@@ -934,21 +1061,22 @@ const UserManagement: React.FC = () => {
           onClose={() => setDeleteDialogOpen(false)}
           PaperProps={{
             sx: {
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'white',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+              border: '1px solid #e0e0e0',
+              borderRadius: '16px',
             }
           }}
         >
-          <DialogTitle sx={{ color: 'white' }}>Confirm Delete</DialogTitle>
+          <DialogTitle sx={{ color: '#1F2937' }}>Confirm Delete</DialogTitle>
           <DialogContent>
-            <Typography sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+            <Typography sx={{ color: '#374151' }}>
               Are you sure you want to delete {selectedUser?.first_name} {selectedUser?.last_name}?
               This action cannot be undone.
             </Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)} sx={{ color: 'white' }}>
+            <Button onClick={() => setDeleteDialogOpen(false)} sx={{ color: '#1F2937' }}>
               Cancel
             </Button>
             <Button 

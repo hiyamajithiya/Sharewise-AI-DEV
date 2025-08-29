@@ -460,15 +460,22 @@ const Trading: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Box 
+      sx={{
+        minHeight: '100vh',
+        background: '#f5f7fa',
+        position: 'relative',
+      }}
+    >
+      <Container maxWidth="xl" sx={{ py: 3, position: 'relative', zIndex: 1 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
               Trading Dashboard 📈
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{ color: '#6B7280' }}>
               {isTestingMode && selectedUser
                 ? `Testing trading interface for ${selectedUser.role} role - ${subscriptionTier} tier`
                 : `Your ${subscriptionTier} trading interface with advanced tools`
@@ -486,8 +493,20 @@ const Trading: React.FC = () => {
 
       {/* Tier Limitations Alert */}
       {subscriptionTier === 'BASIC' && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Typography variant="body2">
+        <Alert 
+          severity="info" 
+          sx={{ 
+            mb: 3,
+            background: '#e3f2fd',
+            border: '1px solid #2196f3',
+            borderRadius: '16px',
+            color: '#1F2937',
+            '& .MuiAlert-icon': {
+              color: '#2196f3'
+            }
+          }}
+        >
+          <Typography variant="body2" sx={{ color: '#1F2937' }}>
             <strong>Basic Plan:</strong> You have access to {tierFeatures.signalsPerDay} signals per day, 
             max order value ₹{tierFeatures.maxOrderValue.toLocaleString()}, and basic order types.
             <strong> Upgrade to Pro or Elite for more features!</strong>
@@ -496,8 +515,32 @@ const Trading: React.FC = () => {
       )}
 
       {/* Trading Tabs */}
-      <Paper sx={{ mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="trading tabs">
+      <Paper sx={{ 
+        mb: 3,
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        borderRadius: '16px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
+      }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          aria-label="trading tabs"
+          sx={{
+            '& .MuiTab-root': {
+              color: '#6B7280',
+              '&.Mui-selected': {
+                color: '#667eea'
+              },
+              '&:hover': {
+                color: '#374151'
+              }
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: '#667eea'
+            }
+          }}
+        >
           <Tab label="All Signals" />
           <Tab label="Options Chain" />
           <Tab label="Futures" />
@@ -509,7 +552,13 @@ const Trading: React.FC = () => {
         {/* Trading Signals */}
         <Grid item xs={12} lg={8}>
           <TabPanel value={activeTab} index={0}>
-            <Paper sx={{ p: 3 }}>
+            <Paper sx={{ 
+              p: 3,
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '16px'
+            }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Live Trading Signals
@@ -643,18 +692,36 @@ const Trading: React.FC = () => {
 
           {/* Options Chain Tab */}
           <TabPanel value={activeTab} index={1}>
-            <Paper sx={{ p: 3 }}>
+            <Paper sx={{ 
+              p: 3,
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '16px'
+            }}>
               <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
                   Options Chain
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                   <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel>Underlying</InputLabel>
+                    <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Underlying</InputLabel>
                     <Select
                       value={selectedUnderlying}
                       label="Underlying"
                       onChange={(e) => setSelectedUnderlying(e.target.value)}
+                      sx={{
+                        color: '#1F2937',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#e0e0e0'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#d0d0d0'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#667eea'
+                        }
+                      }}
                     >
                       <MenuItem value="NIFTY">NIFTY</MenuItem>
                       <MenuItem value="BANKNIFTY">BANKNIFTY</MenuItem>
@@ -666,7 +733,21 @@ const Trading: React.FC = () => {
                     value={selectedExpiry}
                     onChange={(e) => setSelectedExpiry(e.target.value)}
                     size="small"
-                    InputLabelProps={{ shrink: true }}
+                    InputLabelProps={{ shrink: true, style: { color: '#6B7280' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        color: '#1F2937',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.3)'
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255,255,255,0.5)'
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'rgba(255,255,255,0.8)'
+                        }
+                      }
+                    }}
                   />
                 </Box>
               </Box>
@@ -675,18 +756,30 @@ const Trading: React.FC = () => {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center"><strong>Call OI</strong></TableCell>
-                      <TableCell align="center"><strong>Call Price</strong></TableCell>
-                      <TableCell align="center"><strong>Strike</strong></TableCell>
-                      <TableCell align="center"><strong>Put Price</strong></TableCell>
-                      <TableCell align="center"><strong>Put OI</strong></TableCell>
-                      <TableCell align="center"><strong>Actions</strong></TableCell>
+                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Call OI</strong></TableCell>
+                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Call Price</strong></TableCell>
+                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Strike</strong></TableCell>
+                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Put Price</strong></TableCell>
+                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Put OI</strong></TableCell>
+                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Actions</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {getOptionChainForUnderlying(selectedUnderlying).map((option, index) => (
-                      <TableRow key={index} hover>
-                        <TableCell align="center">{(option.callOI / 100000).toFixed(1)}L</TableCell>
+                      <TableRow 
+                        key={index} 
+                        hover
+                        sx={{
+                          '& .MuiTableCell-root': {
+                            color: '#374151',
+                            borderBottom: '1px solid #e2e8f0'
+                          },
+                          '&:hover': {
+                            backgroundColor: '#f8fafc'
+                          }
+                        }}
+                      >
+                        <TableCell align="center" sx={{ color: '#374151' }}>{(option.callOI / 100000).toFixed(1)}L</TableCell>
                         <TableCell align="center">
                           <Button
                             variant="text"
@@ -703,7 +796,7 @@ const Trading: React.FC = () => {
                           </Button>
                         </TableCell>
                         <TableCell align="center">
-                          <Typography sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
+                          <Typography sx={{ fontWeight: 600, fontSize: '1.1rem', color: '#1F2937' }}>
                             {option.strike}
                           </Typography>
                         </TableCell>
@@ -722,7 +815,7 @@ const Trading: React.FC = () => {
                             ₹{option.putPrice}
                           </Button>
                         </TableCell>
-                        <TableCell align="center">{(option.putOI / 100000).toFixed(1)}L</TableCell>
+                        <TableCell align="center" sx={{ color: 'rgba(255,255,255,0.9)' }}>{(option.putOI / 100000).toFixed(1)}L</TableCell>
                         <TableCell align="center">
                           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                             <Button size="small" variant="outlined" color="success">
@@ -743,8 +836,14 @@ const Trading: React.FC = () => {
 
           {/* Futures Tab */}
           <TabPanel value={activeTab} index={2}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            <Paper sx={{ 
+              p: 3,
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '16px'
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
                 Futures Chain
               </Typography>
               
@@ -752,19 +851,31 @@ const Trading: React.FC = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell><strong>Symbol</strong></TableCell>
-                      <TableCell><strong>Price</strong></TableCell>
-                      <TableCell><strong>Expiry</strong></TableCell>
-                      <TableCell><strong>Open Interest</strong></TableCell>
-                      <TableCell><strong>Actions</strong></TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Symbol</strong></TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Price</strong></TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Expiry</strong></TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Open Interest</strong></TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Actions</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {Object.entries(mockFuturesChain).flatMap(([underlying, contracts]) =>
                       contracts.map((contract, index) => (
-                        <TableRow key={`${underlying}-${index}`} hover>
+                        <TableRow 
+                          key={`${underlying}-${index}`} 
+                          hover
+                          sx={{
+                            '& .MuiTableCell-root': {
+                              color: '#374151',
+                              borderBottom: '1px solid #e2e8f0'
+                            },
+                            '&:hover': {
+                              backgroundColor: '#f8fafc'
+                            }
+                          }}
+                        >
                           <TableCell>
-                            <Typography sx={{ fontWeight: 600 }}>
+                            <Typography sx={{ fontWeight: 600, color: '#1F2937' }}>
                               {contract.symbol}
                             </Typography>
                           </TableCell>
@@ -814,8 +925,14 @@ const Trading: React.FC = () => {
 
           {/* F&O Positions Tab */}
           <TabPanel value={activeTab} index={3}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            <Paper sx={{ 
+              p: 3,
+              background: 'white',
+              border: '1px solid #e0e0e0',
+              borderRadius: '16px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
                 F&O Positions
               </Typography>
               
@@ -846,42 +963,53 @@ const Trading: React.FC = () => {
                           +₹762.50 (12.15%)
                         </Typography>
                       </TableCell>
-                      <TableCell>15</TableCell>
+                      <TableCell sx={{ color: 'white' }}>15</TableCell>
                     </TableRow>
-                    <TableRow>
-                      <TableCell>BANKNIFTY24DEC48000PE</TableCell>
+                    <TableRow sx={{
+                      '& .MuiTableCell-root': {
+                        color: '#374151',
+                        borderBottom: '1px solid #e2e8f0'
+                      }
+                    }}>
+                      <TableCell sx={{ color: '#1F2937' }}>BANKNIFTY24DEC48000PE</TableCell>
                       <TableCell>
                         <Chip label="PUT" color="error" size="small" />
                       </TableCell>
-                      <TableCell>-25</TableCell>
-                      <TableCell>₹180.25</TableCell>
-                      <TableCell>₹165.50</TableCell>
+                      <TableCell sx={{ color: '#1F2937' }}>-25</TableCell>
+                      <TableCell sx={{ color: '#1F2937' }}>₹180.25</TableCell>
+                      <TableCell sx={{ color: '#1F2937' }}>₹165.50</TableCell>
                       <TableCell>
                         <Typography sx={{ color: 'success.main', fontWeight: 600 }}>
                           +₹368.75 (8.17%)
                         </Typography>
                       </TableCell>
-                      <TableCell>15</TableCell>
+                      <TableCell sx={{ color: 'white' }}>15</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
 
-              <Box sx={{ mt: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 1 }}>
+              <Box sx={{ 
+                mt: 3, 
+                p: 2, 
+                background: '#f8fafc', 
+                border: '1px solid #e2e8f0', 
+                borderRadius: '12px' 
+              }}>
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
-                    <Typography variant="body2" color="text.secondary">Total P&L</Typography>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Total P&L</Typography>
                     <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600 }}>
                       +₹1,131.25
                     </Typography>
                   </Grid>
                   <Grid item xs={4}>
-                    <Typography variant="body2" color="text.secondary">Margin Used</Typography>
-                    <Typography variant="h6">₹40,000</Typography>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Margin Used</Typography>
+                    <Typography variant="h6" sx={{ color: '#1F2937' }}>₹40,000</Typography>
                   </Grid>
                   <Grid item xs={4}>
-                    <Typography variant="body2" color="text.secondary">Available Margin</Typography>
-                    <Typography variant="h6">₹1,60,000</Typography>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Available Margin</Typography>
+                    <Typography variant="h6" sx={{ color: '#1F2937' }}>₹1,60,000</Typography>
                   </Grid>
                 </Grid>
               </Box>
@@ -893,16 +1021,23 @@ const Trading: React.FC = () => {
         <Grid item xs={12} lg={4}>
           {/* Order Placement Panel */}
           {selectedSignal && (
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            <Paper sx={{ 
+              p: 3, 
+              mb: 3,
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '16px'
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
                 Place Order - {selectedSignal.symbol}
               </Typography>
               
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                   Signal: {selectedSignal.type} at ₹{selectedSignal.price}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                   Target: ₹{selectedSignal.target} | Stop Loss: ₹{selectedSignal.stopLoss}
                 </Typography>
               </Box>
@@ -916,17 +1051,45 @@ const Trading: React.FC = () => {
                   size="small"
                   fullWidth
                   helperText={`Max: ₹${tierFeatures.maxOrderValue.toLocaleString()}`}
+                  InputLabelProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+                  FormHelperTextProps={{ style: { color: 'rgba(255,255,255,0.6)' } }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      color: 'white',
+                      '& fieldset': {
+                        borderColor: 'rgba(255,255,255,0.3)'
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'rgba(255,255,255,0.5)'
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: 'rgba(255,255,255,0.8)'
+                      }
+                    }
+                  }}
                 />
 
                 <FormControl size="small" fullWidth>
-                  <InputLabel>Order Type</InputLabel>
+                  <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Order Type</InputLabel>
                   <Select
                     value={orderType}
                     label="Order Type"
                     onChange={(e) => setOrderType(e.target.value)}
+                    sx={{
+                      color: 'white',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.3)'
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.5)'
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.8)'
+                      }
+                    }}
                   >
                     {tierFeatures.allowedOrderTypes.map((type: string) => (
-                      <MenuItem key={type} value={type}>
+                      <MenuItem key={type} value={type} sx={{ color: 'black' }}>
                         {type.replace('_', ' ')}
                       </MenuItem>
                     ))}
@@ -954,8 +1117,14 @@ const Trading: React.FC = () => {
           )}
 
           {/* Active Orders */}
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+          <Paper sx={{ 
+            p: 3,
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '16px'
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
               Active Orders
               <Badge badgeContent={activeOrders.length} color="primary" sx={{ ml: 1 }}>
                 <AccountBalance />
@@ -963,10 +1132,16 @@ const Trading: React.FC = () => {
             </Typography>
 
             {activeOrders.map((order) => (
-              <Card key={order.id} sx={{ mb: 2, border: '1px solid', borderColor: 'divider' }}>
+              <Card key={order.id} sx={{ 
+                mb: 2, 
+                background: 'rgba(255,255,255,0.1)', 
+                backdropFilter: 'blur(10px)', 
+                border: '1px solid rgba(255,255,255,0.2)', 
+                borderRadius: '12px' 
+              }}>
                 <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'white' }}>
                       {order.symbol}
                     </Typography>
                     <Chip 
@@ -975,11 +1150,11 @@ const Trading: React.FC = () => {
                       size="small" 
                     />
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                     {order.type} {order.quantity} @ ₹{order.price.toLocaleString()}
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                       {order.time}
                     </Typography>
                     <Typography 
@@ -997,9 +1172,9 @@ const Trading: React.FC = () => {
             ))}
 
             {activeOrders.length === 0 && (
-              <Box sx={{ textAlign: 'center', py: 3, color: 'text.secondary' }}>
-                <Schedule sx={{ fontSize: 36, mb: 1 }} />
-                <Typography variant="body2">No active orders</Typography>
+              <Box sx={{ textAlign: 'center', py: 3, color: 'rgba(255,255,255,0.7)' }}>
+                <Schedule sx={{ fontSize: 36, mb: 1, color: 'rgba(255,255,255,0.7)' }} />
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>No active orders</Typography>
               </Box>
             )}
           </Paper>
@@ -1007,14 +1182,20 @@ const Trading: React.FC = () => {
 
         {/* Market Overview */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ 
+            p: 3,
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '16px'
+          }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
                 Market Overview & Charts
               </Typography>
               {tierFeatures.realTimeData && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                     Last Updated: {marketQuotes['NIFTY']?.timestamp ? new Date(marketQuotes['NIFTY'].timestamp).toLocaleTimeString() : 'Never'}
                   </Typography>
                   <Chip
@@ -1044,7 +1225,7 @@ const Trading: React.FC = () => {
               </Button>
               {tierFeatures.realTimeData && Object.keys(marketQuotes).length > 0 && (
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Typography variant="body2" sx={{ alignSelf: 'center', color: 'text.secondary' }}>
+                  <Typography variant="body2" sx={{ alignSelf: 'center', color: 'rgba(255,255,255,0.8)' }}>
                     Live Quotes:
                   </Typography>
                   {Object.entries(marketQuotes).slice(0, 3).map(([symbol, quote]) => (
@@ -1063,24 +1244,26 @@ const Trading: React.FC = () => {
             <Box
               sx={{
                 height: 300,
-                backgroundColor: 'grey.50',
+                background: 'rgba(255,255,255,0.05)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.1)',
                 borderRadius: 2,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'text.secondary',
+                color: 'rgba(255,255,255,0.7)',
               }}
             >
               <Box sx={{ textAlign: 'center' }}>
-                <ShowChart sx={{ fontSize: 48, mb: 2 }} />
-                <Typography variant="h6">
+                <ShowChart sx={{ fontSize: 48, mb: 2, color: 'rgba(255,255,255,0.7)' }} />
+                <Typography variant="h6" sx={{ color: 'white' }}>
                   {tierFeatures.advancedCharts ? "Advanced" : "Basic"} Trading Charts
                 </Typography>
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                   Interactive market charts and technical indicators will be integrated here
                 </Typography>
                 {!tierFeatures.advancedCharts && (
-                  <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
+                  <Typography variant="body2" sx={{ color: '#ffb74d', mt: 1 }}>
                     Upgrade to Pro/Elite for advanced charting tools
                   </Typography>
                 )}
@@ -1091,8 +1274,28 @@ const Trading: React.FC = () => {
       </Grid>
 
       {/* F&O Trading Dialog */}
-      <Dialog open={foDialogOpen} onClose={() => setFoDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
+      <Dialog 
+        open={foDialogOpen} 
+        onClose={() => setFoDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '16px',
+            color: 'white'
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(5px)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: 'white' }}>
           {selectedFoInstrument?.type === 'FUTURES' 
             ? `Trade ${selectedFoInstrument?.symbol}` 
             : `Trade ${selectedFoInstrument?.underlying} ${selectedFoInstrument?.strike} ${selectedFoInstrument?.type}`
@@ -1108,6 +1311,21 @@ const Trading: React.FC = () => {
                   type="number"
                   defaultValue="1"
                   size="small"
+                  InputLabelProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      color: 'white',
+                      '& fieldset': {
+                        borderColor: 'rgba(255,255,255,0.3)'
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'rgba(255,255,255,0.5)'
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: 'rgba(255,255,255,0.8)'
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -1117,43 +1335,94 @@ const Trading: React.FC = () => {
                   type="number"
                   defaultValue={selectedFoInstrument?.price}
                   size="small"
+                  InputLabelProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      color: 'white',
+                      '& fieldset': {
+                        borderColor: 'rgba(255,255,255,0.3)'
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'rgba(255,255,255,0.5)'
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: 'rgba(255,255,255,0.8)'
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Order Type</InputLabel>
-                  <Select defaultValue="MARKET" label="Order Type">
-                    <MenuItem value="MARKET">Market</MenuItem>
-                    <MenuItem value="LIMIT">Limit</MenuItem>
-                    <MenuItem value="SL">Stop Loss</MenuItem>
-                    <MenuItem value="BRACKET">Bracket</MenuItem>
+                  <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Order Type</InputLabel>
+                  <Select 
+                    defaultValue="MARKET" 
+                    label="Order Type"
+                    sx={{
+                      color: 'white',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.3)'
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.5)'
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.8)'
+                      }
+                    }}
+                  >
+                    <MenuItem value="MARKET" sx={{ color: 'black' }}>Market</MenuItem>
+                    <MenuItem value="LIMIT" sx={{ color: 'black' }}>Limit</MenuItem>
+                    <MenuItem value="SL" sx={{ color: 'black' }}>Stop Loss</MenuItem>
+                    <MenuItem value="BRACKET" sx={{ color: 'black' }}>Bracket</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Product Type</InputLabel>
-                  <Select defaultValue="INTRADAY" label="Product Type">
-                    <MenuItem value="INTRADAY">Intraday (MIS)</MenuItem>
-                    <MenuItem value="DELIVERY">Normal (NRML)</MenuItem>
+                  <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Product Type</InputLabel>
+                  <Select 
+                    defaultValue="INTRADAY" 
+                    label="Product Type"
+                    sx={{
+                      color: 'white',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.3)'
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.5)'
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.8)'
+                      }
+                    }}
+                  >
+                    <MenuItem value="INTRADAY" sx={{ color: 'black' }}>Intraday (MIS)</MenuItem>
+                    <MenuItem value="DELIVERY" sx={{ color: 'black' }}>Normal (NRML)</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
               
               {/* Margin Information */}
               <Grid item xs={12}>
-                <Box sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 1 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                <Box sx={{ 
+                  p: 2, 
+                  background: 'rgba(255,255,255,0.1)', 
+                  backdropFilter: 'blur(10px)', 
+                  border: '1px solid rgba(255,255,255,0.2)', 
+                  borderRadius: '8px' 
+                }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1, color: 'white' }}>
                     Margin Information
                   </Typography>
                   <Grid container spacing={1}>
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">Required Margin:</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>₹25,000</Typography>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>Required Margin:</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'white' }}>₹25,000</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">Available Balance:</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>₹1,60,000</Typography>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>Available Balance:</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'white' }}>₹1,60,000</Typography>
                     </Grid>
                   </Grid>
                 </Box>
@@ -1185,7 +1454,8 @@ const Trading: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

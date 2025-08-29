@@ -140,7 +140,7 @@ const SupportTickets: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -171,7 +171,7 @@ const SupportTickets: React.FC = () => {
             >
               Support Tickets
             </Typography>
-            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 400 }}>
+            <Typography variant="h6" sx={{ color: '#374151', fontWeight: 400 }}>
               Manage and track customer support requests
             </Typography>
           </Box>
@@ -181,8 +181,8 @@ const SupportTickets: React.FC = () => {
             onClick={() => setOpenDialog(true)}
             sx={{
               background: 'rgba(255,255,255,0.2)',
-              backdropFilter: 'blur(10px)',
-              color: 'white',
+              
+              color: '#1F2937',
               '&:hover': {
                 background: 'rgba(255,255,255,0.3)',
               },
@@ -197,22 +197,22 @@ const SupportTickets: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(33, 150, 243, 0.3)', mr: 2 }}>
-                    <Assignment sx={{ color: 'white' }} />
+                    <Assignment sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {ticketStats.total}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Total Tickets
                     </Typography>
                   </Box>
@@ -224,22 +224,22 @@ const SupportTickets: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(244, 67, 54, 0.3)', mr: 2 }}>
-                    <PriorityHigh sx={{ color: 'white' }} />
+                    <PriorityHigh sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {ticketStats.open}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Open Tickets
                     </Typography>
                   </Box>
@@ -251,22 +251,22 @@ const SupportTickets: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(255, 152, 0, 0.3)', mr: 2 }}>
-                    <Schedule sx={{ color: 'white' }} />
+                    <Schedule sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {ticketStats.inProgress}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       In Progress
                     </Typography>
                   </Box>
@@ -278,22 +278,22 @@ const SupportTickets: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <CheckCircle sx={{ color: 'white' }} />
+                    <CheckCircle sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {ticketStats.resolved}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Resolved
                     </Typography>
                   </Box>
@@ -306,30 +306,30 @@ const SupportTickets: React.FC = () => {
         {/* Tickets Table */}
         <Card
           sx={{
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
+            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            
+            border: '1px solid #e0e0e0',
             borderRadius: '16px',
           }}
         >
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
                 All Support Tickets
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton
                   sx={{
-                    color: 'rgba(255,255,255,0.7)',
-                    '&:hover': { color: 'white', bgcolor: 'rgba(255,255,255,0.1)' },
+                    color: '#6B7280',
+                    '&:hover': { color: '#1F2937', bgcolor: 'rgba(255,255,255,0.1)' },
                   }}
                 >
                   <Search />
                 </IconButton>
                 <IconButton
                   sx={{
-                    color: 'rgba(255,255,255,0.7)',
-                    '&:hover': { color: 'white', bgcolor: 'rgba(255,255,255,0.1)' },
+                    color: '#6B7280',
+                    '&:hover': { color: '#1F2937', bgcolor: 'rgba(255,255,255,0.1)' },
                   }}
                 >
                   <FilterList />
@@ -337,35 +337,35 @@ const SupportTickets: React.FC = () => {
               </Box>
             </Box>
 
-            <TableContainer component={Paper} sx={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+            <TableContainer component={Paper} sx={{ background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderRadius: '12px' }}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>ID</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Title</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Customer</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Priority</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Status</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Assigned To</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Created</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>Actions</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>ID</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Title</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Customer</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Priority</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Status</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Assigned To</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Created</TableCell>
+                    <TableCell sx={{ color: '#374151', fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {tickets.map((ticket) => (
                     <TableRow key={ticket.id}>
-                      <TableCell sx={{ color: 'white', fontWeight: 500 }}>{ticket.id}</TableCell>
-                      <TableCell sx={{ color: 'white' }}>{ticket.title}</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 500 }}>{ticket.id}</TableCell>
+                      <TableCell sx={{ color: '#1F2937' }}>{ticket.title}</TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Avatar sx={{ width: 32, height: 32, mr: 2, bgcolor: 'rgba(255,255,255,0.2)' }}>
-                            <Person sx={{ color: 'white', fontSize: '1rem' }} />
+                            <Person sx={{ color: '#1F2937', fontSize: '1rem' }} />
                           </Avatar>
                           <Box>
-                            <Typography variant="body2" sx={{ color: 'white' }}>
+                            <Typography variant="body2" sx={{ color: '#1F2937' }}>
                               {ticket.customer}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                            <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                               {ticket.email}
                             </Typography>
                           </Box>
@@ -385,14 +385,14 @@ const SupportTickets: React.FC = () => {
                           color={getStatusColor(ticket.status) as any}
                         />
                       </TableCell>
-                      <TableCell sx={{ color: 'white' }}>{ticket.assignedTo}</TableCell>
-                      <TableCell sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                      <TableCell sx={{ color: '#1F2937' }}>{ticket.assignedTo}</TableCell>
+                      <TableCell sx={{ color: '#374151' }}>
                         {new Date(ticket.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         <IconButton
                           onClick={(e) => handleMenuClick(e, ticket.id)}
-                          sx={{ color: 'rgba(255,255,255,0.7)' }}
+                          sx={{ color: '#6B7280' }}
                         >
                           <MoreVert />
                         </IconButton>
@@ -423,8 +423,15 @@ const SupportTickets: React.FC = () => {
           onClose={() => setOpenDialog(false)}
           maxWidth="md"
           fullWidth
+          PaperProps={{
+            sx: {
+              background: 'rgba(255, 255, 255, 0.1)',
+              
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+            }
+          }}
         >
-          <DialogTitle>Create New Support Ticket</DialogTitle>
+          <DialogTitle sx={{ color: '#1F2937' }}>Create New Support Ticket</DialogTitle>
           <DialogContent>
             <Box sx={{ mt: 2 }}>
               <Grid container spacing={2}>
@@ -433,15 +440,27 @@ const SupportTickets: React.FC = () => {
                     fullWidth
                     label="Ticket Title"
                     variant="outlined"
-                    sx={{ mb: 2 }}
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      mb: 2,
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
-                    <InputLabel>Priority</InputLabel>
+                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Priority</InputLabel>
                     <Select
                       label="Priority"
                       defaultValue="medium"
+                      sx={{
+                        color: '#1F2937',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                        '& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.7)' }
+                      }}
                     >
                       <MenuItem value="low">Low</MenuItem>
                       <MenuItem value="medium">Medium</MenuItem>
@@ -451,10 +470,16 @@ const SupportTickets: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
-                    <InputLabel>Category</InputLabel>
+                    <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Category</InputLabel>
                     <Select
                       label="Category"
                       defaultValue="general"
+                      sx={{
+                        color: '#1F2937',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                        '& .MuiSelect-icon': { color: 'rgba(255, 255, 255, 0.7)' }
+                      }}
                     >
                       <MenuItem value="technical">Technical</MenuItem>
                       <MenuItem value="billing">Billing</MenuItem>
@@ -470,14 +495,27 @@ const SupportTickets: React.FC = () => {
                     multiline
                     rows={4}
                     variant="outlined"
+                    InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                    InputProps={{ sx: { color: '#1F2937' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+                    }}
                   />
                 </Grid>
               </Grid>
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-            <Button variant="contained" onClick={() => setOpenDialog(false)}>
+            <Button onClick={() => setOpenDialog(false)} sx={{ color: '#1F2937' }}>Cancel</Button>
+            <Button 
+              variant="contained" 
+              onClick={() => setOpenDialog(false)}
+              sx={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
+                color: '#1F2937'
+              }}
+            >
               Create Ticket
             </Button>
           </DialogActions>

@@ -13,8 +13,6 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Divider,
-  Alert,
   LinearProgress,
   IconButton,
   Menu,
@@ -210,7 +208,7 @@ const Portfolio: React.FC = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#f5f7fa',
       position: 'relative',
       '&::before': {
         content: '""',
@@ -230,7 +228,7 @@ const Portfolio: React.FC = () => {
           p: 3,
           borderRadius: '20px',
           background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
+          
           border: '1px solid rgba(255, 255, 255, 0.2)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
         }}>
@@ -239,7 +237,7 @@ const Portfolio: React.FC = () => {
               <Typography variant="h4" component="h1" sx={{ 
                 fontWeight: 700, 
                 mb: 1, 
-                color: 'white',
+                color: '#1F2937',
                 textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
               }}>
                 Portfolio Dashboard
@@ -258,11 +256,11 @@ const Portfolio: React.FC = () => {
                   fontWeight: 600, 
                   fontSize: '0.875rem',
                   backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
+                  color: '#1F2937',
                   border: '1px solid rgba(255, 255, 255, 0.3)'
                 }} 
               />
-              <IconButton onClick={handleMenuClick} sx={{ color: 'white' }}>
+              <IconButton onClick={handleMenuClick} sx={{ color: '#1F2937' }}>
                 <MoreVert />
               </IconButton>
             </Box>
@@ -289,11 +287,11 @@ const Portfolio: React.FC = () => {
             p: 2,
             borderRadius: '15px',
             background: 'rgba(59, 130, 246, 0.1)',
-            backdropFilter: 'blur(20px)',
+            
             border: '1px solid rgba(59, 130, 246, 0.2)',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
           }}>
-            <Typography variant="body2" sx={{ color: 'white' }}>
+            <Typography variant="body2" sx={{ color: '#1F2937' }}>
               <strong>Basic Plan:</strong> Maximum {tierFeatures.maxHoldings} holdings, 
               portfolio value up to ₹{tierFeatures.portfolioValue.toLocaleString()}.
               <strong> Upgrade for advanced analytics and risk management!</strong>
@@ -319,13 +317,13 @@ const Portfolio: React.FC = () => {
               startIcon={<PieChart />}
               sx={{
                 ...(viewMode === 'holdings' ? {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: '#f5f7fa',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
                   boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
                 } : {
-                  color: 'white',
+                  color: '#1F2937',
                   borderColor: 'rgba(255, 255, 255, 0.3)',
                   borderRadius: '15px',
                   textTransform: 'none',
@@ -346,7 +344,7 @@ const Portfolio: React.FC = () => {
               disabled={!tierFeatures.advancedAnalytics}
               sx={{
                 ...(viewMode === 'performance' ? {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: '#f5f7fa',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
@@ -373,7 +371,7 @@ const Portfolio: React.FC = () => {
               disabled={!tierFeatures.riskAnalysis}
               sx={{
                 ...(viewMode === 'analysis' ? {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: '#f5f7fa',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
@@ -404,15 +402,15 @@ const Portfolio: React.FC = () => {
               p: 3,
               borderRadius: '20px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
                   Your Holdings
                   <Badge badgeContent={holdings.length} color="primary" sx={{ ml: 2 }}>
-                    <PieChart sx={{ color: 'white' }} />
+                    <PieChart sx={{ color: '#1F2937' }} />
                   </Badge>
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
@@ -426,13 +424,13 @@ const Portfolio: React.FC = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Stock</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Quantity</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Avg Price</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Current Price</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>Market Value</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>P&L</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>P&L %</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>Stock</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>Quantity</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>Avg Price</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>Current Price</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>Market Value</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>P&L</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>P&L %</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -442,7 +440,7 @@ const Portfolio: React.FC = () => {
                         <TableRow key={holding.id} hover>
                           <TableCell>
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
                                 {holding.symbol}
                               </Typography>
                               <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
@@ -450,10 +448,10 @@ const Portfolio: React.FC = () => {
                               </Typography>
                             </Box>
                           </TableCell>
-                          <TableCell sx={{ color: 'white' }}>{holding.quantity}</TableCell>
-                          <TableCell sx={{ color: 'white' }}>₹{holding.avgPrice.toLocaleString()}</TableCell>
-                          <TableCell sx={{ color: 'white' }}>₹{holding.currentPrice.toLocaleString()}</TableCell>
-                          <TableCell sx={{ color: 'white' }}>₹{metrics.marketValue.toLocaleString()}</TableCell>
+                          <TableCell sx={{ color: '#1F2937' }}>{holding.quantity}</TableCell>
+                          <TableCell sx={{ color: '#1F2937' }}>₹{holding.avgPrice.toLocaleString()}</TableCell>
+                          <TableCell sx={{ color: '#1F2937' }}>₹{holding.currentPrice.toLocaleString()}</TableCell>
+                          <TableCell sx={{ color: '#1F2937' }}>₹{metrics.marketValue.toLocaleString()}</TableCell>
                           <TableCell>
                             <Typography 
                               variant="body2" 
@@ -496,11 +494,11 @@ const Portfolio: React.FC = () => {
               p: 3,
               borderRadius: '20px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
                 Performance Analysis
               </Typography>
               {tierFeatures.advancedAnalytics ? (
@@ -516,8 +514,8 @@ const Portfolio: React.FC = () => {
                   }}
                 >
                   <Box sx={{ textAlign: 'center' }}>
-                    <Timeline sx={{ fontSize: 48, mb: 2, color: 'white' }} />
-                    <Typography variant="h6" sx={{ color: 'white' }}>Advanced Performance Charts</Typography>
+                    <Timeline sx={{ fontSize: 48, mb: 2, color: '#1F2937' }} />
+                    <Typography variant="h6" sx={{ color: '#1F2937' }}>Advanced Performance Charts</Typography>
                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
                       Interactive performance tracking and portfolio analytics will be integrated here
                     </Typography>
@@ -528,11 +526,11 @@ const Portfolio: React.FC = () => {
                   p: 2,
                   borderRadius: '15px',
                   background: 'rgba(245, 158, 11, 0.1)',
-                  backdropFilter: 'blur(20px)',
+                  
                   border: '1px solid rgba(245, 158, 11, 0.2)',
                   boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
                 }}>
-                  <Typography variant="body2" sx={{ color: 'white' }}>
+                  <Typography variant="body2" sx={{ color: '#1F2937' }}>
                     <strong>Upgrade to Pro or Elite</strong> to access advanced performance analytics, 
                     portfolio benchmarking, and historical performance tracking.
                   </Typography>
@@ -546,11 +544,11 @@ const Portfolio: React.FC = () => {
               p: 3,
               borderRadius: '20px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
                 Risk Analysis & Recommendations
               </Typography>
               {tierFeatures.riskAnalysis ? (
@@ -566,8 +564,8 @@ const Portfolio: React.FC = () => {
                   }}
                 >
                   <Box sx={{ textAlign: 'center' }}>
-                    <Assessment sx={{ fontSize: 48, mb: 2, color: 'white' }} />
-                    <Typography variant="h6" sx={{ color: 'white' }}>Portfolio Risk Analysis</Typography>
+                    <Assessment sx={{ fontSize: 48, mb: 2, color: '#1F2937' }} />
+                    <Typography variant="h6" sx={{ color: '#1F2937' }}>Portfolio Risk Analysis</Typography>
                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
                       Risk metrics, diversification analysis, and rebalancing recommendations
                     </Typography>
@@ -578,11 +576,11 @@ const Portfolio: React.FC = () => {
                   p: 2,
                   borderRadius: '15px',
                   background: 'rgba(245, 158, 11, 0.1)',
-                  backdropFilter: 'blur(20px)',
+                  
                   border: '1px solid rgba(245, 158, 11, 0.2)',
                   boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
                 }}>
-                  <Typography variant="body2" sx={{ color: 'white' }}>
+                  <Typography variant="body2" sx={{ color: '#1F2937' }}>
                     <strong>Upgrade to Pro or Elite</strong> to access comprehensive risk analysis, 
                     portfolio diversification insights, and automated rebalancing alerts.
                   </Typography>
@@ -600,18 +598,18 @@ const Portfolio: React.FC = () => {
             mb: 3,
             borderRadius: '20px',
             background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
+            
             border: '1px solid rgba(255, 255, 255, 0.2)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
               Sector Allocation
             </Typography>
             {sectorAllocation.map((sector, index) => (
               <Box key={sector.sector} sx={{ mb: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="body2" sx={{ color: 'white' }}>{sector.sector}</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
+                  <Typography variant="body2" sx={{ color: '#1F2937' }}>{sector.sector}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
                     {sector.percentage}%
                   </Typography>
                 </Box>
@@ -630,31 +628,31 @@ const Portfolio: React.FC = () => {
             mb: 3,
             borderRadius: '20px',
             background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
+            
             border: '1px solid rgba(255, 255, 255, 0.2)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
               Portfolio Insights
             </Typography>
             
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
-                <Typography variant="body2" sx={{ color: 'white' }}>
+                <Typography variant="body2" sx={{ color: '#1F2937' }}>
                   Well diversified across {sectorAllocation.length} sectors
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
-                <Typography variant="body2" sx={{ color: 'white' }}>
+                <Typography variant="body2" sx={{ color: '#1F2937' }}>
                   Strong performance with +{portfolioData.totalPnLPercent}% returns
                 </Typography>
               </Box>
               {tierFeatures.rebalanceAlerts && (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <Warning color="warning" sx={{ mr: 1, fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ color: 'white' }}>
+                  <Typography variant="body2" sx={{ color: '#1F2937' }}>
                     Consider rebalancing IT sector allocation
                   </Typography>
                 </Box>
@@ -667,11 +665,11 @@ const Portfolio: React.FC = () => {
                 p: 2,
                 borderRadius: '15px',
                 background: 'rgba(59, 130, 246, 0.1)',
-                backdropFilter: 'blur(20px)',
+                
                 border: '1px solid rgba(59, 130, 246, 0.2)',
                 boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
               }}>
-                <Typography variant="body2" sx={{ color: 'white' }}>
+                <Typography variant="body2" sx={{ color: '#1F2937' }}>
                   Upgrade for automated rebalancing alerts and portfolio optimization suggestions.
                 </Typography>
               </Box>
@@ -683,11 +681,11 @@ const Portfolio: React.FC = () => {
             p: 3,
             borderRadius: '20px',
             background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
+            
             border: '1px solid rgba(255, 255, 255, 0.2)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
               Quick Actions
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -695,7 +693,7 @@ const Portfolio: React.FC = () => {
                 variant="contained" 
                 fullWidth
                 sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: '#f5f7fa',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
@@ -713,7 +711,7 @@ const Portfolio: React.FC = () => {
                 variant="outlined" 
                 fullWidth
                 sx={{
-                  color: 'white',
+                  color: '#1F2937',
                   borderColor: 'rgba(255, 255, 255, 0.3)',
                   borderRadius: '15px',
                   textTransform: 'none',

@@ -36,9 +36,7 @@ import {
 import {
   Build,
   Code,
-  Notifications,
   Api,
-  Dashboard as DashboardIcon,
   Add,
   Edit,
   Delete,
@@ -48,7 +46,6 @@ import {
   ExpandMore,
   Webhook,
   Schedule,
-  Security,
   Storage,
   CloudSync,
   BugReport,
@@ -143,7 +140,7 @@ const CustomTools: React.FC = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#f5f7fa',
       position: 'relative',
       '&::before': {
         content: '""',
@@ -158,13 +155,26 @@ const CustomTools: React.FC = () => {
     }}>
       <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ 
+        mb: 4,
+        p: 3,
+        borderRadius: '16px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+      }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-              Custom Tools & Integrations 🛠️
+            <Typography variant="h4" component="h1" sx={{ 
+              fontWeight: 700, 
+              mb: 1,
+              color: '#1F2937',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+            }}>
+              Custom Tools & Integrations
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
               {isTestingMode && selectedUser
                 ? `Testing custom tools for ${selectedUser.role} role`
                 : 'Build custom trading tools, webhooks, and API integrations for automated workflows'
@@ -175,6 +185,18 @@ const CustomTools: React.FC = () => {
             variant="contained"
             startIcon={<Add />}
             onClick={() => setCreateToolDialog(true)}
+            sx={{
+              background: '#f5f7fa',
+              borderRadius: '16px',
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 12px 30px rgba(102, 126, 234, 0.4)',
+              },
+            }}
           >
             Create Tool
           </Button>
@@ -182,19 +204,27 @@ const CustomTools: React.FC = () => {
       </Box>
 
       {/* Elite Feature Notice */}
-      <Alert severity="info" sx={{ mb: 4 }}>
-        <Typography variant="body2">
+      <Box sx={{
+        mb: 4,
+        p: 2,
+        borderRadius: '16px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+      }}>
+        <Typography variant="body2" sx={{ color: '#1F2937' }}>
           <strong>🌟 Elite Developer Tools:</strong> Advanced API access, custom webhook endpoints, 
           automated trading scripts, and integration capabilities available exclusively to Elite subscribers.
         </Typography>
-      </Alert>
+      </Box>
 
       {/* Main Content Tabs */}
         <Paper sx={{ 
           mb: 3,
-          borderRadius: '20px',
+          borderRadius: '16px',
           background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
+          
           border: '1px solid rgba(255, 255, 255, 0.2)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
         }}>
@@ -203,7 +233,20 @@ const CustomTools: React.FC = () => {
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{ 
+            borderBottom: 1, 
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            '& .MuiTab-root': {
+              color: 'rgba(255, 255, 255, 0.7)',
+              '&.Mui-selected': {
+                color: '#1F2937',
+                fontWeight: 600,
+              },
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: 'white',
+            },
+          }}
         >
           <Tab
             icon={<Build />}
@@ -235,9 +278,9 @@ const CustomTools: React.FC = () => {
           {customTools.map((tool) => (
             <Grid item xs={12} md={6} lg={4} key={tool.id}>
               <Card sx={{
-              borderRadius: '20px',
+              borderRadius: '16px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
@@ -245,7 +288,7 @@ const CustomTools: React.FC = () => {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {getToolIcon(tool.type)}
-                      <Typography variant="h6" component="div">
+                      <Typography variant="h6" component="div" sx={{ color: '#1F2937' }}>
                         {tool.name}
                       </Typography>
                     </Box>
@@ -256,15 +299,15 @@ const CustomTools: React.FC = () => {
                     />
                   </Box>
 
-                  <Typography variant="body2" color="text.secondary" paragraph>
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }} paragraph>
                     {tool.description}
                   </Typography>
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       Last run: {tool.lastRun}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       {tool.executions} executions
                     </Typography>
                   </Box>
@@ -295,9 +338,9 @@ const CustomTools: React.FC = () => {
           {customTools.length === 0 && (
             <Grid item xs={12}>
               <Card sx={{
-              borderRadius: '20px',
+              borderRadius: '16px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
@@ -330,12 +373,12 @@ const CustomTools: React.FC = () => {
             <Card sx={{
               borderRadius: '20px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
                   API Endpoints
                 </Typography>
 
@@ -381,12 +424,12 @@ const CustomTools: React.FC = () => {
             <Card sx={{
               borderRadius: '20px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
                   API Usage
                 </Typography>
 
@@ -442,12 +485,12 @@ const CustomTools: React.FC = () => {
             <Card sx={{
               borderRadius: '20px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
                   Webhook Configuration
                 </Typography>
 
@@ -509,12 +552,12 @@ const CustomTools: React.FC = () => {
             <Card sx={{
               borderRadius: '20px',
               background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
+              
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
                   Webhook Activity
                 </Typography>
 

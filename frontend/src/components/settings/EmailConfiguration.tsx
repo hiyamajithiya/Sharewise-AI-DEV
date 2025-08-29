@@ -295,6 +295,9 @@ const EmailConfiguration: React.FC = () => {
             onChange={(e) => handleFieldChange('from_name', e.target.value)}
             fullWidth
             sx={{ mb: 2 }}
+            InputLabelProps={{
+              shrink: !!config.from_name,
+            }}
             helperText="Display name shown in emails (e.g., ShareWise AI)"
           />
 
@@ -305,6 +308,9 @@ const EmailConfiguration: React.FC = () => {
             onChange={(e) => handleFieldChange('email_address', e.target.value)}
             fullWidth
             sx={{ mb: 2 }}
+            InputLabelProps={{
+              shrink: !!config.email_address,
+            }}
             helperText="Email address to send from"
           />
 
@@ -318,6 +324,9 @@ const EmailConfiguration: React.FC = () => {
               fullWidth
               sx={{ mb: 2 }}
               helperText={config.provider === 'GMAIL' ? 'Use App Password (not regular password)' : 'SMTP password'}
+              InputLabelProps={{
+                shrink: !!config.email_password,
+              }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -342,6 +351,9 @@ const EmailConfiguration: React.FC = () => {
               fullWidth
               sx={{ mb: 2 }}
               helperText="Your service provider API key"
+              InputLabelProps={{
+                shrink: !!config.api_key,
+              }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -365,6 +377,9 @@ const EmailConfiguration: React.FC = () => {
                 onChange={(e) => handleFieldChange('oauth2_client_id', e.target.value)}
                 fullWidth
                 sx={{ mb: 2 }}
+                InputLabelProps={{
+                  shrink: !!config.oauth2_client_id,
+                }}
                 helperText="OAuth2 application client ID"
               />
               <TextField
@@ -375,6 +390,9 @@ const EmailConfiguration: React.FC = () => {
                 fullWidth
                 sx={{ mb: 2 }}
                 helperText="OAuth2 application client secret"
+                InputLabelProps={{
+                  shrink: !!config.oauth2_client_secret,
+                }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -396,6 +414,9 @@ const EmailConfiguration: React.FC = () => {
                 fullWidth
                 sx={{ mb: 2 }}
                 helperText="OAuth2 refresh token (obtained during setup)"
+                InputLabelProps={{
+                  shrink: !!config.oauth2_refresh_token,
+                }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -422,6 +443,10 @@ const EmailConfiguration: React.FC = () => {
             fullWidth
             sx={{ mb: 2 }}
             disabled={config.provider !== 'CUSTOM'}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            helperText={config.provider !== 'CUSTOM' ? 'Auto-configured based on selected provider' : 'Enter your SMTP server address'}
           />
 
           <TextField
@@ -432,6 +457,10 @@ const EmailConfiguration: React.FC = () => {
             fullWidth
             sx={{ mb: 2 }}
             disabled={config.provider !== 'CUSTOM'}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            helperText={config.provider !== 'CUSTOM' ? 'Auto-configured based on selected provider' : 'Common ports: 587 (TLS), 465 (SSL), 25'}
           />
 
           <Box sx={{ mb: 2 }}>
@@ -463,107 +492,438 @@ const EmailConfiguration: React.FC = () => {
 
         {/* Configuration Help */}
         <Grid item xs={12}>
-          <Card sx={{ bgcolor: 'info.light', border: '1px solid', borderColor: 'info.main' }}>
+          <Card sx={{ 
+            bgcolor: config.provider === 'GMAIL' ? 'rgba(219, 68, 55, 0.1)' :
+                     config.provider === 'OUTLOOK' ? 'rgba(0, 120, 212, 0.1)' :
+                     config.provider === 'SENDGRID' ? 'rgba(0, 122, 255, 0.1)' :
+                     config.provider === 'MAILGUN' ? 'rgba(255, 0, 0, 0.1)' :
+                     config.provider === 'AWS_SES' ? 'rgba(255, 153, 0, 0.1)' :
+                     'info.light',
+            border: '1px solid', 
+            borderColor: config.provider === 'GMAIL' ? 'rgba(219, 68, 55, 0.3)' :
+                        config.provider === 'OUTLOOK' ? 'rgba(0, 120, 212, 0.3)' :
+                        config.provider === 'SENDGRID' ? 'rgba(0, 122, 255, 0.3)' :
+                        config.provider === 'MAILGUN' ? 'rgba(255, 0, 0, 0.3)' :
+                        config.provider === 'AWS_SES' ? 'rgba(255, 153, 0, 0.3)' :
+                        'info.main'
+          }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Info sx={{ color: 'info.main', mr: 2, mt: 0.5 }} />
-                <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                    Setup Instructions
+                <Info sx={{ 
+                  color: config.provider === 'GMAIL' ? '#db4437' :
+                        config.provider === 'OUTLOOK' ? '#0078d4' :
+                        config.provider === 'SENDGRID' ? '#007aff' :
+                        config.provider === 'MAILGUN' ? '#ff0000' :
+                        config.provider === 'AWS_SES' ? '#ff9900' :
+                        'info.main',
+                  mr: 2, 
+                  mt: 0.5 
+                }} />
+                <Box sx={{ width: '100%' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                    Setup Instructions for {config.provider === 'CUSTOM' ? 'Custom SMTP' : config.provider.replace('_', ' ')}
                   </Typography>
                   {config.provider === 'GMAIL' && (
                     <Box>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        <strong>Gmail Setup ({config.auth_method}):</strong>
-                      </Typography>
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        <Typography variant="body2">
+                          <strong>⚠️ Important:</strong> Gmail requires special authentication setup for third-party apps.
+                        </Typography>
+                      </Alert>
+                      
                       {config.auth_method === 'PASSWORD' && (
-                        <Typography variant="body2" component="div">
-                          1. Enable 2-Factor Authentication on your Google account<br />
-                          2. Go to Google Account Settings → Security → 2-Step Verification<br />
-                          3. Generate an App Password: Account Settings → Security → App passwords<br />
-                          4. Use the 16-character App Password (not your regular password)<br />
-                          5. Use your full Gmail address as the email address
-                        </Typography>
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#db4437' }}>
+                            📧 App Password Method (Recommended for Quick Setup):
+                          </Typography>
+                          <Box sx={{ pl: 2, mb: 2 }}>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 1: Enable 2-Factor Authentication</strong><br />
+                              • Go to <a href="https://myaccount.google.com/security" target="_blank" rel="noopener">Google Account Security</a><br />
+                              • Click on "2-Step Verification" and follow the setup process<br />
+                              • This is required before you can create App Passwords
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 2: Generate App Password</strong><br />
+                              • Go to <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">App Passwords Page</a><br />
+                              • Select "Mail" and your device type<br />
+                              • Click "Generate" to create a 16-character password<br />
+                              • <strong>Copy this password immediately</strong> (you won't see it again)
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 3: Configure in ShareWise</strong><br />
+                              • Email Address: Your full Gmail address (e.g., yourname@gmail.com)<br />
+                              • Password: The 16-character App Password (spaces are optional)<br />
+                              • SMTP Settings are pre-configured for Gmail
+                            </Typography>
+                          </Box>
+                        </Box>
                       )}
+                      
                       {config.auth_method === 'OAUTH2' && (
-                        <Typography variant="body2" component="div">
-                          1. Go to Google Cloud Console → APIs & Services → Credentials<br />
-                          2. Create OAuth2 credentials for a web application<br />
-                          3. Add authorized redirect URI for your application<br />
-                          4. Use the generated Client ID and Client Secret<br />
-                          5. Obtain refresh token through OAuth2 flow<br />
-                          <strong>Note:</strong> OAuth2 is more secure than app passwords
-                        </Typography>
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#db4437' }}>
+                            🔐 OAuth2 Method (Most Secure):
+                          </Typography>
+                          <Box sx={{ pl: 2, mb: 2 }}>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 1: Create Google Cloud Project</strong><br />
+                              • Go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener">Google Cloud Console</a><br />
+                              • Create a new project or select existing one<br />
+                              • Enable Gmail API for the project
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 2: Create OAuth2 Credentials</strong><br />
+                              • Navigate to APIs & Services → Credentials<br />
+                              • Click "Create Credentials" → "OAuth client ID"<br />
+                              • Application type: "Web application"<br />
+                              • Add authorized redirect URI: <code>http://localhost:3000/oauth/callback</code><br />
+                              • Save Client ID and Client Secret
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 3: Obtain Refresh Token</strong><br />
+                              • Use OAuth2 Playground or implement OAuth flow<br />
+                              • Scope needed: <code>https://mail.google.com/</code><br />
+                              • Exchange authorization code for refresh token<br />
+                              • This token allows permanent access without re-authentication
+                            </Typography>
+                          </Box>
+                        </Box>
                       )}
+                      
+                      <Alert severity="warning" sx={{ mt: 1 }}>
+                        <Typography variant="caption">
+                          <strong>Common Issues:</strong><br />
+                          • "Less secure app access" is no longer available since May 2022<br />
+                          • Regular passwords will NOT work - you must use App Password or OAuth2<br />
+                          • Ensure your account has 2FA enabled before generating App Passwords
+                        </Typography>
+                      </Alert>
                     </Box>
                   )}
                   {config.provider === 'OUTLOOK' && (
                     <Box>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        <strong>Outlook Setup ({config.auth_method}):</strong>
-                      </Typography>
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        <Typography variant="body2">
+                          <strong>📧 Microsoft Outlook/Office 365 Email Configuration</strong>
+                        </Typography>
+                      </Alert>
+                      
                       {config.auth_method === 'PASSWORD' && (
-                        <Typography variant="body2" component="div">
-                          1. Enable 2-Factor Authentication if not already enabled<br />
-                          2. Use your full Outlook email address<br />
-                          3. Use your regular password or App Password if 2FA is enabled
-                        </Typography>
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#0078d4' }}>
+                            🔑 App Password Method:
+                          </Typography>
+                          <Box sx={{ pl: 2, mb: 2 }}>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 1: Enable Two-Step Verification</strong><br />
+                              • Go to <a href="https://account.microsoft.com/security" target="_blank" rel="noopener">Microsoft Account Security</a><br />
+                              • Enable "Two-step verification"<br />
+                              • Follow the setup wizard to complete 2FA setup
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 2: Create App Password</strong><br />
+                              • Go to <a href="https://account.microsoft.com/security/apppasswords" target="_blank" rel="noopener">App Passwords Page</a><br />
+                              • Click "Create a new app password"<br />
+                              • Copy the generated password (you won't see it again)<br />
+                              • Use this password instead of your regular account password
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 3: SMTP Configuration</strong><br />
+                              • Email: Your full Outlook/Office 365 email<br />
+                              • Password: The App Password you just generated<br />
+                              • SMTP Host: <code>smtp-mail.outlook.com</code> (Outlook) or <code>smtp.office365.com</code> (Office 365)<br />
+                              • Port: 587 (TLS) or 25
+                            </Typography>
+                          </Box>
+                        </Box>
                       )}
+                      
                       {config.auth_method === 'OAUTH2' && (
-                        <Typography variant="body2" component="div">
-                          1. Register app in Azure AD/Microsoft 365 admin center<br />
-                          2. Configure API permissions for Mail.Send<br />
-                          3. Generate client secret in app registration<br />
-                          4. Use Microsoft Graph OAuth2 endpoints<br />
-                          <strong>Note:</strong> OAuth2 is recommended for enterprise accounts
-                        </Typography>
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#0078d4' }}>
+                            🔐 OAuth2/Modern Authentication (Enterprise):
+                          </Typography>
+                          <Box sx={{ pl: 2, mb: 2 }}>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 1: Register Application in Azure AD</strong><br />
+                              • Go to <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure Portal</a><br />
+                              • Navigate to Azure Active Directory → App registrations<br />
+                              • Click "New registration" and configure your app<br />
+                              • Redirect URI: <code>http://localhost:3000/oauth/callback</code>
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 2: Configure API Permissions</strong><br />
+                              • Add Microsoft Graph API permissions<br />
+                              • Required permissions: <code>Mail.Send</code>, <code>Mail.ReadWrite</code><br />
+                              • Grant admin consent if required by your organization
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 3: Generate Client Secret</strong><br />
+                              • Go to Certificates & secrets<br />
+                              • Create new client secret<br />
+                              • Copy the secret value immediately<br />
+                              • Use Application (client) ID and secret in configuration
+                            </Typography>
+                          </Box>
+                        </Box>
                       )}
+                      
+                      <Alert severity="warning" sx={{ mt: 1 }}>
+                        <Typography variant="caption">
+                          <strong>Important Notes:</strong><br />
+                          • Basic authentication is being phased out for many Microsoft accounts<br />
+                          • OAuth2/Modern Auth is required for most enterprise Office 365 accounts<br />
+                          • Personal Outlook.com accounts may still use App Passwords
+                        </Typography>
+                      </Alert>
                     </Box>
                   )}
                   {config.provider === 'SENDGRID' && (
                     <Box>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        <strong>SendGrid Setup:</strong>
-                      </Typography>
-                      {config.auth_method === 'API_KEY' ? (
-                        <Typography variant="body2" component="div">
-                          1. Log in to SendGrid dashboard<br />
-                          2. Go to Settings → API Keys<br />
-                          3. Create a new API key with "Mail Send" permissions<br />
-                          4. Copy the generated API key<br />
-                          5. Use "apikey" as username (if required)
-                        </Typography>
-                      ) : (
+                      <Alert severity="info" sx={{ mb: 2 }}>
                         <Typography variant="body2">
-                          Use API Key authentication for SendGrid (most secure method).
+                          <strong>📮 SendGrid Professional Email Service</strong>
                         </Typography>
+                      </Alert>
+                      
+                      {config.auth_method === 'API_KEY' ? (
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#007aff' }}>
+                            🔐 API Key Configuration:
+                          </Typography>
+                          <Box sx={{ pl: 2, mb: 2 }}>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 1: Access SendGrid Dashboard</strong><br />
+                              • Log in to <a href="https://app.sendgrid.com" target="_blank" rel="noopener">SendGrid Dashboard</a><br />
+                              • Navigate to Settings → API Keys<br />
+                              • Click "Create API Key"
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 2: Configure API Key Permissions</strong><br />
+                              • Choose "Restricted Access" for security<br />
+                              • Enable permissions: Mail Send (Full Access)<br />
+                              • Optionally enable: Template Engine, Tracking<br />
+                              • Click "Create & View" to generate the key
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 3: Save and Configure</strong><br />
+                              • <strong>Copy the API key immediately</strong> (shown only once)<br />
+                              • In ShareWise, paste the API key in the API Key field<br />
+                              • SMTP Host: <code>smtp.sendgrid.net</code><br />
+                              • Port: 587 (TLS) or 465 (SSL)<br />
+                              • Username: <code>apikey</code> (literal string)<br />
+                              • Password: Your API key
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 4: Sender Authentication (Required)</strong><br />
+                              • Go to Settings → Sender Authentication<br />
+                              • Verify your sending domain or email address<br />
+                              • Complete DNS verification for domain authentication<br />
+                              • This improves deliverability and prevents spam marking
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <Alert severity="warning">
+                          <Typography variant="body2">
+                            Please select <strong>API Key</strong> authentication method for SendGrid.
+                            SendGrid requires API key authentication for security.
+                          </Typography>
+                        </Alert>
                       )}
+                      
+                      <Alert severity="success" sx={{ mt: 1 }}>
+                        <Typography variant="caption">
+                          <strong>SendGrid Benefits:</strong><br />
+                          • High deliverability rates with reputation monitoring<br />
+                          • Real-time analytics and email tracking<br />
+                          • Scales from free tier (100 emails/day) to enterprise
+                        </Typography>
+                      </Alert>
                     </Box>
                   )}
-                  {config.provider === 'MAILGUN' && config.auth_method === 'API_KEY' && (
+                  {config.provider === 'MAILGUN' && (
                     <Box>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        <strong>Mailgun Setup:</strong>
-                      </Typography>
-                      <Typography variant="body2" component="div">
-                        1. Log in to Mailgun dashboard<br />
-                        2. Go to Settings → API Keys<br />
-                        3. Copy your Private API key<br />
-                        4. Use "api" as username with the API key as password
-                      </Typography>
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        <Typography variant="body2">
+                          <strong>🚀 Mailgun Developer-Friendly Email Service</strong>
+                        </Typography>
+                      </Alert>
+                      
+                      {config.auth_method === 'API_KEY' ? (
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#ff0000' }}>
+                            🔑 API Key Setup:
+                          </Typography>
+                          <Box sx={{ pl: 2, mb: 2 }}>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 1: Get Your API Keys</strong><br />
+                              • Log in to <a href="https://app.mailgun.com" target="_blank" rel="noopener">Mailgun Dashboard</a><br />
+                              • Navigate to Settings → API Keys<br />
+                              • Copy your Private API key (starts with key-)<br />
+                              • Note your sending domain (e.g., mg.yourdomain.com)
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 2: Domain Configuration</strong><br />
+                              • Go to Sending → Domains<br />
+                              • Add and verify your domain<br />
+                              • Add DNS records as instructed (SPF, DKIM, MX)<br />
+                              • Wait for verification (usually 24-48 hours)
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 3: SMTP Configuration</strong><br />
+                              • SMTP Host: <code>smtp.mailgun.org</code> (US) or <code>smtp.eu.mailgun.org</code> (EU)<br />
+                              • Port: 587 (TLS) or 465 (SSL)<br />
+                              • Username: <code>postmaster@YOUR_DOMAIN</code><br />
+                              • Password: Your Private API key<br />
+                              • Or use Username: <code>api</code> with API key as password
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 4: Regional Settings</strong><br />
+                              • Choose your region: US or EU<br />
+                              • EU region complies with GDPR requirements<br />
+                              • Use region-specific endpoints for better performance
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <Alert severity="warning">
+                          <Typography variant="body2">
+                            Please select <strong>API Key</strong> authentication for Mailgun.
+                          </Typography>
+                        </Alert>
+                      )}
+                      
+                      <Alert severity="success" sx={{ mt: 1 }}>
+                        <Typography variant="caption">
+                          <strong>Mailgun Features:</strong><br />
+                          • Powerful email validation and verification<br />
+                          • Detailed logs and analytics for 3 days (free) or 30 days (paid)<br />
+                          • Excellent API documentation and SDKs
+                        </Typography>
+                      </Alert>
                     </Box>
                   )}
-                  {config.provider === 'AWS_SES' && config.auth_method === 'API_KEY' && (
+                  {config.provider === 'AWS_SES' && (
                     <Box>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        <strong>AWS SES Setup:</strong>
-                      </Typography>
-                      <Typography variant="body2" component="div">
-                        1. Create IAM user with SES permissions<br />
-                        2. Generate access key and secret key<br />
-                        3. Use access key as username and secret key as password<br />
-                        4. Ensure your email/domain is verified in SES
-                      </Typography>
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        <Typography variant="body2">
+                          <strong>☁️ Amazon SES (Simple Email Service)</strong>
+                        </Typography>
+                      </Alert>
+                      
+                      {config.auth_method === 'API_KEY' ? (
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#ff9900' }}>
+                            🔐 AWS Credentials Setup:
+                          </Typography>
+                          <Box sx={{ pl: 2, mb: 2 }}>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 1: Create IAM User</strong><br />
+                              • Go to <a href="https://console.aws.amazon.com/iam" target="_blank" rel="noopener">AWS IAM Console</a><br />
+                              • Create new IAM user with programmatic access<br />
+                              • Attach policy: <code>AmazonSESFullAccess</code> or create custom policy<br />
+                              • Save Access Key ID and Secret Access Key
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 2: Verify Email/Domain in SES</strong><br />
+                              • Go to <a href="https://console.aws.amazon.com/ses" target="_blank" rel="noopener">Amazon SES Console</a><br />
+                              • Navigate to Verified identities<br />
+                              • Add and verify your sending email or domain<br />
+                              • Complete DNS verification for domains (DKIM, SPF)
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 3: Request Production Access</strong><br />
+                              • New AWS accounts start in Sandbox mode<br />
+                              • Submit request to move to Production<br />
+                              • Explain your use case and expected volume<br />
+                              • Wait for approval (usually 24 hours)
+                            </Typography>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                              <strong>Step 4: SMTP Configuration</strong><br />
+                              • SMTP Endpoint varies by region:<br />
+                              • US East: <code>email-smtp.us-east-1.amazonaws.com</code><br />
+                              • EU West: <code>email-smtp.eu-west-1.amazonaws.com</code><br />
+                              • Port: 587 (TLS) or 465 (SSL)<br />
+                              • Generate SMTP credentials from IAM (different from access keys)<br />
+                              • Or use Access Key as username, Secret Key as password
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <Alert severity="warning">
+                          <Typography variant="body2">
+                            Please select <strong>API Key</strong> authentication for AWS SES.
+                          </Typography>
+                        </Alert>
+                      )}
+                      
+                      <Alert severity="info" sx={{ mt: 1 }}>
+                        <Typography variant="caption">
+                          <strong>AWS SES Notes:</strong><br />
+                          • Sandbox mode limits: 200 emails/day, 1 email/second<br />
+                          • Production mode: 50,000+ emails/day based on reputation<br />
+                          • Very cost-effective: $0.10 per 1,000 emails<br />
+                          • Integrates well with other AWS services
+                        </Typography>
+                      </Alert>
+                    </Box>
+                  )}
+                  {config.provider === 'CUSTOM' && (
+                    <Box>
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        <Typography variant="body2">
+                          <strong>⚙️ Custom SMTP Server Configuration</strong>
+                        </Typography>
+                      </Alert>
+                      
+                      <Box>
+                        <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: '#666' }}>
+                          🔧 Manual SMTP Configuration:
+                        </Typography>
+                        <Box sx={{ pl: 2, mb: 2 }}>
+                          <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                            <strong>Common SMTP Settings:</strong><br />
+                            • SMTP Host: Your mail server address (e.g., mail.yourdomain.com)<br />
+                            • SMTP Port: Common ports are:<br />
+                            &nbsp;&nbsp;- 25: Default SMTP (often blocked by ISPs)<br />
+                            &nbsp;&nbsp;- 587: TLS/STARTTLS (recommended)<br />
+                            &nbsp;&nbsp;- 465: SSL (legacy, but still used)<br />
+                            &nbsp;&nbsp;- 2525: Alternative SMTP port
+                          </Typography>
+                          <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                            <strong>Security Settings:</strong><br />
+                            • Use TLS: Enable for STARTTLS on port 587<br />
+                            • Use SSL: Enable for SSL/TLS on port 465<br />
+                            • Most modern servers use TLS on port 587
+                          </Typography>
+                          <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                            <strong>Authentication:</strong><br />
+                            • Username: Usually your full email address<br />
+                            • Password: Your email account password<br />
+                            • Some servers may use different username formats
+                          </Typography>
+                          <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+                            <strong>Popular Hosting Providers:</strong><br />
+                            • <strong>cPanel/WHM:</strong> mail.yourdomain.com, Port 587, TLS<br />
+                            • <strong>Plesk:</strong> smtp.yourdomain.com, Port 587, TLS<br />
+                            • <strong>Zoho:</strong> smtp.zoho.com, Port 587, TLS<br />
+                            • <strong>Yandex:</strong> smtp.yandex.com, Port 587, TLS<br />
+                            • <strong>ProtonMail:</strong> Requires Bridge application
+                          </Typography>
+                        </Box>
+                      </Box>
+                      
+                      <Alert severity="warning" sx={{ mt: 1 }}>
+                        <Typography variant="caption">
+                          <strong>Troubleshooting Tips:</strong><br />
+                          • Check with your hosting provider for exact SMTP settings<br />
+                          • Ensure your IP is not blacklisted for sending emails<br />
+                          • Some servers require SPF/DKIM records for authentication<br />
+                          • Firewall may block certain ports - check with your IT team
+                        </Typography>
+                      </Alert>
                     </Box>
                   )}
                 </Box>

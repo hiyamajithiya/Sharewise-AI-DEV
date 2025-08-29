@@ -20,9 +20,6 @@ import {
   Store as MarketplaceIcon,
   School as LearnIcon,
   Info,
-  HelpOutline,
-  Lightbulb,
-  Psychology,
   TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 
@@ -68,37 +65,43 @@ const AIStudio: React.FC = () => {
     setTabValue(newValue);
   };
 
-  // Helper component for guidelines
-  const GuidelineBox = ({ title, children, icon = <Info /> }: { title: string, children: React.ReactNode, icon?: React.ReactNode }) => (
-    <Paper elevation={0} sx={{ p: 3, mb: 3, bgcolor: 'info.light', border: '1px solid', borderColor: 'info.main' }}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-        {icon}
-        <Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'info.main' }}>
-            {title}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'info.dark' }}>
-            {children}
-          </Typography>
-        </Box>
-      </Box>
-    </Paper>
-  );
 
   if (loading && !dashboard) {
     return <LoadingSpinner />;
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Box 
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%)
+          `,
+          pointerEvents: 'none',
+          zIndex: 0
+        }
+      }}
+    >
+      <Container maxWidth="xl" sx={{ py: 3, position: 'relative', zIndex: 1 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box>
-            <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
+            <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom sx={{ color: 'white' }}>
               AI Model Studio 🤖
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
               Create intelligent trading assistants that learn from market data
             </Typography>
             <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
@@ -107,6 +110,14 @@ const AIStudio: React.FC = () => {
                 size="small"
                 onClick={() => setShowFnOStudio(true)}
                 startIcon={<TrendingUpIcon />}
+                sx={{
+                  color: 'white',
+                  borderColor: 'rgba(255,255,255,0.5)',
+                  '&:hover': {
+                    borderColor: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.1)'
+                  }
+                }}
               >
                 F&O Models
               </Button>
@@ -114,6 +125,14 @@ const AIStudio: React.FC = () => {
                 variant="outlined" 
                 size="small"
                 onClick={() => setShowFnOStudio(false)}
+                sx={{
+                  color: 'white',
+                  borderColor: 'rgba(255,255,255,0.5)',
+                  '&:hover': {
+                    borderColor: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.1)'
+                  }
+                }}
               >
                 General Models
               </Button>
@@ -125,18 +144,18 @@ const AIStudio: React.FC = () => {
             <Paper 
               elevation={0} 
               sx={{ 
-                p: 2, 
-                bgcolor: 'info.light', 
-                borderRadius: 2, 
-                maxWidth: 300,
-                border: '1px solid',
-                borderColor: 'info.main'
+                p: 2,
+                background: 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '16px',
+                maxWidth: 300
               }}
             >
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'info.main' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#1F2937' }}>
                 💡 Getting Started
               </Typography>
-              <Typography variant="body2" sx={{ color: 'info.dark', fontSize: '0.8rem' }}>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem' }}>
                 AI models predict "Buy/Sell/Hold" decisions by learning from historical data. 
                 No coding required - just follow the step-by-step wizard!
               </Typography>
@@ -193,47 +212,47 @@ const AIStudio: React.FC = () => {
               <Paper 
                 elevation={1} 
                 sx={{ 
-                  p: 3, 
-                  bgcolor: 'success.light', 
-                  borderRadius: 2,
-                  border: '1px solid',
-                  borderColor: 'success.main',
+                  p: 3,
+                  background: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '16px',
                   mt: 2
                 }}
               >
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: 'success.main' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
                   🚀 Quick Start Guide
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6} md={3}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
                       1. Create Model
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                       Choose what to predict
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={3}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
                       2. Select Features
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                       Pick data indicators
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={3}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
                       3. Train AI
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                       10-30 minutes wait
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={3}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
                       4. Get Predictions
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                       Ready to trade
                     </Typography>
                   </Grid>
@@ -245,20 +264,41 @@ const AIStudio: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <Paper sx={{ mb: 3 }}>
+      <Paper sx={{ 
+        mb: 3,
+        background: 'rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        borderRadius: '16px'
+      }}>
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{ 
+            borderBottom: 1, 
+            borderColor: 'rgba(255,255,255,0.2)',
+            '& .MuiTab-root': {
+              color: 'rgba(255,255,255,0.7)',
+              '&.Mui-selected': {
+                color: 'white'
+              },
+              '&:hover': {
+                color: 'white'
+              }
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: 'white'
+            }
+          }}
         >
           <Tab
             icon={<DashboardIcon />}
             label={
               <Box sx={{ textAlign: 'left' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>Dashboard</Typography>
-                <Typography variant="caption" color="text.secondary">Overview & stats</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>Dashboard</Typography>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Overview & stats</Typography>
               </Box>
             }
             iconPosition="start"
@@ -267,8 +307,8 @@ const AIStudio: React.FC = () => {
             icon={<ModelIcon />}
             label={
               <Box sx={{ textAlign: 'left' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>My Models</Typography>
-                <Typography variant="caption" color="text.secondary">Your AI models</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>My Models</Typography>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Your AI models</Typography>
               </Box>
             }
             iconPosition="start"
@@ -277,8 +317,8 @@ const AIStudio: React.FC = () => {
             icon={<ModelIcon />}
             label={
               <Box sx={{ textAlign: 'left' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>Create Model</Typography>
-                <Typography variant="caption" color="text.secondary">Build new AI</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>Create Model</Typography>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Build new AI</Typography>
               </Box>
             }
             iconPosition="start"
@@ -287,8 +327,8 @@ const AIStudio: React.FC = () => {
             icon={<MarketplaceIcon />}
             label={
               <Box sx={{ textAlign: 'left' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>Marketplace</Typography>
-                <Typography variant="caption" color="text.secondary">Browse & buy models</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>Marketplace</Typography>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Browse & buy models</Typography>
               </Box>
             }
             iconPosition="start"
@@ -297,8 +337,8 @@ const AIStudio: React.FC = () => {
             icon={<LearnIcon />}
             label={
               <Box sx={{ textAlign: 'left' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>Training Jobs</Typography>
-                <Typography variant="caption" color="text.secondary">Monitor AI learning</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>Training Jobs</Typography>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Monitor AI learning</Typography>
               </Box>
             }
             iconPosition="start"
@@ -313,13 +353,18 @@ const AIStudio: React.FC = () => {
           <Grid container spacing={3}>
             {/* Recent Models */}
             <Grid item xs={12} lg={6}>
-              <Card>
+              <Card sx={{
+                background: 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '16px'
+              }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>
                     Recent Models
                   </Typography>
                   {dashboard.recent_models.length === 0 ? (
-                    <Typography color="text.secondary">
+                    <Typography sx={{ color: 'rgba(255,255,255,0.8)' }}>
                       No models created yet. Create your first model to get started.
                     </Typography>
                   ) : (
@@ -333,15 +378,15 @@ const AIStudio: React.FC = () => {
                             alignItems: 'center',
                             py: 1,
                             borderBottom: '1px solid',
-                            borderColor: 'divider',
+                            borderColor: 'rgba(255,255,255,0.2)',
                             '&:last-child': { borderBottom: 'none' },
                           }}
                         >
                           <Box>
-                            <Typography variant="subtitle2">
+                            <Typography variant="subtitle2" sx={{ color: 'white' }}>
                               {model.name}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                               {model.model_type} • {model.created_at}
                             </Typography>
                           </Box>
@@ -368,13 +413,18 @@ const AIStudio: React.FC = () => {
 
             {/* Recent Training Jobs */}
             <Grid item xs={12} lg={6}>
-              <Card>
+              <Card sx={{
+                background: 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '16px'
+              }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>
                     Recent Training Jobs
                   </Typography>
                   {dashboard.recent_training_jobs.length === 0 ? (
-                    <Typography color="text.secondary">
+                    <Typography sx={{ color: 'rgba(255,255,255,0.8)' }}>
                       No training jobs yet.
                     </Typography>
                   ) : (
@@ -385,12 +435,12 @@ const AIStudio: React.FC = () => {
                           sx={{
                             py: 1,
                             borderBottom: '1px solid',
-                            borderColor: 'divider',
+                            borderColor: 'rgba(255,255,255,0.2)',
                             '&:last-child': { borderBottom: 'none' },
                           }}
                         >
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                            <Typography variant="subtitle2">
+                            <Typography variant="subtitle2" sx={{ color: 'white' }}>
                               Training Job #{job.id.slice(-8)}
                             </Typography>
                             <Chip
@@ -410,17 +460,23 @@ const AIStudio: React.FC = () => {
                           {job.status === 'RUNNING' && (
                             <Box sx={{ width: '100%' }}>
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography variant="body2" sx={{ color: '#6B7280' }}>
                                   {job.current_step}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography variant="body2" sx={{ color: '#6B7280' }}>
                                   {job.progress_percentage}%
                                 </Typography>
                               </Box>
                               <LinearProgress
                                 variant="determinate"
                                 value={job.progress_percentage}
-                                sx={{ borderRadius: 1 }}
+                                sx={{ 
+                                  borderRadius: 1,
+                                  backgroundColor: 'rgba(255,255,255,0.2)',
+                                  '& .MuiLinearProgress-bar': {
+                                    backgroundColor: 'white'
+                                  }
+                                }}
                               />
                             </Box>
                           )}
@@ -434,18 +490,30 @@ const AIStudio: React.FC = () => {
 
             {/* Quick Actions */}
             <Grid item xs={12}>
-              <Card>
+              <Card sx={{
+                background: 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '16px'
+              }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'white' }}>
                     Quick Actions
                   </Typography>
                   <Grid container spacing={2} sx={{ mt: 1 }}>
                     <Grid item>
                       <Button
                         variant="contained"
-                        color="primary"
                         onClick={() => setTabValue(2)}
                         startIcon={<ModelIcon />}
+                        sx={{
+                          backgroundColor: 'rgba(255,255,255,0.2)',
+                          color: 'white',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(255,255,255,0.3)'
+                          }
+                        }}
                       >
                         Create New Model
                       </Button>
@@ -455,6 +523,14 @@ const AIStudio: React.FC = () => {
                         variant="outlined"
                         onClick={() => setTabValue(3)}
                         startIcon={<MarketplaceIcon />}
+                        sx={{
+                          color: 'white',
+                          borderColor: 'rgba(255,255,255,0.5)',
+                          '&:hover': {
+                            borderColor: 'white',
+                            backgroundColor: 'rgba(255,255,255,0.1)'
+                          }
+                        }}
                       >
                         Browse Marketplace
                       </Button>
@@ -464,6 +540,14 @@ const AIStudio: React.FC = () => {
                         variant="outlined"
                         onClick={() => setTabValue(1)}
                         startIcon={<ModelIcon />}
+                        sx={{
+                          color: 'white',
+                          borderColor: 'rgba(255,255,255,0.5)',
+                          '&:hover': {
+                            borderColor: 'white',
+                            backgroundColor: 'rgba(255,255,255,0.1)'
+                          }
+                        }}
                       >
                         View My Models
                       </Button>
@@ -494,10 +578,11 @@ const AIStudio: React.FC = () => {
 
       {error && (
         <Box sx={{ mt: 2 }}>
-          <Typography color="error">{error}</Typography>
+          <Typography sx={{ color: '#ff6b6b' }}>{error}</Typography>
         </Box>
       )}
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

@@ -72,7 +72,6 @@ import { useLocation } from 'react-router-dom';
 import { selectTestingState } from '../store/slices/testingSlice';
 import { fetchNotifications, markAsRead, markAllAsRead } from '../store/slices/notificationSlice';
 import { RootState } from '../store';
-import { Notification } from '../types';
 import StatCard from '../components/common/StatCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -415,19 +414,30 @@ const Strategies: React.FC = () => {
 
   // Helper component for guidelines
   const GuidelineBox = ({ title, children, icon = <Info /> }: { title: string, children: React.ReactNode, icon?: React.ReactNode }) => (
-    <Alert severity="info" sx={{ mb: 3 }}>
+    <Box
+      sx={{
+        p: 2,
+        mb: 3,
+        background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        
+        border: '1px solid #e0e0e0',
+        borderRadius: '12px'
+      }}
+    >
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-        {icon}
+        <Box sx={{ color: '#374151' }}>
+          {icon}
+        </Box>
         <Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: '#1F2937' }}>
             {title}
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: '#374151' }}>
             {children}
           </Typography>
         </Box>
       </Box>
-    </Alert>
+    </Box>
   );
 
   const handleNext = () => {
@@ -583,15 +593,16 @@ const Strategies: React.FC = () => {
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Box sx={{ minHeight: '100vh', background: '#f5f7fa' }}>
+      <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
               Trading Strategies 🎯
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{ color: '#6B7280' }}>
               {isTestingMode && selectedUser
                 ? `Testing strategies for ${selectedUser.role} role - ${subscriptionTier} tier`
                 : `Manage your ${subscriptionTier} trading strategies and backtests`
@@ -619,7 +630,18 @@ const Strategies: React.FC = () => {
 
       {/* Feedback Message */}
       {feedbackMessage && (
-        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setFeedbackMessage('')}>
+        <Alert 
+          severity="success" 
+          sx={{ 
+            mb: 3,
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            borderRadius: '16px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            color: '#1F2937'
+          }} 
+          onClose={() => setFeedbackMessage('')}
+        >
           {feedbackMessage}
         </Alert>
       )}
@@ -670,9 +692,9 @@ const Strategies: React.FC = () => {
       </Grid>
 
       {/* Strategies Table */}
-      <Paper sx={{ p: 3 }}>
+      <Paper sx={{ p: 3, background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', border: '1px solid #e0e0e0' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
             Your Strategies
             <Badge badgeContent={strategies.length} color="primary" sx={{ ml: 2 }}>
               <Settings />
@@ -697,12 +719,23 @@ const Strategies: React.FC = () => {
                 onClick={() => setCreateDialogOpen(true)}
                 startIcon={<Add />}
                 size="large"
-                sx={{ borderRadius: '8px', px: 4, py: 1.5 }}
+                sx={{ 
+                  borderRadius: '16px', 
+                  px: 4, 
+                  py: 1.5,
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  color: '#1F2937',
+                  '&:hover': {
+                    background: 'rgba(255,255,255,0.2)',
+                  }
+                }}
               >
                 Create Your First Strategy
               </Button>
               
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                 Takes 5 minutes • Beginner-friendly • No coding required
               </Typography>
             </Box>
@@ -914,14 +947,16 @@ const Strategies: React.FC = () => {
                 <ListItem 
                   key={notification.id}
                   sx={{ 
-                    border: 1, 
-                    borderColor: 'divider', 
-                    borderRadius: 1, 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: '12px', 
                     mb: 1,
-                    bgcolor: notification.is_read ? 'background.paper' : 'action.hover',
+                    background: notification.is_read 
+                      ? 'rgba(255,255,255,0.05)' 
+                      : 'rgba(255,255,255,0.1)',
+                    
                     cursor: 'pointer',
                     '&:hover': {
-                      bgcolor: 'action.selected',
+                      background: 'rgba(255,255,255,0.15)',
                     }
                   }}
                   onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
@@ -940,7 +975,7 @@ const Strategies: React.FC = () => {
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: notification.is_read ? 400 : 600 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: notification.is_read ? 400 : 600, color: '#1F2937' }}>
                           {notification.title}
                         </Typography>
                         {!notification.is_read && (
@@ -957,12 +992,11 @@ const Strategies: React.FC = () => {
                       <>
                         <Typography 
                           variant="body2" 
-                          color="text.secondary"
-                          sx={{ mt: 0.5, mb: 1 }}
+                          sx={{ mt: 0.5, mb: 1, color: '#374151' }}
                         >
                           {notification.message}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" sx={{ color: '#6B7280' }}>
                           {new Date(notification.created_at).toLocaleString()}
                         </Typography>
                       </>
@@ -1120,7 +1154,51 @@ const Strategies: React.FC = () => {
             Create New Trading Strategy
           </Box>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent
+          sx={{
+            '& .MuiTextField-root': {
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'rgba(255,255,255,0.3)',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'rgba(255,255,255,0.5)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'white',
+                },
+                color: '#1F2937',
+              },
+              '& .MuiInputLabel-root': {
+                color: '#374151',
+                '&.Mui-focused': {
+                  color: '#1F2937',
+                },
+              },
+            },
+            '& .MuiFormControl-root .MuiInputLabel-root': {
+              color: '#374151',
+              '&.Mui-focused': {
+                color: '#1F2937',
+              },
+            },
+            '& .MuiSelect-root': {
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(255,255,255,0.3)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(255,255,255,0.5)',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'white',
+              },
+              color: '#1F2937',
+              '& .MuiSvgIcon-root': {
+                color: '#374151',
+              },
+            },
+          }}
+        >
           <Box sx={{ pt: 2 }}>
             <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
               {steps.map((label) => (
@@ -1132,9 +1210,17 @@ const Strategies: React.FC = () => {
 
             {/* Step 0: Basic Info */}
             {activeStep === 0 && (
-              <Card variant="outlined">
+              <Card 
+                variant="outlined"
+                sx={{
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '16px'
+                }}
+              >
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Basic Strategy Information</Typography>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>Basic Strategy Information</Typography>
                   
                   <GuidelineBox title="Getting Started - What is a Trading Strategy?" icon={<Lightbulb />}>
                     A trading strategy is like a recipe for making money in the stock market. It tells you exactly when to buy stocks, when to sell them, and how much to invest. Think of it as your personal trading assistant that follows rules you set up.
@@ -1249,9 +1335,17 @@ const Strategies: React.FC = () => {
 
             {/* Step 1: Symbols & Scripts */}
             {activeStep === 1 && (
-              <Card variant="outlined">
+              <Card 
+                variant="outlined"
+                sx={{
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '16px'
+                }}
+              >
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Symbols & Scripts Configuration</Typography>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>Symbols & Scripts Configuration</Typography>
 
                   <GuidelineBox title="What are Trading Symbols?" icon={<HelpOutline />}>
                     Trading symbols are short codes for companies on the stock exchange. For example:<br/>
@@ -1308,9 +1402,17 @@ const Strategies: React.FC = () => {
 
             {/* Step 2: Buy Conditions */}
             {activeStep === 2 && (
-              <Card variant="outlined">
+              <Card 
+                variant="outlined"
+                sx={{
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '16px'
+                }}
+              >
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Buy Entry Conditions</Typography>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>Buy Entry Conditions</Typography>
 
                   <GuidelineBox title="Understanding Buy Conditions - When to Buy Stocks?" icon={<Lightbulb />}>
                     This is where you tell your strategy exactly when to buy stocks. Think of it like this:<br/>
@@ -1409,9 +1511,17 @@ const Strategies: React.FC = () => {
 
             {/* Step 3: Sell Conditions */}
             {activeStep === 3 && (
-              <Card variant="outlined">
+              <Card 
+                variant="outlined"
+                sx={{
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '16px'
+                }}
+              >
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Sell Exit Conditions</Typography>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>Sell Exit Conditions</Typography>
 
                   <GuidelineBox title="Understanding Sell Conditions - When to Exit & Take Profit?" icon={<TrendingUp />}>
                     Selling at the right time is crucial! This tells your strategy when to sell stocks and lock in profits.<br/>
@@ -1509,9 +1619,17 @@ const Strategies: React.FC = () => {
 
             {/* Step 4: Risk Management */}
             {activeStep === 4 && (
-              <Card variant="outlined">
+              <Card 
+                variant="outlined"
+                sx={{
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '16px'
+                }}
+              >
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Risk Management Settings</Typography>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>Risk Management Settings</Typography>
 
                   <GuidelineBox title="Why Risk Management is CRITICAL?" icon={<Warning />}>
                     <strong>This is the most important step!</strong> Risk management protects your money from big losses.<br/>
@@ -1588,13 +1706,20 @@ const Strategies: React.FC = () => {
                       </FormControl>
                     </Grid>
                     <Grid item xs={12}>
-                      <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1 }}>Strategy Summary:</Typography>
-                        <Typography variant="body2">• Name: {newStrategy.name || 'Not specified'}</Typography>
-                        <Typography variant="body2">• Symbols: {newStrategy.symbols || 'Not specified'}</Typography>
-                        <Typography variant="body2">• Buy: {newStrategy.buyConditions.indicator} {newStrategy.buyConditions.operator} {newStrategy.buyConditions.value}</Typography>
-                        <Typography variant="body2">• Sell: {newStrategy.sellConditions.indicator} {newStrategy.sellConditions.operator} {newStrategy.sellConditions.value}</Typography>
-                        <Typography variant="body2">• Risk: {newStrategy.stopLoss}% SL, {newStrategy.takeProfit}% TP</Typography>
+                      <Box sx={{ 
+                        mt: 2, 
+                        p: 2, 
+                        background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', 
+                        
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '16px'
+                      }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, color: '#1F2937' }}>Strategy Summary:</Typography>
+                        <Typography variant="body2" sx={{ color: '#374151' }}>• Name: {newStrategy.name || 'Not specified'}</Typography>
+                        <Typography variant="body2" sx={{ color: '#374151' }}>• Symbols: {newStrategy.symbols || 'Not specified'}</Typography>
+                        <Typography variant="body2" sx={{ color: '#374151' }}>• Buy: {newStrategy.buyConditions.indicator} {newStrategy.buyConditions.operator} {newStrategy.buyConditions.value}</Typography>
+                        <Typography variant="body2" sx={{ color: '#374151' }}>• Sell: {newStrategy.sellConditions.indicator} {newStrategy.sellConditions.operator} {newStrategy.sellConditions.value}</Typography>
+                        <Typography variant="body2" sx={{ color: '#374151' }}>• Risk: {newStrategy.stopLoss}% SL, {newStrategy.takeProfit}% TP</Typography>
                       </Box>
                     </Grid>
                   </Grid>
@@ -1603,9 +1728,31 @@ const Strategies: React.FC = () => {
             )}
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={resetDialog}>Cancel</Button>
-          <Button disabled={activeStep === 0} onClick={handleBack}>
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={resetDialog}
+            sx={{
+              color: '#374151',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            disabled={activeStep === 0} 
+            onClick={handleBack}
+            sx={{
+              color: '#374151',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              },
+              '&:disabled': {
+                color: 'rgba(255,255,255,0.3)',
+              }
+            }}
+          >
             Back
           </Button>
           {activeStep === steps.length - 1 ? (
@@ -1613,11 +1760,38 @@ const Strategies: React.FC = () => {
               variant="contained" 
               onClick={handleCreateStrategy}
               disabled={!newStrategy.name || !newStrategy.symbols}
+              sx={{
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
+                borderRadius: '16px',
+                color: '#1F2937',
+                '&:hover': {
+                  background: 'rgba(255,255,255,0.2)',
+                },
+                '&:disabled': {
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  color: 'rgba(255,255,255,0.3)',
+                }
+              }}
             >
               Create Strategy
             </Button>
           ) : (
-            <Button variant="contained" onClick={handleNext}>
+            <Button 
+              variant="contained" 
+              onClick={handleNext}
+              sx={{
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
+                borderRadius: '16px',
+                color: '#1F2937',
+                '&:hover': {
+                  background: 'rgba(255,255,255,0.2)',
+                }
+              }}
+            >
               Next
             </Button>
           )}
@@ -1625,27 +1799,114 @@ const Strategies: React.FC = () => {
       </Dialog>
 
       {/* Manual Trading Dialog */}
-      <Dialog open={tradeDialogOpen} onClose={() => setTradeDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={tradeDialogOpen} 
+        onClose={() => setTradeDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            
+            border: '1px solid #e0e0e0',
+            borderRadius: '16px'
+          }
+        }}
+      >
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <PlayArrow color="primary" />
-            Execute Manual Trade
+            <PlayArrow sx={{ color: '#1F2937' }} />
+            <Typography variant="h6" sx={{ color: '#1F2937' }}>
+              Execute Manual Trade
+            </Typography>
           </Box>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent
+          sx={{
+            '& .MuiTextField-root': {
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'rgba(255,255,255,0.3)',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'rgba(255,255,255,0.5)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'white',
+                },
+                color: '#1F2937',
+              },
+              '& .MuiInputLabel-root': {
+                color: '#374151',
+                '&.Mui-focused': {
+                  color: '#1F2937',
+                },
+              },
+            },
+            '& .MuiFormControl-root .MuiInputLabel-root': {
+              color: '#374151',
+              '&.Mui-focused': {
+                color: '#1F2937',
+              },
+            },
+            '& .MuiSelect-root': {
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(255,255,255,0.3)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(255,255,255,0.5)',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'white',
+              },
+              color: '#1F2937',
+              '& .MuiSvgIcon-root': {
+                color: '#374151',
+              },
+            },
+          }}
+        >
           {selectedStrategyId && (
             <Box sx={{ pt: 1 }}>
-              <GuidelineBox title="Manual Trading Guide" icon={<HelpOutline />}>
-                Manual trading means you're making the trade decision yourself, overriding your strategy's automatic signals. Only do this if you see a clear opportunity or need to exit a position urgently.
-              </GuidelineBox>
+              <Box
+                sx={{
+                  p: 2,
+                  mb: 3,
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px'
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  <HelpOutline sx={{ color: '#374151' }} />
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: '#1F2937' }}>
+                      Manual Trading Guide
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#374151' }}>
+                      Manual trading means you're making the trade decision yourself, overriding your strategy's automatic signals. Only do this if you see a clear opportunity or need to exit a position urgently.
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
 
-              <Alert severity="info" sx={{ mb: 3 }}>
-                <Typography variant="body2">
+              <Box
+                sx={{
+                  p: 2,
+                  mb: 3,
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px'
+                }}
+              >
+                <Typography variant="body2" sx={{ color: '#1F2937' }}>
                   <strong>Strategy:</strong> {strategies.find(s => s.id === selectedStrategyId)?.name}
                   <br />
                   <strong>Next Signal:</strong> {strategies.find(s => s.id === selectedStrategyId)?.nextSignal}
                 </Typography>
-              </Alert>
+              </Box>
 
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={6}>
@@ -1654,12 +1915,66 @@ const Strategies: React.FC = () => {
                     defaultValue="RELIANCE"
                     fullWidth
                     size="small"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.3)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255,255,255,0.5)',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'white',
+                        },
+                        color: '#1F2937',
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: '#374151',
+                        '&.Mui-focused': {
+                          color: '#1F2937',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Action</InputLabel>
-                    <Select defaultValue="BUY" label="Action">
+                    <InputLabel sx={{ color: '#374151', '&.Mui-focused': { color: '#1F2937' } }}>Action</InputLabel>
+                    <Select 
+                      defaultValue="BUY" 
+                      label="Action"
+                      sx={{
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(255,255,255,0.3)',
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(255,255,255,0.5)',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'white',
+                        },
+                        color: '#1F2937',
+                        '& .MuiSvgIcon-root': {
+                          color: '#374151',
+                        }
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                            
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '12px',
+                            '& .MuiMenuItem-root': {
+                              color: '#1F2937',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255,255,255,0.1)'
+                              }
+                            }
+                          }
+                        }
+                      }}
+                    >
                       <MenuItem value="BUY">Buy</MenuItem>
                       <MenuItem value="SELL">Sell</MenuItem>
                     </Select>
@@ -1697,25 +2012,50 @@ const Strategies: React.FC = () => {
                 </Select>
               </FormControl>
 
-              <Alert severity="warning" sx={{ mb: 2 }}>
-                <Typography variant="body2">
+              <Box
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px'
+                }}
+              >
+                <Typography variant="body2" sx={{ color: '#1F2937' }}>
                   <strong>Risk Warning:</strong> Manual trading overrides strategy signals. 
                   Ensure you understand the market conditions before proceeding.
                 </Typography>
-              </Alert>
+              </Box>
 
-              <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>Trade Summary:</Typography>
-                <Typography variant="body2">• Action: Buy 10 shares of RELIANCE</Typography>
-                <Typography variant="body2">• Price: ₹2,485.50 per share</Typography>
-                <Typography variant="body2">• Total Value: ₹24,855.00</Typography>
-                <Typography variant="body2">• Strategy: {strategies.find(s => s.id === selectedStrategyId)?.name}</Typography>
+              <Box sx={{ 
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', 
+                
+                border: '1px solid #e0e0e0',
+                borderRadius: '16px',
+                p: 2
+              }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, color: '#1F2937' }}>Trade Summary:</Typography>
+                <Typography variant="body2" sx={{ color: '#374151' }}>• Action: Buy 10 shares of RELIANCE</Typography>
+                <Typography variant="body2" sx={{ color: '#374151' }}>• Price: ₹2,485.50 per share</Typography>
+                <Typography variant="body2" sx={{ color: '#374151' }}>• Total Value: ₹24,855.00</Typography>
+                <Typography variant="body2" sx={{ color: '#374151' }}>• Strategy: {strategies.find(s => s.id === selectedStrategyId)?.name}</Typography>
               </Box>
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTradeDialogOpen(false)}>Cancel</Button>
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={() => setTradeDialogOpen(false)}
+            sx={{
+              color: '#374151',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              }
+            }}
+          >
+            Cancel
+          </Button>
           <Button 
             variant="contained" 
             color="primary"
@@ -1725,12 +2065,23 @@ const Strategies: React.FC = () => {
               // In real app, this would execute the trade via API
             }}
             startIcon={<PlayArrow />}
+            sx={{
+              background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+              
+              border: '1px solid #e0e0e0',
+              borderRadius: '16px',
+              color: '#1F2937',
+              '&:hover': {
+                background: 'rgba(255,255,255,0.2)',
+              }
+            }}
           >
             Execute Trade
           </Button>
         </DialogActions>
       </Dialog>
     </Container>
+    </Box>
   );
 };
 

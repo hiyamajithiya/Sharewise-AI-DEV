@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Container,
-  Paper,
   Box,
   TextField,
   Button,
@@ -124,23 +123,50 @@ const Register: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="md">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper
-          elevation={3}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: '#f5f7fa',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 4,
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(255,255,255,0.06) 0%, transparent 50%)
+          `,
+          pointerEvents: 'none',
+        },
+      }}
+    >
+      <Container component="main" maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+        <Box
           sx={{
             padding: 4,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             width: '100%',
+            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            
+            border: '1px solid #e0e0e0',
+            borderRadius: '16px',
           }}
         >
           {/* Logo/Brand */}
@@ -149,29 +175,31 @@ const Register: React.FC = () => {
               sx={{
                 width: 48,
                 height: 48,
-                background: 'linear-gradient(135deg, #0052CC 0%, #1976D2 100%)',
+                background: 'rgba(255, 255, 255, 0.2)',
+                
                 borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0px 4px 8px rgba(0, 82, 204, 0.2)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
               }}
             >
-              <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
+              <Typography variant="h5" sx={{ color: '#1F2937', fontWeight: 700 }}>
                 S
               </Typography>
             </Box>
             <Box>
-              <Typography component="h1" variant="h4" sx={{ fontWeight: 700, color: '#0052CC', mb: 0 }}>
+              <Typography component="h1" variant="h4" sx={{ fontWeight: 700, color: '#1F2937', mb: 0 }}>
                 ShareWise AI
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#374151' }}>
                 Professional Trading Platform
               </Typography>
             </Box>
           </Box>
           
-          <Typography component="h2" variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+          <Typography component="h2" variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1F2937' }}>
             Start Your Journey
           </Typography>
 
@@ -199,10 +227,42 @@ const Register: React.FC = () => {
                   onChange={handleChange}
                   error={!!errors.first_name}
                   helperText={errors.first_name}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(5px)',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      '& input': {
+                        color: '#1F2937',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.3)',
+                        },
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.4)',
+                        },
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#6B7280',
+                      '&.Mui-focused': {
+                        color: '#1F2937',
+                      },
+                    },
+                    '& .MuiFormHelperText-root': {
+                      color: '#6B7280',
+                    },
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Person />
+                        <Person sx={{ color: '#6B7280' }} />
                       </InputAdornment>
                     ),
                   }}
@@ -222,10 +282,42 @@ const Register: React.FC = () => {
                   onChange={handleChange}
                   error={!!errors.last_name}
                   helperText={errors.last_name}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(5px)',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      '& input': {
+                        color: '#1F2937',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.3)',
+                        },
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.4)',
+                        },
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#6B7280',
+                      '&.Mui-focused': {
+                        color: '#1F2937',
+                      },
+                    },
+                    '& .MuiFormHelperText-root': {
+                      color: '#6B7280',
+                    },
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Person />
+                        <Person sx={{ color: '#6B7280' }} />
                       </InputAdornment>
                     ),
                   }}
@@ -245,10 +337,42 @@ const Register: React.FC = () => {
                   onChange={handleChange}
                   error={!!errors.email}
                   helperText={errors.email}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(5px)',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      '& input': {
+                        color: '#1F2937',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.3)',
+                        },
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.4)',
+                        },
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#6B7280',
+                      '&.Mui-focused': {
+                        color: '#1F2937',
+                      },
+                    },
+                    '& .MuiFormHelperText-root': {
+                      color: '#6B7280',
+                    },
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Email />
+                        <Email sx={{ color: '#6B7280' }} />
                       </InputAdornment>
                     ),
                   }}
@@ -268,6 +392,38 @@ const Register: React.FC = () => {
                   onChange={handleChange}
                   error={!!errors.username}
                   helperText={errors.username}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(5px)',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      '& input': {
+                        color: '#1F2937',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.3)',
+                        },
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.4)',
+                        },
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#6B7280',
+                      '&.Mui-focused': {
+                        color: '#1F2937',
+                      },
+                    },
+                    '& .MuiFormHelperText-root': {
+                      color: '#6B7280',
+                    },
+                  }}
                 />
               </Grid>
 
@@ -285,10 +441,42 @@ const Register: React.FC = () => {
                   onChange={handleChange}
                   error={!!errors.password}
                   helperText={errors.password}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(5px)',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      '& input': {
+                        color: '#1F2937',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.3)',
+                        },
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.4)',
+                        },
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#6B7280',
+                      '&.Mui-focused': {
+                        color: '#1F2937',
+                      },
+                    },
+                    '& .MuiFormHelperText-root': {
+                      color: '#6B7280',
+                    },
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Lock />
+                        <Lock sx={{ color: '#6B7280' }} />
                       </InputAdornment>
                     ),
                     endAdornment: (
@@ -297,6 +485,7 @@ const Register: React.FC = () => {
                           aria-label="toggle password visibility"
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
+                          sx={{ color: '#6B7280' }}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
@@ -319,10 +508,42 @@ const Register: React.FC = () => {
                   onChange={handleChange}
                   error={!!errors.confirmPassword}
                   helperText={errors.confirmPassword}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(5px)',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      '& input': {
+                        color: '#1F2937',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.3)',
+                        },
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        '& fieldset': {
+                          borderColor: 'rgba(255,255,255,0.4)',
+                        },
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#6B7280',
+                      '&.Mui-focused': {
+                        color: '#1F2937',
+                      },
+                    },
+                    '& .MuiFormHelperText-root': {
+                      color: '#6B7280',
+                    },
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Lock />
+                        <Lock sx={{ color: '#6B7280' }} />
                       </InputAdornment>
                     ),
                     endAdornment: (
@@ -331,6 +552,7 @@ const Register: React.FC = () => {
                           aria-label="toggle password visibility"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           edge="end"
+                          sx={{ color: '#6B7280' }}
                         >
                           {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
@@ -345,29 +567,61 @@ const Register: React.FC = () => {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2, py: 1.5 }}
+              sx={{ 
+                mt: 3, 
+                mb: 2, 
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                borderRadius: 2,
+                background: '#f5f7fa',
+                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                textTransform: 'none',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
+                },
+                '&:disabled': {
+                  background: 'rgba(255,255,255,0.2)',
+                  color: 'rgba(255,255,255,0.5)',
+                },
+              }}
               disabled={loading}
             >
-              Create Account
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
-              <Link component={RouterLink} to="/login" variant="body2">
+              <Link 
+                component={RouterLink} 
+                to="/login" 
+                variant="body2"
+                sx={{
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                    color: '#1F2937',
+                  },
+                }}
+              >
                 Already have an account? Sign In
               </Link>
             </Box>
           </Box>
-        </Paper>
-
-        {/* Terms Notice */}
-        <Box sx={{ mt: 4, textAlign: 'center', maxWidth: 600 }}>
-          <Typography variant="body2" color="text.secondary">
-            By creating an account, you agree to our Terms of Service and Privacy Policy.
-            All trading involves risk and past performance does not guarantee future results.
-          </Typography>
         </Box>
-      </Box>
-    </Container>
+
+          {/* Terms Notice */}
+          <Box sx={{ mt: 4, textAlign: 'center', maxWidth: 600 }}>
+            <Typography variant="body2" sx={{ color: '#6B7280' }}>
+              By creating an account, you agree to our Terms of Service and Privacy Policy.
+              All trading involves risk and past performance does not guarantee future results.
+            </Typography>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

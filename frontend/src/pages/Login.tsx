@@ -101,7 +101,7 @@ const Login: React.FC = () => {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
       }}>
         <LoadingSpinner message="Signing in..." />
       </Box>
@@ -267,16 +267,41 @@ const Login: React.FC = () => {
             justifyContent: 'center',
             alignItems: 'center',
             padding: { xs: 2, sm: 3, md: 4 },
-            backgroundColor: '#f8f9fa',
+            background: '#f5f7fa',
             height: '100%',
             overflow: 'hidden',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255,255,255,0.06) 0%, transparent 50%)
+              `,
+              pointerEvents: 'none',
+            },
           }}
         >
-          <Box sx={{ width: '100%', maxWidth: 400 }}>
+          <Box sx={{ 
+            width: '100%', 
+            maxWidth: 400,
+            background: 'white',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e0e0e0',
+            borderRadius: '16px',
+            padding: 4,
+            position: 'relative',
+            zIndex: 1,
+          }}>
             <Typography variant="h3" sx={{ 
               mb: 1,
               fontWeight: 700,
-              color: '#2D3748',
+              color: '#1F2937',
               fontSize: { xs: '2rem', sm: '2.5rem', md: '2.5rem' },
             }}>
               Welcome Back
@@ -284,7 +309,7 @@ const Login: React.FC = () => {
             
             <Typography variant="body1" sx={{ 
               mb: 3,
-              color: '#718096',
+              color: '#374151',
               fontSize: { xs: '0.9rem', sm: '1rem' },
             }}>
               Sign in to access your trading dashboard
@@ -317,23 +342,39 @@ const Login: React.FC = () => {
                   mb: 2,
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& input': {
+                      color: '#1F2937',
+                    },
                     '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.15)',
                       '& fieldset': {
-                        borderColor: '#667eea',
+                        borderColor: 'rgba(255,255,255,0.3)',
                       },
                     },
                     '&.Mui-focused': {
+                      backgroundColor: 'rgba(255,255,255,0.15)',
                       '& fieldset': {
-                        borderColor: '#667eea',
+                        borderColor: 'rgba(255,255,255,0.4)',
                       },
                     },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: '#6B7280',
+                    '&.Mui-focused': {
+                      color: '#1F2937',
+                    },
+                  },
+                  '& .MuiFormHelperText-root': {
+                    color: '#6B7280',
                   },
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Email sx={{ color: '#667eea' }} />
+                      <Email sx={{ color: '#6B7280' }} />
                     </InputAdornment>
                   ),
                 }}
@@ -357,23 +398,39 @@ const Login: React.FC = () => {
                   mb: 2,
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& input': {
+                      color: '#1F2937',
+                    },
                     '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.15)',
                       '& fieldset': {
-                        borderColor: '#667eea',
+                        borderColor: 'rgba(255,255,255,0.3)',
                       },
                     },
                     '&.Mui-focused': {
+                      backgroundColor: 'rgba(255,255,255,0.15)',
                       '& fieldset': {
-                        borderColor: '#667eea',
+                        borderColor: 'rgba(255,255,255,0.4)',
                       },
                     },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: '#6B7280',
+                    '&.Mui-focused': {
+                      color: '#1F2937',
+                    },
+                  },
+                  '& .MuiFormHelperText-root': {
+                    color: '#6B7280',
                   },
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Lock sx={{ color: '#667eea' }} />
+                      <Lock sx={{ color: '#6B7280' }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -382,7 +439,7 @@ const Login: React.FC = () => {
                         aria-label="toggle password visibility"
                         onClick={handleTogglePasswordVisibility}
                         edge="end"
-                        sx={{ color: '#667eea' }}
+                        sx={{ color: '#6B7280' }}
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
@@ -421,11 +478,12 @@ const Login: React.FC = () => {
                   to="/register" 
                   variant="body1"
                   sx={{
-                    color: '#667eea',
+                    color: '#6B7280',
                     fontWeight: 500,
                     textDecoration: 'none',
                     '&:hover': {
                       textDecoration: 'underline',
+                      color: '#1F2937',
                     },
                   }}
                 >

@@ -8,7 +8,6 @@ import {
   Button,
   Card,
   CardContent,
-  Divider,
   Alert,
   TextField,
   FormControl,
@@ -75,6 +74,43 @@ const Settings: React.FC = () => {
   const testingState = useSelector(selectTestingState);
   const { isTestingMode, selectedUser } = testingState;
   const themeMode = useSelector((state: RootState) => state.theme.mode);
+  
+  // Theme configuration
+  const getThemeColors = (mode: 'light' | 'dark' | 'auto') => {
+    const actualMode = mode === 'auto' ? 'light' : mode; // For demo, auto defaults to light
+    
+    if (actualMode === 'dark') {
+      return {
+        background: '#1a202c',
+        surface: '#2d3748',
+        primary: '#4a5568',
+        secondary: '#718096',
+        text: {
+          primary: '#ffffff',
+          secondary: '#e2e8f0',
+          disabled: '#a0aec0',
+        },
+        border: '#4a5568',
+        hover: '#4a5568',
+      };
+    } else {
+      return {
+        background: '#f5f7fa',
+        surface: 'white',
+        primary: '#1F2937',
+        secondary: '#6B7280',
+        text: {
+          primary: '#1F2937',
+          secondary: '#6B7280',
+          disabled: '#9CA3AF',
+        },
+        border: '#e0e0e0',
+        hover: '#f9fafb',
+      };
+    }
+  };
+
+  const theme = getThemeColors(themeMode);
   
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
   const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
@@ -181,12 +217,13 @@ const Settings: React.FC = () => {
       <Paper sx={{ 
         p: 3,
         borderRadius: '16px',
-        background: 'white',
-        border: '1px solid #e0e0e0',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        background: theme.surface,
+        border: `1px solid ${theme.border}`,
+        boxShadow: themeMode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
+        transition: 'all 0.3s ease',
       }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: theme.text.primary, transition: 'color 0.3s ease' }}>
           Profile Information
         </Typography>
         <Button
@@ -194,11 +231,11 @@ const Settings: React.FC = () => {
           startIcon={isEditing ? <Save /> : <Edit />}
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           sx={{
-            color: isEditing ? 'white' : 'rgba(255, 255, 255, 0.9)',
-            borderColor: 'rgba(255, 255, 255, 0.3)',
+            color: isEditing ? 'white' : '#374151',
+            borderColor: '#d1d5db',
             '&:hover': {
-              borderColor: 'rgba(255, 255, 255, 0.5)',
-              backgroundColor: isEditing ? undefined : 'rgba(255, 255, 255, 0.1)',
+              borderColor: '#9ca3af',
+              backgroundColor: isEditing ? undefined : '#f9fafb',
             },
           }}
         >
@@ -211,10 +248,10 @@ const Settings: React.FC = () => {
           {effectiveUser?.first_name?.[0] || 'U'}
         </Avatar>
         <Box>
-          <Typography variant="h6" sx={{ color: 'white' }}>
+          <Typography variant="h6" sx={{ color: '#1F2937' }}>
             {effectiveUser?.first_name || 'User'} {effectiveUser?.last_name || ''}
           </Typography>
-          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+          <Typography variant="body2" sx={{ color: '#6B7280' }}>
             {effectiveUser?.email || 'user@example.com'}
           </Typography>
           <Chip 
@@ -235,12 +272,12 @@ const Settings: React.FC = () => {
             disabled={!isEditing}
             fullWidth
             sx={{
-              '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
+              '& .MuiInputLabel-root': { color: '#6B7280' },
               '& .MuiOutlinedInput-root': {
-                color: 'white',
-                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                '&.Mui-focused fieldset': { borderColor: 'white' },
+                color: '#1F2937',
+                '& fieldset': { borderColor: '#d1d5db' },
+                '&:hover fieldset': { borderColor: '#9ca3af' },
+                '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
               },
             }}
           />
@@ -252,6 +289,15 @@ const Settings: React.FC = () => {
             onChange={(e) => handleInputChange('lastName', e.target.value)}
             disabled={!isEditing}
             fullWidth
+            sx={{
+              '& .MuiInputLabel-root': { color: '#6B7280' },
+              '& .MuiOutlinedInput-root': {
+                color: '#1F2937',
+                '& fieldset': { borderColor: '#d1d5db' },
+                '&:hover fieldset': { borderColor: '#9ca3af' },
+                '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -280,25 +326,26 @@ const Settings: React.FC = () => {
       <Paper sx={{ 
         p: 3,
         borderRadius: '16px',
-        background: 'white',
-        border: '1px solid #e0e0e0',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        background: theme.surface,
+        border: `1px solid ${theme.border}`,
+        boxShadow: themeMode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
+        transition: 'all 0.3s ease',
       }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: theme.text.primary, transition: 'color 0.3s ease' }}>
         Security Settings
       </Typography>
 
       <List>
         <ListItem>
-          <ListItemIcon sx={{ color: 'white' }}>
+          <ListItemIcon sx={{ color: '#1F2937' }}>
             <Lock />
           </ListItemIcon>
           <ListItemText
             primary="Change Password"
             secondary="Last changed 30 days ago"
             sx={{
-              '& .MuiListItemText-primary': { color: 'white' },
-              '& .MuiListItemText-secondary': { color: 'rgba(255, 255, 255, 0.7)' },
+              '& .MuiListItemText-primary': { color: '#1F2937' },
+              '& .MuiListItemText-secondary': { color: '#6B7280' },
             }}
           />
           <ListItemSecondaryAction>
@@ -309,15 +356,15 @@ const Settings: React.FC = () => {
         </ListItem>
         
         <ListItem>
-          <ListItemIcon sx={{ color: 'white' }}>
+          <ListItemIcon sx={{ color: '#1F2937' }}>
             <Security />
           </ListItemIcon>
           <ListItemText
             primary="Two-Factor Authentication"
             secondary={tierFeatures.advancedSecurity ? "Enhanced 2FA enabled" : "Basic SMS verification"}
             sx={{
-              '& .MuiListItemText-primary': { color: 'white' },
-              '& .MuiListItemText-secondary': { color: 'rgba(255, 255, 255, 0.7)' },
+              '& .MuiListItemText-primary': { color: '#1F2937' },
+              '& .MuiListItemText-secondary': { color: '#6B7280' },
             }}
           />
           <ListItemSecondaryAction>
@@ -383,7 +430,7 @@ const Settings: React.FC = () => {
         border: '1px solid #e0e0e0',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
       }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
         Notification Preferences
       </Typography>
 
@@ -458,18 +505,19 @@ const Settings: React.FC = () => {
       <Paper sx={{ 
         p: 3,
         borderRadius: '16px',
-        background: 'white',
-        border: '1px solid #e0e0e0',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        background: theme.surface,
+        border: `1px solid ${theme.border}`,
+        boxShadow: themeMode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
+        transition: 'all 0.3s ease',
       }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: theme.text.primary, transition: 'color 0.3s ease' }}>
         App Preferences
       </Typography>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
-            <InputLabel>Theme</InputLabel>
+            <InputLabel sx={{ color: theme.text.secondary }}>Theme</InputLabel>
             <Select
               value={themeMode}
               label="Theme"
@@ -478,10 +526,26 @@ const Settings: React.FC = () => {
                 dispatch(setThemeMode(newTheme));
               }}
               disabled={!tierFeatures.customThemes}
+              sx={{
+                color: theme.text.primary,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: theme.border,
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: theme.text.secondary,
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#3b82f6',
+                },
+                '& .MuiSelect-icon': {
+                  color: theme.text.secondary,
+                },
+                transition: 'all 0.3s ease',
+              }}
             >
-              <MenuItem value="light">Light</MenuItem>
-              <MenuItem value="dark" disabled={!tierFeatures.customThemes}>Dark</MenuItem>
-              <MenuItem value="auto" disabled={!tierFeatures.customThemes}>Auto</MenuItem>
+              <MenuItem value="light">🌞 Light</MenuItem>
+              <MenuItem value="dark" disabled={!tierFeatures.customThemes}>🌙 Dark</MenuItem>
+              <MenuItem value="auto" disabled={!tierFeatures.customThemes}>🔄 Auto</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -531,6 +595,82 @@ const Settings: React.FC = () => {
         </Grid>
       </Grid>
 
+      {/* Theme Preview */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="subtitle1" sx={{ 
+          fontWeight: 600, 
+          mb: 2,
+          color: theme.text.primary,
+          transition: 'color 0.3s ease'
+        }}>
+          Theme Preview
+        </Typography>
+        <Box sx={{ 
+          p: 3,
+          borderRadius: '12px',
+          background: theme.surface,
+          border: `2px solid ${theme.border}`,
+          transition: 'all 0.3s ease',
+        }}>
+          <Typography variant="h6" sx={{ 
+            color: theme.text.primary, 
+            mb: 1,
+            transition: 'color 0.3s ease'
+          }}>
+            Current Theme: {themeMode === 'light' ? '🌞 Light Mode' : themeMode === 'dark' ? '🌙 Dark Mode' : '🔄 Auto Mode'}
+          </Typography>
+          <Typography variant="body2" sx={{ 
+            color: theme.text.secondary,
+            mb: 2,
+            transition: 'color 0.3s ease'
+          }}>
+            This preview shows how the interface looks with the selected theme. 
+            {themeMode === 'light' && ' Light theme uses bright backgrounds and dark text.'}
+            {themeMode === 'dark' && ' Dark theme uses dark backgrounds and light text.'}
+            {themeMode === 'auto' && ' Auto theme adapts to your system preferences.'}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Box sx={{
+              width: 60,
+              height: 30,
+              borderRadius: 2,
+              background: theme.text.primary,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.3s ease'
+            }}>
+              <Typography variant="caption" sx={{ 
+                color: theme.surface,
+                fontWeight: 600,
+                transition: 'color 0.3s ease'
+              }}>
+                Text
+              </Typography>
+            </Box>
+            <Box sx={{
+              width: 60,
+              height: 30,
+              borderRadius: 2,
+              background: theme.background,
+              border: `1px solid ${theme.border}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.3s ease'
+            }}>
+              <Typography variant="caption" sx={{ 
+                color: theme.text.primary,
+                fontWeight: 600,
+                transition: 'color 0.3s ease'
+              }}>
+                BG
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
       {!tierFeatures.customThemes && (
         <Alert severity="info" sx={{ mt: 3 }}>
           <Typography variant="body2">
@@ -550,7 +690,7 @@ const Settings: React.FC = () => {
         border: '1px solid #e0e0e0',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
       }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
         Current Subscription
       </Typography>
 
@@ -671,7 +811,7 @@ const Settings: React.FC = () => {
         border: '1px solid #e0e0e0',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
       }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'white' }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
         Billing & Payments
       </Typography>
 
@@ -755,18 +895,32 @@ const Settings: React.FC = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      background: '#f5f7fa',
-      position: 'relative'
+      backgroundColor: theme.background,
+      transition: 'background-color 0.3s ease',
     }}>
       <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ 
+        mb: 4,
+        p: 3,
+        borderRadius: '16px',
+        background: theme.surface,
+        border: `1px solid ${theme.border}`,
+        boxShadow: themeMode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
+        transition: 'all 0.3s ease',
+      }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1, color: '#1a1a1a' }}>
-              Settings ⚙️
+            <Typography variant="h4" component="h1" sx={{ 
+              fontWeight: 700, 
+              mb: 1, 
+              color: theme.text.primary,
+              textShadow: themeMode === 'dark' ? '2px 2px 4px rgba(255,255,255,0.1)' : '2px 2px 4px rgba(0,0,0,0.2)',
+              transition: 'color 0.3s ease',
+            }}>
+              Settings
             </Typography>
-            <Typography variant="body1" sx={{ color: '#6b7280' }}>
+            <Typography variant="body1" sx={{ color: theme.text.secondary, transition: 'color 0.3s ease' }}>
               {isTestingMode && selectedUser
                 ? `Testing settings for ${selectedUser.role} role - ${subscriptionTier} tier`
                 : `Manage your ${subscriptionTier} account settings and preferences`
@@ -783,7 +937,6 @@ const Settings: React.FC = () => {
             }} 
           />
         </Box>
-        <Divider />
       </Box>
 
       <Grid container spacing={3}>
@@ -792,9 +945,10 @@ const Settings: React.FC = () => {
           <Paper sx={{ 
             p: 2,
             borderRadius: '16px',
-            background: 'white',
-            border: '1px solid #e0e0e0',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            background: theme.surface,
+            border: `1px solid ${theme.border}`,
+            boxShadow: themeMode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
+            transition: 'all 0.3s ease',
           }}>
             <List component="nav">
               {settingsSections.map((section) => (
@@ -810,28 +964,35 @@ const Settings: React.FC = () => {
                     borderRadius: 2, 
                     mb: 0.5,
                     cursor: 'pointer',
-                    color: '#374151',
+                    color: theme.text.primary,
                     backgroundColor: 'transparent',
                     border: 'none',
                     width: '100%',
                     textAlign: 'left',
+                    transition: 'all 0.3s ease',
                     '&.Mui-selected': {
-                      backgroundColor: '#e3f2fd',
-                      color: '#1976d2',
+                      backgroundColor: themeMode === 'dark' ? '#4a5568' : '#e3f2fd',
+                      color: themeMode === 'dark' ? '#90cdf4' : '#1976d2',
                       '& .MuiListItemIcon-root': {
-                        color: '#1976d2',
+                        color: themeMode === 'dark' ? '#90cdf4' : '#1976d2',
                       },
                     },
                     '&:hover': {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: theme.hover,
                     },
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 36, color: '#6b7280' }}>
+                  <ListItemIcon sx={{ minWidth: 36, color: theme.text.secondary, transition: 'color 0.3s ease' }}>
                     {section.icon}
                   </ListItemIcon>
                   <ListItemText 
-                    primary={section.label} 
+                    primary={section.label}
+                    sx={{
+                      '& .MuiListItemText-primary': { 
+                        color: theme.text.primary,
+                        transition: 'color 0.3s ease'
+                      }
+                    }}
                   />
                 </ListItem>
               ))}

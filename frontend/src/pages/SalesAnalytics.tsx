@@ -30,10 +30,7 @@ import {
   People,
   Assignment,
   Refresh,
-  Person,
   Business,
-  CheckCircle,
-  Schedule,
   Star,
 } from '@mui/icons-material';
 
@@ -135,7 +132,7 @@ const SalesAnalytics: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f5f7fa',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -166,18 +163,18 @@ const SalesAnalytics: React.FC = () => {
             >
               Sales Analytics
             </Typography>
-            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 400 }}>
+            <Typography variant="h6" sx={{ color: '#374151', fontWeight: 400 }}>
               Performance metrics and sales team insights
             </Typography>
           </Box>
           <IconButton
             sx={{
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
+              background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+              
               '&:hover': { background: 'rgba(255,255,255,0.2)' },
             }}
           >
-            <Refresh sx={{ color: 'white' }} />
+            <Refresh sx={{ color: '#1F2937' }} />
           </IconButton>
         </Box>
 
@@ -186,23 +183,23 @@ const SalesAnalytics: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(76, 175, 80, 0.3)', mr: 2 }}>
-                    <AttachMoney sx={{ color: 'white' }} />
+                    <AttachMoney sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       ${(salesMetrics.revenue / 1000).toFixed(0)}K
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
                         Total Revenue
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -231,23 +228,23 @@ const SalesAnalytics: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(33, 150, 243, 0.3)', mr: 2 }}>
-                    <People sx={{ color: 'white' }} />
+                    <People sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {salesMetrics.totalLeads}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
                         Total Leads
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -269,23 +266,23 @@ const SalesAnalytics: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(156, 39, 176, 0.3)', mr: 2 }}>
-                    <BarChart sx={{ color: 'white' }} />
+                    <BarChart sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       {salesMetrics.conversionRate}%
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
                         Conversion Rate
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -307,23 +304,23 @@ const SalesAnalytics: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'rgba(255, 152, 0, 0.3)', mr: 2 }}>
-                    <Assignment sx={{ color: 'white' }} />
+                    <Assignment sx={{ color: '#1F2937' }} />
                   </Avatar>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                    <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 700 }}>
                       ${(salesMetrics.avgDealSize / 1000).toFixed(0)}K
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
                         Avg Deal Size
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -348,35 +345,35 @@ const SalesAnalytics: React.FC = () => {
           <Grid item xs={12} lg={8}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
                 mb: 3,
               }}
             >
               <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Sales Team Performance
                 </Typography>
                 
-                <TableContainer component={Paper} sx={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                <TableContainer component={Paper} sx={{ background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', borderRadius: '12px' }}>
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ color: '#374151', fontWeight: 600 }}>
                           Sales Rep
                         </TableCell>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ color: '#374151', fontWeight: 600 }}>
                           Revenue
                         </TableCell>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ color: '#374151', fontWeight: 600 }}>
                           Deals
                         </TableCell>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ color: '#374151', fontWeight: 600 }}>
                           Conversion
                         </TableCell>
-                        <TableCell sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                        <TableCell sx={{ color: '#374151', fontWeight: 600 }}>
                           Target Progress
                         </TableCell>
                       </TableRow>
@@ -390,26 +387,26 @@ const SalesAnalytics: React.FC = () => {
                                 {rep.avatar}
                               </Avatar>
                               <Box>
-                                <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                                <Typography variant="body2" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                   {rep.name}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                   {rep.role}
                                 </Typography>
                               </Box>
                             </Box>
                           </TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>
+                          <TableCell sx={{ color: '#1F2937', fontWeight: 600 }}>
                             ${rep.revenue.toLocaleString()}
                           </TableCell>
                           <TableCell>
                             <Chip
                               label={rep.deals}
                               size="small"
-                              sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                              sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: '#1F2937' }}
                             />
                           </TableCell>
-                          <TableCell sx={{ color: 'white' }}>
+                          <TableCell sx={{ color: '#1F2937' }}>
                             {rep.conversionRate}%
                           </TableCell>
                           <TableCell>
@@ -450,14 +447,14 @@ const SalesAnalytics: React.FC = () => {
             {/* Lead Sources */}
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Lead Sources Performance
                 </Typography>
                 
@@ -466,9 +463,9 @@ const SalesAnalytics: React.FC = () => {
                     <Grid item xs={12} sm={6} key={index}>
                       <Card
                         sx={{
-                          background: 'rgba(255,255,255,0.05)',
+                          background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                           backdropFilter: 'blur(5px)',
-                          border: '1px solid rgba(255,255,255,0.1)',
+                          border: '1px solid #e0e0e0',
                           borderRadius: '12px',
                         }}
                       >
@@ -478,21 +475,21 @@ const SalesAnalytics: React.FC = () => {
                               <Avatar sx={{ bgcolor: source.color, width: 32, height: 32, mr: 2 }}>
                                 <Business sx={{ fontSize: '1rem' }} />
                               </Avatar>
-                              <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                              <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                 {source.source}
                               </Typography>
                             </Box>
                             <Chip
                               label={`${source.count} leads`}
                               size="small"
-                              sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                              sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: '#1F2937' }}
                             />
                           </Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                            <Typography variant="body2" sx={{ color: '#6B7280' }}>
                               Conversion:
                             </Typography>
-                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                            <Typography variant="body2" sx={{ color: '#1F2937', fontWeight: 600 }}>
                               {source.conversion}%
                             </Typography>
                           </Box>
@@ -509,15 +506,15 @@ const SalesAnalytics: React.FC = () => {
           <Grid item xs={12} lg={4}>
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
                 mb: 3,
               }}
             >
               <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Top Customers
                 </Typography>
                 
@@ -527,13 +524,13 @@ const SalesAnalytics: React.FC = () => {
                       <ListItem sx={{ px: 0 }}>
                         <ListItemAvatar>
                           <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>
-                            <Business sx={{ color: 'white' }} />
+                            <Business sx={{ color: '#1F2937' }} />
                           </Avatar>
                         </ListItemAvatar>
                         <ListItemText
                           primary={
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                              <Typography variant="body2" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                 {customer.name}
                               </Typography>
                               <Chip
@@ -545,10 +542,10 @@ const SalesAnalytics: React.FC = () => {
                           }
                           secondary={
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                              <Typography variant="body2" sx={{ color: '#374151', fontWeight: 600 }}>
                                 ${customer.value.toLocaleString()}
                               </Typography>
-                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                              <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                 {customer.deals} deals
                               </Typography>
                             </Box>
@@ -567,14 +564,14 @@ const SalesAnalytics: React.FC = () => {
             {/* Monthly Trends Summary */}
             <Card
               sx={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                
+                border: '1px solid #e0e0e0',
                 borderRadius: '16px',
               }}
             >
               <CardContent>
-                <Typography variant="h6" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1F2937', mb: 3, fontWeight: 600 }}>
                   Monthly Trends
                 </Typography>
                 
@@ -583,24 +580,24 @@ const SalesAnalytics: React.FC = () => {
                     <Grid item xs={12} key={index}>
                       <Card
                         sx={{
-                          background: 'rgba(255,255,255,0.05)',
+                          background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                           backdropFilter: 'blur(5px)',
-                          border: '1px solid rgba(255,255,255,0.1)',
+                          border: '1px solid #e0e0e0',
                           borderRadius: '8px',
                         }}
                       >
                         <CardContent sx={{ py: 2 }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                            <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
                               {month.month}
                             </Typography>
                             <Star sx={{ color: '#ffd700', fontSize: '1.2rem' }} />
                           </Box>
                           <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between' }}>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                            <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                               Revenue: ${month.revenue.toLocaleString()}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                            <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                               {month.leads} leads
                             </Typography>
                           </Box>
