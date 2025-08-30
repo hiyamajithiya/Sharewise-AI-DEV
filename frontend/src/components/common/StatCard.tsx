@@ -69,9 +69,9 @@ const StatCard: React.FC<StatCardProps> = ({
         transition: 'all 0.3s ease-in-out',
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2 }}>
         {/* Header with Icon */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
           <Box>
             <Typography 
               variant="body2" 
@@ -93,8 +93,8 @@ const StatCard: React.FC<StatCardProps> = ({
           </Box>
           <Box
             sx={{
-              width: 48,
-              height: 48,
+              width: 40,
+              height: 40,
               borderRadius: '12px',
               background: getIconBackground(),
               display: 'flex',
@@ -115,7 +115,7 @@ const StatCard: React.FC<StatCardProps> = ({
           sx={{ 
             fontWeight: 700,
             color: theme.palette.text.primary,
-            mb: change ? 2 : 0,
+            mb: change ? 1 : 0,
             lineHeight: 1.2
           }}
         >

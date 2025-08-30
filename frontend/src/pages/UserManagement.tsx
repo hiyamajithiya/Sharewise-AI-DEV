@@ -30,6 +30,7 @@ import {
   Tabs,
   Tab,
   LinearProgress,
+  CircularProgress,
 } from '@mui/material';
 import {
   People,
@@ -54,12 +55,14 @@ import {
 import { useSelector } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
 import StatCard from '../components/common/StatCard';
+import apiService from '../services/api';
 
 interface User {
   id: number;
   first_name: string;
   last_name: string;
   email: string;
+  phone_number?: string;
   role: string;
   subscription_tier: string;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'PENDING';
@@ -114,10 +117,13 @@ const UserManagement: React.FC = () => {
     first_name: '',
     last_name: '',
     email: '',
+    phone_number: '',
     role: 'USER',
     subscription_tier: 'PRO',
     password: ''
   });
+  const [saving, setSaving] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const testingState = useSelector(selectTestingState);
   const { isTestingMode, selectedUser: testingUser } = testingState;
@@ -197,12 +203,38 @@ const UserManagement: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setUsers(mockUsers);
-      setLoading(false);
-    }, 1000);
+    loadUsers();
   }, []);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getAllUsers();
+      // Transform backend response to match frontend interface
+      const transformedUsers = response.results?.map((user: any) => ({
+        id: parseInt(user.id),
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        email: user.email,
+        phone_number: user.profile?.phone_number || '',
+        role: user.role,
+        subscription_tier: user.subscription_tier || 'PRO',
+        status: user.is_active ? 'ACTIVE' : 'INACTIVE',
+        last_login: user.last_login || new Date().toISOString(),
+        created_at: user.date_joined,
+        is_verified: user.email_verified,
+        total_trades: user.profile?.total_trades || 0,
+        portfolio_value: user.profile?.portfolio_value || 0,
+      })) || [];
+      setUsers(transformedUsers);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+      // Fallback to mock data if API fails
+      setUsers(mockUsers);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Check URL parameter to auto-open add user dialog
   useEffect(() => {
@@ -225,6 +257,7 @@ const UserManagement: React.FC = () => {
       first_name: '',
       last_name: '',
       email: '',
+      phone_number: '',
       role: 'USER',
       subscription_tier: 'PRO',
       password: ''
@@ -237,6 +270,7 @@ const UserManagement: React.FC = () => {
         first_name: selectedUser.first_name,
         last_name: selectedUser.last_name,
         email: selectedUser.email,
+        phone_number: selectedUser.phone_number || '',
         role: selectedUser.role,
         subscription_tier: selectedUser.subscription_tier || 'PRO',
         password: ''
@@ -265,41 +299,54 @@ const UserManagement: React.FC = () => {
     setActionMenuAnchor(null);
   };
 
-  const handleSaveUser = () => {
-    if (selectedUser) {
-      // Edit existing user
-      setUsers(users.map(u => 
-        u.id === selectedUser.id 
-          ? { 
-              ...u, 
-              first_name: newUser.first_name,
-              last_name: newUser.last_name,
-              email: newUser.email,
-              role: newUser.role,
-              subscription_tier: newUser.subscription_tier
-            }
-          : u
-      ));
-    } else {
-      // Add new user
-      const newUserData = {
-        id: Math.max(...users.map(u => u.id)) + 1,
-        first_name: newUser.first_name,
-        last_name: newUser.last_name,
-        email: newUser.email,
-        role: newUser.role,
-        subscription_tier: newUser.subscription_tier,
-        status: 'ACTIVE',
-        last_login: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        is_verified: false,
-        total_trades: 0,
-        portfolio_value: 0
-      };
-      setUsers([...users, newUserData as User]);
+  const handleSaveUser = async () => {
+    try {
+      setSaving(true);
+      
+      if (selectedUser) {
+        // Edit existing user - TODO: Implement update user API
+        setUsers(users.map(u => 
+          u.id === selectedUser.id 
+            ? { 
+                ...u, 
+                first_name: newUser.first_name,
+                last_name: newUser.last_name,
+                email: newUser.email,
+                phone_number: newUser.phone_number,
+                role: newUser.role,
+                subscription_tier: newUser.subscription_tier
+              }
+            : u
+        ));
+      } else {
+        // Create new user via API
+        await apiService.createUser({
+          email: newUser.email,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+          phone_number: newUser.phone_number,
+          role: newUser.role,
+          subscription_tier: newUser.subscription_tier,
+          password: newUser.password,
+        });
+        
+        // Reload users list to get the newly created user
+        await loadUsers();
+        
+        setTestResult({ success: true, message: 'User created successfully!' });
+      }
+      
+      setUserDialogOpen(false);
+      setSelectedUser(null);
+    } catch (error: any) {
+      console.error('Failed to save user:', error);
+      setTestResult({ 
+        success: false, 
+        message: apiService.handleApiError(error)
+      });
+    } finally {
+      setSaving(false);
     }
-    setUserDialogOpen(false);
-    setSelectedUser(null);
   };
 
   const handleExport = () => {
@@ -434,37 +481,37 @@ const UserManagement: React.FC = () => {
 
   return (
     <Box sx={{ 
-      height: '100vh',
+      minHeight: '150vh', // Increased page height significantly
+      height: 'auto',
       background: '#f5f7fa',
-      position: 'relative',
-      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
+      overflow: 'auto',
     }}>
-      <Container maxWidth="xl" sx={{ py: 2, position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Header */}
+      <Container maxWidth="xl" sx={{ py: 1, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Compact Header with Stats */}
         <Box sx={{ 
-          mb: 2,
+          mb: 1,
           p: 2,
-          borderRadius: '16px',
+          borderRadius: '12px',
           background: 'white',
           border: '1px solid #e0e0e0',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
           flexShrink: 0,
         }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Box>
-              <Typography variant="h4" component="h1" sx={{ 
+              <Typography variant="h5" component="h1" sx={{ 
                 fontWeight: 700, 
-                mb: 1, 
+                mb: 0.5, 
                 color: '#1F2937',
               }}>
                 User Management 👥
               </Typography>
-              <Typography variant="body1" sx={{ color: '#6B7280' }}>
+              <Typography variant="body2" sx={{ color: '#6B7280' }}>
                 {isTestingMode && testingUser
                   ? `Testing user management for ${testingUser.role} role`
-                  : 'Manage users, roles, and permissions across the platform'
+                  : 'Manage users, roles, and permissions'
                 }
               </Typography>
             </Box>
@@ -472,10 +519,9 @@ const UserManagement: React.FC = () => {
               variant="contained"
               startIcon={<PersonAdd />}
               onClick={handleAddUser}
+              size="small"
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: '1px solid #667eea',
-                color: 'white',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
                 },
@@ -484,31 +530,43 @@ const UserManagement: React.FC = () => {
               Add User
             </Button>
           </Box>
+
+          {/* Inline Statistics Cards */}
+          <Grid container spacing={2}>
+            {getUserStats().map((stat, index) => (
+              <Grid item xs={12} sm={6} lg={3} key={index}>
+                <StatCard {...stat} />
+              </Grid>
+            ))}
+          </Grid>
         </Box>
 
-        {/* Statistics Cards */}
-        <Grid container spacing={2} sx={{ mb: 2, flexShrink: 0 }}>
-          {getUserStats().map((stat, index) => (
-            <Grid item xs={12} sm={6} lg={3} key={index}>
-              <StatCard {...stat} />
-            </Grid>
-          ))}
-        </Grid>
+        {/* Status Alert */}
+        {testResult && (
+          <Alert
+            severity={testResult.success ? 'success' : 'error'}
+            sx={{ mb: 1 }}
+            onClose={() => setTestResult(null)}
+          >
+            {testResult.message}
+          </Alert>
+        )}
 
-        {/* Filters and Search */}
+        {/* Compact Filters */}
         <Paper sx={{ 
-          mb: 2,
-          p: 2,
-          borderRadius: '16px',
+          mb: 1,
+          p: 1.5,
+          borderRadius: '12px',
           background: 'white',
           border: '1px solid #e0e0e0',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
           flexShrink: 0,
         }}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
+                size="small"
                 placeholder="Search users..."
                 variant="outlined"
                 value={searchTerm}
@@ -544,7 +602,7 @@ const UserManagement: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12} md={2}>
-              <FormControl fullWidth variant="outlined">
+              <FormControl fullWidth variant="outlined" size="small">
                 <InputLabel 
                   sx={{ 
                     color: '#6B7280',
@@ -587,7 +645,7 @@ const UserManagement: React.FC = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12} md={2}>
-              <FormControl fullWidth variant="outlined">
+              <FormControl fullWidth variant="outlined" size="small">
                 <InputLabel 
                   sx={{ 
                     color: '#6B7280',
@@ -632,6 +690,7 @@ const UserManagement: React.FC = () => {
             <Grid item xs={12} md={4}>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button
+                  size="small"
                   variant="outlined"
                   startIcon={<FilterList />}
                   onClick={() => console.log('Filters clicked')}
@@ -647,6 +706,7 @@ const UserManagement: React.FC = () => {
                   Filters
                 </Button>
                 <Button
+                  size="small"
                   variant="outlined"
                   startIcon={<Download />}
                   onClick={handleExport}
@@ -662,6 +722,7 @@ const UserManagement: React.FC = () => {
                   Export
                 </Button>
                 <Button
+                  size="small"
                   variant="outlined"
                   startIcon={<Upload />}
                   onClick={handleImport}
@@ -718,23 +779,8 @@ const UserManagement: React.FC = () => {
           </Box>
           
           <TableContainer sx={{ 
-            flex: 1, 
+            height: '800px', // Fixed large height to show 5+ users
             overflow: 'auto',
-            maxHeight: 'calc(100vh - 400px)', // Ensures table doesn't exceed viewport
-            '&::-webkit-scrollbar': {
-              width: '8px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: '#f1f1f1',
-              borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#c1c1c1',
-              borderRadius: '4px',
-              '&:hover': {
-                background: '#a8a8a8',
-              },
-            },
           }}>
             <Table stickyHeader>
               <TableHead>
@@ -928,7 +974,14 @@ const UserManagement: React.FC = () => {
                 label="First Name"
                 value={newUser.first_name}
                 onChange={(e) => setNewUser({...newUser, first_name: e.target.value})}
-                InputLabelProps={{ sx: { color: '#6B7280' } }}
+                InputLabelProps={{ 
+                  sx: { 
+                    color: '#6B7280',
+                    backgroundColor: 'white',
+                    px: 1,
+                    borderRadius: '4px'
+                  } 
+                }}
                 InputProps={{ sx: { color: '#1F2937' } }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
@@ -946,7 +999,14 @@ const UserManagement: React.FC = () => {
                 label="Last Name"
                 value={newUser.last_name}
                 onChange={(e) => setNewUser({...newUser, last_name: e.target.value})}
-                InputLabelProps={{ sx: { color: '#6B7280' } }}
+                InputLabelProps={{ 
+                  sx: { 
+                    color: '#6B7280',
+                    backgroundColor: 'white',
+                    px: 1,
+                    borderRadius: '4px'
+                  } 
+                }}
                 InputProps={{ sx: { color: '#1F2937' } }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
@@ -965,7 +1025,41 @@ const UserManagement: React.FC = () => {
                 type="email"
                 value={newUser.email}
                 onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                InputLabelProps={{ sx: { color: '#6B7280' } }}
+                InputLabelProps={{ 
+                  sx: { 
+                    color: '#6B7280',
+                    backgroundColor: 'white',
+                    px: 1,
+                    borderRadius: '4px'
+                  } 
+                }}
+                InputProps={{ sx: { color: '#1F2937' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': { borderColor: '#e0e0e0' },
+                    '&:hover fieldset': { borderColor: '#d1d5db' },
+                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                  }
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Mobile Number"
+                type="tel"
+                value={newUser.phone_number}
+                onChange={(e) => setNewUser({...newUser, phone_number: e.target.value})}
+                placeholder="+1 (555) 123-4567"
+                InputLabelProps={{ 
+                  sx: { 
+                    color: '#6B7280',
+                    backgroundColor: 'white',
+                    px: 1,
+                    borderRadius: '4px'
+                  } 
+                }}
                 InputProps={{ sx: { color: '#1F2937' } }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
@@ -979,7 +1073,12 @@ const UserManagement: React.FC = () => {
                 }}
               />
               <FormControl fullWidth>
-                <InputLabel sx={{ color: '#6B7280' }}>Role</InputLabel>
+                <InputLabel sx={{ 
+                  color: '#6B7280',
+                  backgroundColor: 'white',
+                  px: 1,
+                  borderRadius: '4px'
+                }}>Role</InputLabel>
                 <Select
                   value={newUser.role}
                   onChange={(e) => setNewUser({...newUser, role: e.target.value})}
@@ -1000,7 +1099,12 @@ const UserManagement: React.FC = () => {
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel sx={{ color: '#6B7280' }}>Subscription Tier</InputLabel>
+                <InputLabel sx={{ 
+                  color: '#6B7280',
+                  backgroundColor: 'white',
+                  px: 1,
+                  borderRadius: '4px'
+                }}>Subscription Tier</InputLabel>
                 <Select
                   value={newUser.subscription_tier}
                   onChange={(e) => setNewUser({...newUser, subscription_tier: e.target.value})}
@@ -1025,7 +1129,14 @@ const UserManagement: React.FC = () => {
                   type="password"
                   value={newUser.password}
                   onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                  InputLabelProps={{ sx: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                  InputLabelProps={{ 
+                    sx: { 
+                      color: '#6B7280',
+                      backgroundColor: 'white',
+                      px: 1,
+                      borderRadius: '4px'
+                    } 
+                  }}
                   InputProps={{ sx: { color: '#1F2937' } }}
                   sx={{
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
@@ -1042,6 +1153,8 @@ const UserManagement: React.FC = () => {
             <Button 
               onClick={handleSaveUser} 
               variant="contained"
+              disabled={saving}
+              startIcon={saving ? <CircularProgress size={16} /> : null}
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: 'white',
@@ -1050,7 +1163,7 @@ const UserManagement: React.FC = () => {
                 }
               }}
             >
-              {selectedUser ? 'Update' : 'Add'} User
+              {saving ? 'Saving...' : `${selectedUser ? 'Update' : 'Add'} User`}
             </Button>
           </DialogActions>
         </Dialog>

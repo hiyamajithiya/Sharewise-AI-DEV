@@ -166,6 +166,67 @@ const Portfolio: React.FC = () => {
     setAnchorEl(null);
   };
 
+  // Quick Actions handlers
+  const handleAddMoney = () => {
+    window.alert(`💰 Add Money Feature\n\nRedirecting to add funds to your portfolio...\n\nCurrent Portfolio Value: ₹${portfolioData.totalValue.toLocaleString()}\nCash Balance: ₹${portfolioData.cashBalance.toLocaleString()}`);
+  };
+
+  const handlePlaceOrder = () => {
+    window.alert(`📈 Place Order Feature\n\nOpening order placement interface...\n\nAvailable Cash: ₹${portfolioData.cashBalance.toLocaleString()}\nCurrent Holdings: ${holdings.length} stocks`);
+  };
+
+  const handleDownloadReport = () => {
+    if (!tierFeatures.exportReports) {
+      window.alert(`🔒 Premium Feature\n\nReport export is available for ${tierFeatures.label === 'Elite Plan' ? 'Elite' : 'Pro and Elite'} subscribers only.\n\nUpgrade your plan to access detailed portfolio reports and analytics.`);
+      return;
+    }
+
+    // Simulate report generation
+    const reportData = `
+📊 PORTFOLIO REPORT - ${new Date().toLocaleDateString()}
+
+Portfolio Summary:
+• Total Value: ₹${portfolioData.totalValue.toLocaleString()}
+• Total P&L: ₹${portfolioData.totalPnL.toLocaleString()} (${portfolioData.totalPnLPercent}%)
+• Today's P&L: ₹${portfolioData.dayChange.toLocaleString()} (${portfolioData.dayChangePercent}%)
+• Cash Balance: ₹${portfolioData.cashBalance.toLocaleString()}
+• Number of Holdings: ${holdings.length}
+
+Holdings Breakdown:
+${holdings.map(holding => {
+  const metrics = calculateHoldingMetrics(holding);
+  return `• ${holding.symbol}: ${holding.quantity} shares @ ₹${holding.currentPrice} (P&L: ${metrics.pnlPercent >= 0 ? '+' : ''}${metrics.pnlPercent.toFixed(2)}%)`;
+}).join('\n')}
+
+Sector Allocation:
+${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).join('\n')}
+`;
+
+    // Create downloadable content
+    const blob = new Blob([reportData], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `portfolio-report-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    window.alert('📄 Portfolio report downloaded successfully!');
+  };
+
+  // Menu action handlers
+  const handleRefreshData = () => {
+    window.alert('🔄 Refreshing portfolio data...\n\nAll holdings and market prices will be updated with the latest information.');
+    handleMenuClose();
+  };
+
+  const handleViewPerformance = () => {
+    setViewMode('performance');
+    handleMenuClose();
+  };
+
   const portfolioStats = [
     {
       title: 'Portfolio Value',
@@ -227,9 +288,8 @@ const Portfolio: React.FC = () => {
           mb: 4,
           p: 3,
           borderRadius: '20px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          background: 'white',
+          border: '1px solid #e0e0e0',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
         }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -242,7 +302,7 @@ const Portfolio: React.FC = () => {
               }}>
                 Portfolio Dashboard
               </Typography>
-              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+              <Typography variant="body1" sx={{ color: '#6B7280' }}>
                 {isTestingMode && selectedUser
                   ? `Testing portfolio for ${selectedUser.role} role - ${subscriptionTier} tier`
                   : `Your ${subscriptionTier} portfolio with ${holdings.length} holdings`
@@ -255,9 +315,9 @@ const Portfolio: React.FC = () => {
                 sx={{ 
                   fontWeight: 600, 
                   fontSize: '0.875rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  backgroundColor: '#f3f4f6',
                   color: '#1F2937',
-                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                  border: '1px solid #d1d5db'
                 }} 
               />
               <IconButton onClick={handleMenuClick} sx={{ color: '#1F2937' }}>
@@ -269,13 +329,13 @@ const Portfolio: React.FC = () => {
 
       {/* Action Menu */}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={handleRefreshData}>
           <Refresh sx={{ mr: 1 }} /> Refresh Data
         </MenuItem>
-        <MenuItem onClick={handleMenuClose} disabled={!tierFeatures.exportReports}>
+        <MenuItem onClick={handleDownloadReport} disabled={!tierFeatures.exportReports}>
           <Download sx={{ mr: 1 }} /> Export Report
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={handleViewPerformance}>
           <Visibility sx={{ mr: 1 }} /> View Performance
         </MenuItem>
       </Menu>
@@ -286,9 +346,8 @@ const Portfolio: React.FC = () => {
             mb: 3,
             p: 2,
             borderRadius: '15px',
-            background: 'rgba(59, 130, 246, 0.1)',
-            
-            border: '1px solid rgba(59, 130, 246, 0.2)',
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
           }}>
             <Typography variant="body2" sx={{ color: '#1F2937' }}>
@@ -317,20 +376,27 @@ const Portfolio: React.FC = () => {
               startIcon={<PieChart />}
               sx={{
                 ...(viewMode === 'holdings' ? {
-                  background: '#f5f7fa',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
                   boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                    transform: 'translateY(-1px)',
+                  },
                 } : {
                   color: '#1F2937',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  borderColor: '#d1d5db',
+                  backgroundColor: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
                   '&:hover': {
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderColor: '#667eea',
+                    background: '#f8f9ff',
+                    color: '#667eea',
                   },
                 })
               }}
@@ -344,20 +410,27 @@ const Portfolio: React.FC = () => {
               disabled={!tierFeatures.advancedAnalytics}
               sx={{
                 ...(viewMode === 'performance' ? {
-                  background: '#f5f7fa',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
                   boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                    transform: 'translateY(-1px)',
+                  },
                 } : {
-                  color: tierFeatures.advancedAnalytics ? 'white' : 'rgba(255, 255, 255, 0.5)',
-                  borderColor: tierFeatures.advancedAnalytics ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+                  color: tierFeatures.advancedAnalytics ? '#1F2937' : '#9CA3AF',
+                  borderColor: tierFeatures.advancedAnalytics ? '#d1d5db' : '#e5e7eb',
+                  backgroundColor: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
-                  '&:hover': {
-                    borderColor: tierFeatures.advancedAnalytics ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
-                    background: tierFeatures.advancedAnalytics ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  '&:hover:not(:disabled)': {
+                    borderColor: tierFeatures.advancedAnalytics ? '#667eea' : '#e5e7eb',
+                    background: tierFeatures.advancedAnalytics ? '#f8f9ff' : 'white',
+                    color: tierFeatures.advancedAnalytics ? '#667eea' : '#9CA3AF',
                   },
                 })
               }}
@@ -371,20 +444,27 @@ const Portfolio: React.FC = () => {
               disabled={!tierFeatures.riskAnalysis}
               sx={{
                 ...(viewMode === 'analysis' ? {
-                  background: '#f5f7fa',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
                   boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                    transform: 'translateY(-1px)',
+                  },
                 } : {
-                  color: tierFeatures.riskAnalysis ? 'white' : 'rgba(255, 255, 255, 0.5)',
-                  borderColor: tierFeatures.riskAnalysis ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+                  color: tierFeatures.riskAnalysis ? '#1F2937' : '#9CA3AF',
+                  borderColor: tierFeatures.riskAnalysis ? '#d1d5db' : '#e5e7eb',
+                  backgroundColor: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
-                  '&:hover': {
-                    borderColor: tierFeatures.riskAnalysis ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
-                    background: tierFeatures.riskAnalysis ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  '&:hover:not(:disabled)': {
+                    borderColor: tierFeatures.riskAnalysis ? '#667eea' : '#e5e7eb',
+                    background: tierFeatures.riskAnalysis ? '#f8f9ff' : 'white',
+                    color: tierFeatures.riskAnalysis ? '#667eea' : '#9CA3AF',
                   },
                 })
               }}
@@ -401,9 +481,8 @@ const Portfolio: React.FC = () => {
             <Paper sx={{ 
               p: 3,
               borderRadius: '20px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'white',
+              border: '1px solid #e0e0e0',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -413,7 +492,7 @@ const Portfolio: React.FC = () => {
                     <PieChart sx={{ color: '#1F2937' }} />
                   </Badge>
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+                <Typography variant="body2" sx={{ color: '#6B7280' }}>
                   {tierFeatures.maxHoldings === -1 
                     ? 'Unlimited holdings' 
                     : `${holdings.length}/${tierFeatures.maxHoldings} holdings`}
@@ -443,7 +522,7 @@ const Portfolio: React.FC = () => {
                               <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
                                 {holding.symbol}
                               </Typography>
-                              <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                              <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                 {holding.name}
                               </Typography>
                             </Box>
@@ -493,9 +572,8 @@ const Portfolio: React.FC = () => {
             <Paper sx={{ 
               p: 3,
               borderRadius: '20px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'white',
+              border: '1px solid #e0e0e0',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
@@ -516,7 +594,7 @@ const Portfolio: React.FC = () => {
                   <Box sx={{ textAlign: 'center' }}>
                     <Timeline sx={{ fontSize: 48, mb: 2, color: '#1F2937' }} />
                     <Typography variant="h6" sx={{ color: '#1F2937' }}>Advanced Performance Charts</Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Interactive performance tracking and portfolio analytics will be integrated here
                     </Typography>
                   </Box>
@@ -543,9 +621,8 @@ const Portfolio: React.FC = () => {
             <Paper sx={{ 
               p: 3,
               borderRadius: '20px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'white',
+              border: '1px solid #e0e0e0',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
@@ -566,7 +643,7 @@ const Portfolio: React.FC = () => {
                   <Box sx={{ textAlign: 'center' }}>
                     <Assessment sx={{ fontSize: 48, mb: 2, color: '#1F2937' }} />
                     <Typography variant="h6" sx={{ color: '#1F2937' }}>Portfolio Risk Analysis</Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       Risk metrics, diversification analysis, and rebalancing recommendations
                     </Typography>
                   </Box>
@@ -664,9 +741,8 @@ const Portfolio: React.FC = () => {
                 mt: 2,
                 p: 2,
                 borderRadius: '15px',
-                background: 'rgba(59, 130, 246, 0.1)',
-                
-                border: '1px solid rgba(59, 130, 246, 0.2)',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
                 boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
               }}>
                 <Typography variant="body2" sx={{ color: '#1F2937' }}>
@@ -680,9 +756,8 @@ const Portfolio: React.FC = () => {
           <Paper sx={{ 
             p: 3,
             borderRadius: '20px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            background: 'white',
+            border: '1px solid #e0e0e0',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
@@ -692,8 +767,10 @@ const Portfolio: React.FC = () => {
               <Button 
                 variant="contained" 
                 fullWidth
+                onClick={handleAddMoney}
                 sx={{
-                  background: '#f5f7fa',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
@@ -710,15 +787,19 @@ const Portfolio: React.FC = () => {
               <Button 
                 variant="outlined" 
                 fullWidth
+                onClick={handlePlaceOrder}
                 sx={{
                   color: '#1F2937',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  borderColor: '#d1d5db',
+                  backgroundColor: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
                   '&:hover': {
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderColor: '#667eea',
+                    background: '#f8f9ff',
+                    color: '#667eea',
+                    transform: 'translateY(-1px)',
                   },
                 }}
               >
@@ -727,16 +808,20 @@ const Portfolio: React.FC = () => {
               <Button 
                 variant="outlined" 
                 fullWidth 
+                onClick={handleDownloadReport}
                 disabled={!tierFeatures.exportReports}
                 sx={{
-                  color: tierFeatures.exportReports ? 'white' : 'rgba(255, 255, 255, 0.5)',
-                  borderColor: tierFeatures.exportReports ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+                  color: tierFeatures.exportReports ? '#1F2937' : '#9CA3AF',
+                  borderColor: tierFeatures.exportReports ? '#d1d5db' : '#e5e7eb',
+                  backgroundColor: 'white',
                   borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
-                  '&:hover': {
-                    borderColor: tierFeatures.exportReports ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
-                    background: tierFeatures.exportReports ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  '&:hover:not(:disabled)': {
+                    borderColor: tierFeatures.exportReports ? '#667eea' : '#e5e7eb',
+                    background: tierFeatures.exportReports ? '#f8f9ff' : 'white',
+                    color: tierFeatures.exportReports ? '#667eea' : '#9CA3AF',
+                    transform: tierFeatures.exportReports ? 'translateY(-1px)' : 'none',
                   },
                 }}
               >

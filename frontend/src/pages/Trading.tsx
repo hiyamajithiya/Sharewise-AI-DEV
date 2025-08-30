@@ -705,7 +705,7 @@ const Trading: React.FC = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                   <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Underlying</InputLabel>
+                    <InputLabel sx={{ color: '#6B7280' }}>Underlying</InputLabel>
                     <Select
                       value={selectedUnderlying}
                       label="Underlying"
@@ -815,7 +815,7 @@ const Trading: React.FC = () => {
                             ₹{option.putPrice}
                           </Button>
                         </TableCell>
-                        <TableCell align="center" sx={{ color: 'rgba(255,255,255,0.9)' }}>{(option.putOI / 100000).toFixed(1)}L</TableCell>
+                        <TableCell align="center" sx={{ color: '#374151' }}>{(option.putOI / 100000).toFixed(1)}L</TableCell>
                         <TableCell align="center">
                           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                             <Button size="small" variant="outlined" color="success">
@@ -1034,10 +1034,10 @@ const Trading: React.FC = () => {
               </Typography>
               
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                <Typography variant="body2" sx={{ color: '#6B7280' }}>
                   Signal: {selectedSignal.type} at ₹{selectedSignal.price}
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                <Typography variant="body2" sx={{ color: '#6B7280' }}>
                   Target: ₹{selectedSignal.target} | Stop Loss: ₹{selectedSignal.stopLoss}
                 </Typography>
               </Box>
@@ -1051,8 +1051,8 @@ const Trading: React.FC = () => {
                   size="small"
                   fullWidth
                   helperText={`Max: ₹${tierFeatures.maxOrderValue.toLocaleString()}`}
-                  InputLabelProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
-                  FormHelperTextProps={{ style: { color: 'rgba(255,255,255,0.6)' } }}
+                  InputLabelProps={{ style: { color: '#6B7280' } }}
+                  FormHelperTextProps={{ style: { color: '#6B7280' } }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       color: 'white',
@@ -1070,7 +1070,7 @@ const Trading: React.FC = () => {
                 />
 
                 <FormControl size="small" fullWidth>
-                  <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Order Type</InputLabel>
+                  <InputLabel sx={{ color: '#6B7280' }}>Order Type</InputLabel>
                   <Select
                     value={orderType}
                     label="Order Type"
@@ -1150,11 +1150,11 @@ const Trading: React.FC = () => {
                       size="small" 
                     />
                   </Box>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
                     {order.type} {order.quantity} @ ₹{order.price.toLocaleString()}
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       {order.time}
                     </Typography>
                     <Typography 
@@ -1172,9 +1172,9 @@ const Trading: React.FC = () => {
             ))}
 
             {activeOrders.length === 0 && (
-              <Box sx={{ textAlign: 'center', py: 3, color: 'rgba(255,255,255,0.7)' }}>
-                <Schedule sx={{ fontSize: 36, mb: 1, color: 'rgba(255,255,255,0.7)' }} />
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>No active orders</Typography>
+              <Box sx={{ textAlign: 'center', py: 3, color: '#6B7280' }}>
+                <Schedule sx={{ fontSize: 36, mb: 1, color: '#6B7280' }} />
+                <Typography variant="body2" sx={{ color: '#6B7280' }}>No active orders</Typography>
               </Box>
             )}
           </Paper>
@@ -1195,7 +1195,7 @@ const Trading: React.FC = () => {
               </Typography>
               {tierFeatures.realTimeData && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
                     Last Updated: {marketQuotes['NIFTY']?.timestamp ? new Date(marketQuotes['NIFTY'].timestamp).toLocaleTimeString() : 'Never'}
                   </Typography>
                   <Chip
@@ -1225,7 +1225,7 @@ const Trading: React.FC = () => {
               </Button>
               {tierFeatures.realTimeData && Object.keys(marketQuotes).length > 0 && (
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Typography variant="body2" sx={{ alignSelf: 'center', color: 'rgba(255,255,255,0.8)' }}>
+                  <Typography variant="body2" sx={{ alignSelf: 'center', color: '#6B7280' }}>
                     Live Quotes:
                   </Typography>
                   {Object.entries(marketQuotes).slice(0, 3).map(([symbol, quote]) => (
@@ -1251,15 +1251,15 @@ const Trading: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'rgba(255,255,255,0.7)',
+                color: '#6B7280',
               }}
             >
               <Box sx={{ textAlign: 'center' }}>
-                <ShowChart sx={{ fontSize: 48, mb: 2, color: 'rgba(255,255,255,0.7)' }} />
+                <ShowChart sx={{ fontSize: 48, mb: 2, color: '#6B7280' }} />
                 <Typography variant="h6" sx={{ color: 'white' }}>
                   {tierFeatures.advancedCharts ? "Advanced" : "Basic"} Trading Charts
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                <Typography variant="body2" sx={{ color: '#6B7280' }}>
                   Interactive market charts and technical indicators will be integrated here
                 </Typography>
                 {!tierFeatures.advancedCharts && (
@@ -1311,7 +1311,7 @@ const Trading: React.FC = () => {
                   type="number"
                   defaultValue="1"
                   size="small"
-                  InputLabelProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+                  InputLabelProps={{ style: { color: '#6B7280' } }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       color: 'white',
@@ -1335,7 +1335,7 @@ const Trading: React.FC = () => {
                   type="number"
                   defaultValue={selectedFoInstrument?.price}
                   size="small"
-                  InputLabelProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+                  InputLabelProps={{ style: { color: '#6B7280' } }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       color: 'white',
@@ -1354,7 +1354,7 @@ const Trading: React.FC = () => {
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth size="small">
-                  <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Order Type</InputLabel>
+                  <InputLabel sx={{ color: '#6B7280' }}>Order Type</InputLabel>
                   <Select 
                     defaultValue="MARKET" 
                     label="Order Type"
@@ -1380,7 +1380,7 @@ const Trading: React.FC = () => {
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth size="small">
-                  <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Product Type</InputLabel>
+                  <InputLabel sx={{ color: '#6B7280' }}>Product Type</InputLabel>
                   <Select 
                     defaultValue="INTRADAY" 
                     label="Product Type"
@@ -1417,11 +1417,11 @@ const Trading: React.FC = () => {
                   </Typography>
                   <Grid container spacing={1}>
                     <Grid item xs={6}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>Required Margin:</Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>Required Margin:</Typography>
                       <Typography variant="body1" sx={{ fontWeight: 600, color: 'white' }}>₹25,000</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>Available Balance:</Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>Available Balance:</Typography>
                       <Typography variant="body1" sx={{ fontWeight: 600, color: 'white' }}>₹1,60,000</Typography>
                     </Grid>
                   </Grid>

@@ -176,32 +176,30 @@ const ModelStudio: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-        <Box>
-          <Typography variant="h5" gutterBottom>
-            Create New AI Trading Model ✨
-          </Typography>
-          <Typography variant="body2" color="text.secondary" paragraph>
-            Build your own intelligent trading assistant that learns from market data and makes predictions for you
-          </Typography>
-        </Box>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          Create New AI Trading Model ✨
+        </Typography>
+        <Typography variant="body2" color="text.secondary" paragraph>
+          Build your own intelligent trading assistant that learns from market data and makes predictions for you
+        </Typography>
         
-        {/* Quick Help - Top Right */}
+        {/* Quick Help - Below Header */}
         <Paper 
           elevation={0} 
           sx={{ 
             p: 2, 
             bgcolor: 'info.light', 
-            borderRadius: 2, 
-            maxWidth: 320,
+            borderRadius: 2,
             border: '1px solid',
-            borderColor: 'info.main'
+            borderColor: 'info.main',
+            mb: 2
           }}
         >
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'info.main' }}>
-            💡 Quick Start
+            💡 Quick Start Guide
           </Typography>
-          <Typography variant="body2" sx={{ color: 'info.dark', fontSize: '0.8rem' }}>
+          <Typography variant="body2" sx={{ color: 'info.dark', fontSize: '0.875rem' }}>
             Create an AI that predicts Buy/Sell/Hold decisions. Classification models are best for beginners.
             Takes 5 min to setup + 10-30 min to train.
           </Typography>
@@ -221,65 +219,81 @@ const ModelStudio: React.FC = () => {
               </StepLabel>
               <StepContent>
 
-                <Grid container spacing={3}>
+                <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
                   <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Model Name"
-                      value={modelData.name}
-                      onChange={(e) => setModelData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="e.g., RELIANCE Buy/Sell Predictor"
-                      helperText="Give your AI model a descriptive name"
-                      required
-                    />
+                    <Box sx={{ height: '100%', minHeight: '80px', display: 'flex', alignItems: 'stretch' }}>
+                      <TextField
+                        fullWidth
+                        label="Model Name"
+                        value={modelData.name}
+                        onChange={(e) => setModelData(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="e.g., RELIANCE Buy/Sell Predictor"
+                        helperText="Give your AI model a descriptive name"
+                        required
+                        sx={{ 
+                          '& .MuiInputBase-root': {
+                            height: '56px'
+                          }
+                        }}
+                      />
+                    </Box>
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                      <InputLabel>Model Type</InputLabel>
-                      <Select
-                        value={modelData.model_type}
-                        onChange={(e) => setModelData(prev => ({ ...prev, model_type: e.target.value }))}
-                        label="Model Type"
-                      >
-                        <MenuItem value="CLASSIFICATION">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Classification (Buy/Sell/Hold)</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🟢 Beginner-friendly - Simple decisions
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="REGRESSION">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Regression (Price Prediction)</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🟡 Advanced - Predicts exact prices
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="CLUSTERING">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Clustering (Pattern Recognition)</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🔴 Expert - Finds hidden patterns
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
+                    <Box sx={{ height: '100%', minHeight: '80px', display: 'flex', alignItems: 'stretch' }}>
+                      <FormControl fullWidth sx={{
+                        '& .MuiInputBase-root': {
+                          height: '56px'
+                        }
+                      }}>
+                        <InputLabel>Model Type</InputLabel>
+                        <Select
+                          value={modelData.model_type}
+                          onChange={(e) => setModelData(prev => ({ ...prev, model_type: e.target.value }))}
+                          label="Model Type"
+                        >
+                          <MenuItem value="CLASSIFICATION">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Classification (Buy/Sell/Hold)</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🟢 Beginner-friendly - Simple decisions
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="REGRESSION">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Regression (Price Prediction)</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🟡 Advanced - Predicts exact prices
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="CLUSTERING">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Clustering (Pattern Recognition)</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🔴 Expert - Finds hidden patterns
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={3}
-                      label="Description"
-                      value={modelData.description}
-                      onChange={(e) => setModelData(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Example: This AI learns from RELIANCE stock data to predict whether I should buy, sell, or hold based on technical indicators"
-                      helperText="Describe what you want your AI to learn and predict"
-                      required
-                    />
+                    <Box sx={{ width: '100%' }}>
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={3}
+                        label="Description"
+                        value={modelData.description}
+                        onChange={(e) => setModelData(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Example: This AI learns from RELIANCE stock data to predict whether I should buy, sell, or hold based on technical indicators"
+                        helperText="Describe what you want your AI to learn and predict"
+                        required
+                        sx={{ minHeight: '120px' }}
+                      />
+                    </Box>
                   </Grid>
                 </Grid>
                 <Box sx={{ mt: 2 }}>
@@ -306,46 +320,60 @@ const ModelStudio: React.FC = () => {
 
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                      <InputLabel>Target Variable</InputLabel>
-                      <Select
-                        value={modelData.target_variable}
-                        onChange={(e) => setModelData(prev => ({ ...prev, target_variable: e.target.value }))}
-                        label="Target Variable"
-                      >
-                        <MenuItem value="signal_type">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Signal Type (Buy/Sell/Hold)</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🟢 Best for beginners - Clear decisions
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="price_change">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Price Change</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🟡 Advanced - Predicts price movements
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="return">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Return</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🟡 Advanced - Predicts profit/loss %
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
+                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'stretch' }}>
+                      <FormControl fullWidth sx={{ minHeight: '80px' }}>
+                        <InputLabel>Target Variable</InputLabel>
+                        <Select
+                          value={modelData.target_variable}
+                          onChange={(e) => setModelData(prev => ({ ...prev, target_variable: e.target.value }))}
+                          label="Target Variable"
+                        >
+                          <MenuItem value="signal_type">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Signal Type (Buy/Sell/Hold)</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🟢 Best for beginners - Clear decisions
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="price_change">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Price Change</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🟡 Advanced - Predicts price movements
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="return">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Return</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🟡 Advanced - Predicts profit/loss %
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Box>
+                    <Box sx={{ 
+                      height: '100%', 
+                      minHeight: '80px', 
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      justifyContent: 'flex-start'
+                    }}>
                       <Typography variant="subtitle2" gutterBottom>
                         Selected Features ({modelData.features.length})
                       </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexWrap: 'wrap', 
+                        gap: 0.5,
+                        flex: 1,
+                        alignItems: 'flex-start'
+                      }}>
                         {modelData.features.map(feature => (
                           <Chip
                             key={feature}
@@ -435,95 +463,113 @@ const ModelStudio: React.FC = () => {
 
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                      <InputLabel>Algorithm</InputLabel>
-                      <Select
-                        value={modelData.training_parameters.algorithm}
-                        onChange={(e) => setModelData(prev => ({
-                          ...prev,
-                          training_parameters: { ...prev.training_parameters, algorithm: e.target.value }
-                        }))}
-                        label="Algorithm"
-                      >
-                        <MenuItem value="random_forest">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Random Forest</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🟢 Beginner-friendly - Reliable and accurate
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="gradient_boosting">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Gradient Boosting</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🟡 Advanced - High accuracy, complex
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="logistic_regression">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Logistic Regression</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🟢 Simple - Fast and interpretable
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="svm">
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Support Vector Machine</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              🔴 Expert - Complex but powerful
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
+                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'stretch' }}>
+                      <FormControl fullWidth sx={{ minHeight: '80px' }}>
+                        <InputLabel>Algorithm</InputLabel>
+                        <Select
+                          value={modelData.training_parameters.algorithm}
+                          onChange={(e) => setModelData(prev => ({
+                            ...prev,
+                            training_parameters: { ...prev.training_parameters, algorithm: e.target.value }
+                          }))}
+                          label="Algorithm"
+                        >
+                          <MenuItem value="random_forest">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Random Forest</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🟢 Beginner-friendly - Reliable and accurate
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="gradient_boosting">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Gradient Boosting</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🟡 Advanced - High accuracy, complex
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="logistic_regression">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Logistic Regression</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🟢 Simple - Fast and interpretable
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="svm">
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>Support Vector Machine</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                🔴 Expert - Complex but powerful
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Box>
+                    <Box sx={{ 
+                      height: '100%', 
+                      minHeight: '80px',
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      justifyContent: 'flex-start'
+                    }}>
                       <Typography gutterBottom>
                         Training Period: {modelData.training_period_days} days
                         <Typography variant="caption" color="text.secondary" display="block">
                           How much historical data to use for learning
                         </Typography>
                       </Typography>
-                      <Slider
-                        value={modelData.training_period_days}
-                        onChange={(_, value) => setModelData(prev => ({ ...prev, training_period_days: value as number }))}
-                        min={30}
-                        max={1095}
-                        step={30}
-                        marks={[
-                          { value: 30, label: '1m' },
-                          { value: 365, label: '1y (Recommended)' },
-                          { value: 730, label: '2y' },
-                          { value: 1095, label: '3y' },
-                        ]}
-                      />
+                      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', px: 1 }}>
+                        <Slider
+                          value={modelData.training_period_days}
+                          onChange={(_, value) => setModelData(prev => ({ ...prev, training_period_days: value as number }))}
+                          min={30}
+                          max={1095}
+                          step={30}
+                          marks={[
+                            { value: 30, label: '1m' },
+                            { value: 365, label: '1y (Recommended)' },
+                            { value: 730, label: '2y' },
+                            { value: 1095, label: '3y' },
+                          ]}
+                        />
+                      </Box>
                     </Box>
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Box>
+                    <Box sx={{ 
+                      height: '100%', 
+                      minHeight: '80px',
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      justifyContent: 'flex-start'
+                    }}>
                       <Typography gutterBottom>
                         Validation Split: {(modelData.validation_split * 100).toFixed(0)}%
                         <Typography variant="caption" color="text.secondary" display="block">
                           Data reserved for testing accuracy
                         </Typography>
                       </Typography>
-                      <Slider
-                        value={modelData.validation_split}
-                        onChange={(_, value) => setModelData(prev => ({ ...prev, validation_split: value as number }))}
-                        min={0.1}
-                        max={0.4}
-                        step={0.05}
-                        marks={[
-                          { value: 0.1, label: '10%' },
-                          { value: 0.2, label: '20% (Recommended)' },
-                          { value: 0.3, label: '30%' },
-                          { value: 0.4, label: '40%' },
-                        ]}
-                      />
+                      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', px: 1 }}>
+                        <Slider
+                          value={modelData.validation_split}
+                          onChange={(_, value) => setModelData(prev => ({ ...prev, validation_split: value as number }))}
+                          min={0.1}
+                          max={0.4}
+                          step={0.05}
+                          marks={[
+                            { value: 0.1, label: '10%' },
+                            { value: 0.2, label: '20% (Recommended)' },
+                            { value: 0.3, label: '30%' },
+                            { value: 0.4, label: '40%' },
+                          ]}
+                        />
+                      </Box>
                     </Box>
                   </Grid>
 
@@ -532,83 +578,97 @@ const ModelStudio: React.FC = () => {
                     modelData.training_parameters.algorithm === 'gradient_boosting') && (
                     <>
                       <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          type="number"
-                          label="Number of Estimators"
-                          value={modelData.training_parameters.n_estimators}
-                          onChange={(e) => setModelData(prev => ({
-                            ...prev,
-                            training_parameters: { ...prev.training_parameters, n_estimators: parseInt(e.target.value) || 100 }
-                          }))}
-                        />
+                        <Box sx={{ height: '100%' }}>
+                          <TextField
+                            fullWidth
+                            type="number"
+                            label="Number of Estimators"
+                            value={modelData.training_parameters.n_estimators}
+                            onChange={(e) => setModelData(prev => ({
+                              ...prev,
+                              training_parameters: { ...prev.training_parameters, n_estimators: parseInt(e.target.value) || 100 }
+                            }))}
+                            sx={{ height: '80px' }}
+                          />
+                        </Box>
                       </Grid>
                       <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          type="number"
-                          label="Max Depth"
-                          value={modelData.training_parameters.max_depth}
-                          onChange={(e) => setModelData(prev => ({
-                            ...prev,
-                            training_parameters: { ...prev.training_parameters, max_depth: parseInt(e.target.value) || 10 }
-                          }))}
-                        />
+                        <Box sx={{ height: '100%' }}>
+                          <TextField
+                            fullWidth
+                            type="number"
+                            label="Max Depth"
+                            value={modelData.training_parameters.max_depth}
+                            onChange={(e) => setModelData(prev => ({
+                              ...prev,
+                              training_parameters: { ...prev.training_parameters, max_depth: parseInt(e.target.value) || 10 }
+                            }))}
+                            sx={{ height: '80px' }}
+                          />
+                        </Box>
                       </Grid>
                     </>
                   )}
 
                   {modelData.training_parameters.algorithm === 'gradient_boosting' && (
                     <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label="Learning Rate"
-                        value={modelData.training_parameters.learning_rate}
-                        onChange={(e) => setModelData(prev => ({
-                          ...prev,
-                          training_parameters: { ...prev.training_parameters, learning_rate: parseFloat(e.target.value) || 0.1 }
-                        }))}
-                        inputProps={{ step: 0.01, min: 0.01, max: 1 }}
-                      />
+                      <Box sx={{ height: '100%' }}>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label="Learning Rate"
+                          value={modelData.training_parameters.learning_rate}
+                          onChange={(e) => setModelData(prev => ({
+                            ...prev,
+                            training_parameters: { ...prev.training_parameters, learning_rate: parseFloat(e.target.value) || 0.1 }
+                          }))}
+                          inputProps={{ step: 0.01, min: 0.01, max: 1 }}
+                          sx={{ height: '80px' }}
+                        />
+                      </Box>
                     </Grid>
                   )}
 
                   {(modelData.training_parameters.algorithm === 'logistic_regression' || 
                     modelData.training_parameters.algorithm === 'svm') && (
                     <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label="Regularization (C)"
-                        value={modelData.training_parameters.C}
-                        onChange={(e) => setModelData(prev => ({
-                          ...prev,
-                          training_parameters: { ...prev.training_parameters, C: parseFloat(e.target.value) || 1.0 }
-                        }))}
-                        inputProps={{ step: 0.1, min: 0.01 }}
-                      />
+                      <Box sx={{ height: '100%' }}>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label="Regularization (C)"
+                          value={modelData.training_parameters.C}
+                          onChange={(e) => setModelData(prev => ({
+                            ...prev,
+                            training_parameters: { ...prev.training_parameters, C: parseFloat(e.target.value) || 1.0 }
+                          }))}
+                          inputProps={{ step: 0.1, min: 0.01 }}
+                          sx={{ height: '80px' }}
+                        />
+                      </Box>
                     </Grid>
                   )}
 
                   {modelData.training_parameters.algorithm === 'svm' && (
                     <Grid item xs={12} md={6}>
-                      <FormControl fullWidth>
-                        <InputLabel>Kernel</InputLabel>
-                        <Select
-                          value={modelData.training_parameters.kernel}
-                          onChange={(e) => setModelData(prev => ({
-                            ...prev,
-                            training_parameters: { ...prev.training_parameters, kernel: e.target.value }
-                          }))}
-                          label="Kernel"
-                        >
-                          <MenuItem value="rbf">RBF</MenuItem>
-                          <MenuItem value="linear">Linear</MenuItem>
-                          <MenuItem value="poly">Polynomial</MenuItem>
-                          <MenuItem value="sigmoid">Sigmoid</MenuItem>
-                        </Select>
-                      </FormControl>
+                      <Box sx={{ height: '100%' }}>
+                        <FormControl fullWidth sx={{ height: '80px' }}>
+                          <InputLabel>Kernel</InputLabel>
+                          <Select
+                            value={modelData.training_parameters.kernel}
+                            onChange={(e) => setModelData(prev => ({
+                              ...prev,
+                              training_parameters: { ...prev.training_parameters, kernel: e.target.value }
+                            }))}
+                            label="Kernel"
+                          >
+                            <MenuItem value="rbf">RBF</MenuItem>
+                            <MenuItem value="linear">Linear</MenuItem>
+                            <MenuItem value="poly">Polynomial</MenuItem>
+                            <MenuItem value="sigmoid">Sigmoid</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
                     </Grid>
                   )}
                 </Grid>
@@ -686,57 +746,6 @@ const ModelStudio: React.FC = () => {
           {error}
         </Alert>
       )}
-      
-      {/* Bottom Help Guide */}
-      <Paper 
-        elevation={1} 
-        sx={{ 
-          p: 2, 
-          mt: 3, 
-          bgcolor: 'success.light', 
-          borderRadius: 2,
-          border: '1px solid',
-          borderColor: 'success.main'
-        }}
-      >
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: 'success.main' }}>
-          🎯 Model Creation Steps
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-              1. Basic Info
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Name & type selection
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-              2. Features
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Data indicators to learn from
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-              3. Training
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Algorithm & parameters
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-              4. Create
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Review & finalize
-            </Typography>
-          </Grid>
-        </Grid>
-      </Paper>
     </Box>
   );
 };

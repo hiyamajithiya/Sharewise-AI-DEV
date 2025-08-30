@@ -199,7 +199,7 @@ class RateLimitMiddleware(MiddlewareMixin):
             return True
         
         # Skip for admin (but add audit trail)
-        if request.path.startswith('/admin/') and request.user.is_staff:
+        if request.path.startswith('/admin/') and hasattr(request, 'user') and hasattr(request.user, 'is_staff') and request.user.is_staff:
             return True
         
         # Skip for static files

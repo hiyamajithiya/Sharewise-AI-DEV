@@ -75,7 +75,7 @@ class MarketplaceDashboardView(TemplateView):
         # User statistics
         context['total_users'] = User.objects.count()
         context['model_creators'] = User.objects.filter(
-            created_models__isnull=False
+            ml_models__isnull=False
         ).distinct().count()
         context['model_lessees'] = User.objects.filter(
             leased_models__isnull=False

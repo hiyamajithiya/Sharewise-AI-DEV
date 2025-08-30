@@ -185,39 +185,45 @@ const FnOModelStudio: React.FC = () => {
             <Grid container spacing={2}>
               {fnoModelTypes.map((type) => (
                 <Grid item xs={12} md={6} key={type.type}>
-                  <Card 
-                    sx={{ 
-                      cursor: 'pointer', 
-                      border: modelData.model_type === type.type ? '2px solid' : '1px solid',
-                      borderColor: modelData.model_type === type.type ? 'primary.main' : 'divider'
-                    }}
-                    onClick={() => handleModelTypeSelect(type)}
-                  >
-                    <CardContent>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <PsychologyIcon sx={{ mr: 1 }} />
-                        <Typography variant="h6">{type.name}</Typography>
-                      </Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {type.description}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                        <Chip 
-                          label={`Complexity: ${type.complexity}`} 
-                          size="small" 
-                          color={type.complexity === 'HIGH' ? 'error' : type.complexity === 'MEDIUM' ? 'warning' : 'success'}
-                        />
-                        <Chip 
-                          label={`Min: ${type.min_training_days} days`} 
-                          size="small" 
-                          variant="outlined"
-                        />
-                      </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        Recommended Features: {type.recommended_features.join(', ')}
-                      </Typography>
-                    </CardContent>
-                  </Card>
+                  <Box sx={{ height: '100%' }}>
+                    <Card 
+                      sx={{ 
+                        cursor: 'pointer', 
+                        border: modelData.model_type === type.type ? '2px solid' : '1px solid',
+                        borderColor: modelData.model_type === type.type ? 'primary.main' : 'divider',
+                        height: '100%',
+                        minHeight: '220px',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                      onClick={() => handleModelTypeSelect(type)}
+                    >
+                      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <PsychologyIcon sx={{ mr: 1 }} />
+                          <Typography variant="h6">{type.name}</Typography>
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flex: 1 }}>
+                          {type.description}
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                          <Chip 
+                            label={`Complexity: ${type.complexity}`} 
+                            size="small" 
+                            color={type.complexity === 'HIGH' ? 'error' : type.complexity === 'MEDIUM' ? 'warning' : 'success'}
+                          />
+                          <Chip 
+                            label={`Min: ${type.min_training_days} days`} 
+                            size="small" 
+                            variant="outlined"
+                          />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Recommended Features: {type.recommended_features.join(', ')}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Box>
                 </Grid>
               ))}
             </Grid>
@@ -236,36 +242,46 @@ const FnOModelStudio: React.FC = () => {
             <Grid container spacing={2}>
               {fnoStrategies.map((strategy) => (
                 <Grid item xs={12} md={6} key={strategy.id}>
-                  <Card 
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => handleStrategySelect(strategy)}
-                  >
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                        {strategy.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {strategy.description}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                        <Chip 
-                          label={strategy.risk_level} 
-                          size="small" 
-                          color={strategy.risk_level === 'HIGH' ? 'error' : strategy.risk_level === 'MEDIUM' ? 'warning' : 'success'}
-                        />
-                        <Chip 
-                          label={`₹${strategy.minimum_capital.toLocaleString()}`} 
-                          size="small" 
-                          variant="outlined"
-                        />
-                        <Chip 
-                          label={strategy.best_market_condition} 
-                          size="small" 
-                          variant="outlined"
-                        />
-                      </Box>
-                    </CardContent>
-                  </Card>
+                  <Box sx={{ height: '100%' }}>
+                    <Card 
+                      sx={{ 
+                        cursor: 'pointer',
+                        height: '100%',
+                        minHeight: '180px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        border: modelData.option_strategies.includes(strategy.strategy_type) ? '2px solid' : '1px solid',
+                        borderColor: modelData.option_strategies.includes(strategy.strategy_type) ? 'primary.main' : 'divider'
+                      }}
+                      onClick={() => handleStrategySelect(strategy)}
+                    >
+                      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="h6" gutterBottom>
+                          {strategy.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flex: 1 }}>
+                          {strategy.description}
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          <Chip 
+                            label={strategy.risk_level} 
+                            size="small" 
+                            color={strategy.risk_level === 'HIGH' ? 'error' : strategy.risk_level === 'MEDIUM' ? 'warning' : 'success'}
+                          />
+                          <Chip 
+                            label={`₹${strategy.minimum_capital.toLocaleString()}`} 
+                            size="small" 
+                            variant="outlined"
+                          />
+                          <Chip 
+                            label={strategy.best_market_condition} 
+                            size="small" 
+                            variant="outlined"
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Box>
                 </Grid>
               ))}
             </Grid>
@@ -280,55 +296,61 @@ const FnOModelStudio: React.FC = () => {
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Instrument Types</InputLabel>
-                  <Select
-                    multiple
-                    value={modelData.instrument_types}
-                    onChange={(e) => setModelData((prev: any) => ({
-                      ...prev,
-                      instrument_types: e.target.value as string[]
-                    }))}
-                  >
-                    <MenuItem value="OPTIONS">Options</MenuItem>
-                    <MenuItem value="FUTURES">Futures</MenuItem>
-                  </Select>
-                </FormControl>
+                <Box sx={{ height: '100%' }}>
+                  <FormControl fullWidth sx={{ minHeight: '80px' }}>
+                    <InputLabel>Instrument Types</InputLabel>
+                    <Select
+                      multiple
+                      value={modelData.instrument_types}
+                      onChange={(e) => setModelData((prev: any) => ({
+                        ...prev,
+                        instrument_types: e.target.value as string[]
+                      }))}
+                    >
+                      <MenuItem value="OPTIONS">Options</MenuItem>
+                      <MenuItem value="FUTURES">Futures</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
               </Grid>
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Underlying Assets</InputLabel>
-                  <Select
-                    multiple
-                    value={modelData.underlying_assets}
-                    onChange={(e) => setModelData((prev: any) => ({
-                      ...prev,
-                      underlying_assets: e.target.value as string[]
-                    }))}
-                  >
-                    {instruments.options?.map((inst: any) => (
-                      <MenuItem key={inst.symbol} value={inst.symbol}>
-                        {inst.name} (Lot: {inst.lot_size})
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <Box sx={{ height: '100%' }}>
+                  <FormControl fullWidth sx={{ minHeight: '80px' }}>
+                    <InputLabel>Underlying Assets</InputLabel>
+                    <Select
+                      multiple
+                      value={modelData.underlying_assets}
+                      onChange={(e) => setModelData((prev: any) => ({
+                        ...prev,
+                        underlying_assets: e.target.value as string[]
+                      }))}
+                    >
+                      {instruments.options?.map((inst: any) => (
+                        <MenuItem key={inst.symbol} value={inst.symbol}>
+                          {inst.name} (Lot: {inst.lot_size})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
               </Grid>
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Expiry Handling</InputLabel>
-                  <Select
-                    value={modelData.expiry_handling}
-                    onChange={(e) => setModelData((prev: any) => ({
-                      ...prev,
-                      expiry_handling: e.target.value
-                    }))}
-                  >
-                    <MenuItem value="AUTO_ROLLOVER">Auto Rollover</MenuItem>
-                    <MenuItem value="MANUAL_EXIT">Manual Exit</MenuItem>
-                    <MenuItem value="EXPIRY_BASED">Expiry Based</MenuItem>
-                  </Select>
-                </FormControl>
+                <Box sx={{ height: '100%' }}>
+                  <FormControl fullWidth sx={{ minHeight: '80px' }}>
+                    <InputLabel>Expiry Handling</InputLabel>
+                    <Select
+                      value={modelData.expiry_handling}
+                      onChange={(e) => setModelData((prev: any) => ({
+                        ...prev,
+                        expiry_handling: e.target.value
+                      }))}
+                    >
+                      <MenuItem value="AUTO_ROLLOVER">Auto Rollover</MenuItem>
+                      <MenuItem value="MANUAL_EXIT">Manual Exit</MenuItem>
+                      <MenuItem value="EXPIRY_BASED">Expiry Based</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
               </Grid>
             </Grid>
           </Box>
@@ -401,32 +423,41 @@ const FnOModelStudio: React.FC = () => {
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Model Name"
-                  value={modelData.name}
-                  onChange={(e) => setModelData((prev: any) => ({ ...prev, name: e.target.value }))}
-                  required
-                />
+                <Box sx={{ height: '100%' }}>
+                  <TextField
+                    fullWidth
+                    label="Model Name"
+                    value={modelData.name}
+                    onChange={(e) => setModelData((prev: any) => ({ ...prev, name: e.target.value }))}
+                    required
+                    sx={{ height: '80px' }}
+                  />
+                </Box>
               </Grid>
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Training Period (Days)"
-                  type="number"
-                  value={modelData.training_period_days}
-                  onChange={(e) => setModelData((prev: any) => ({ ...prev, training_period_days: parseInt(e.target.value) }))}
-                />
+                <Box sx={{ height: '100%' }}>
+                  <TextField
+                    fullWidth
+                    label="Training Period (Days)"
+                    type="number"
+                    value={modelData.training_period_days}
+                    onChange={(e) => setModelData((prev: any) => ({ ...prev, training_period_days: parseInt(e.target.value) }))}
+                    sx={{ height: '80px' }}
+                  />
+                </Box>
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={4}
-                  label="Description"
-                  value={modelData.description}
-                  onChange={(e) => setModelData((prev: any) => ({ ...prev, description: e.target.value }))}
-                />
+                <Box sx={{ width: '100%' }}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    label="Description"
+                    value={modelData.description}
+                    onChange={(e) => setModelData((prev: any) => ({ ...prev, description: e.target.value }))}
+                    sx={{ minHeight: '120px' }}
+                  />
+                </Box>
               </Grid>
             </Grid>
           </Box>
@@ -439,36 +470,46 @@ const FnOModelStudio: React.FC = () => {
               Review F&O Model Configuration
             </Typography>
             <Paper sx={{ p: 3 }}>
-              <Grid container spacing={2}>
+              <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle1" fontWeight="bold">Model Type</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {fnoModelTypes.find(t => t.type === modelData.model_type)?.name}
-                  </Typography>
+                  <Box sx={{ height: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography variant="subtitle1" fontWeight="bold">Model Type</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {fnoModelTypes.find(t => t.type === modelData.model_type)?.name}
+                    </Typography>
+                  </Box>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle1" fontWeight="bold">Instruments</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {modelData.instrument_types.join(', ')}
-                  </Typography>
+                  <Box sx={{ height: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography variant="subtitle1" fontWeight="bold">Instruments</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {modelData.instrument_types.join(', ')}
+                    </Typography>
+                  </Box>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle1" fontWeight="bold">Underlying Assets</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {modelData.underlying_assets.join(', ')}
-                  </Typography>
+                  <Box sx={{ height: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography variant="subtitle1" fontWeight="bold">Underlying Assets</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {modelData.underlying_assets.join(', ')}
+                    </Typography>
+                  </Box>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle1" fontWeight="bold">Features Selected</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {modelData.features.length} features
-                  </Typography>
+                  <Box sx={{ height: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography variant="subtitle1" fontWeight="bold">Features Selected</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {modelData.features.length} features
+                    </Typography>
+                  </Box>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" fontWeight="bold">Training Period</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {modelData.training_period_days} days
-                  </Typography>
+                  <Box sx={{ height: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography variant="subtitle1" fontWeight="bold">Training Period</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {modelData.training_period_days} days
+                    </Typography>
+                  </Box>
                 </Grid>
               </Grid>
             </Paper>

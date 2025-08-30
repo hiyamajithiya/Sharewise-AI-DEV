@@ -95,6 +95,10 @@ const Strategies: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [activeStep, setActiveStep] = useState(0);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedStrategyForEdit, setSelectedStrategyForEdit] = useState<any>(null);
+  const [selectedStrategyForDetails, setSelectedStrategyForDetails] = useState<any>(null);
   
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.auth.user);
@@ -593,13 +597,39 @@ const Strategies: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ minHeight: '100vh', background: '#f5f7fa' }}>
-      <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: '#f5f7fa',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }
+    }}>
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+      {/* Header with glassmorphism */}
+      <Box sx={{ 
+        mb: 4,
+        p: 3,
+        borderRadius: '20px',
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+      }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
+            <Typography variant="h4" component="h1" sx={{ 
+              fontWeight: 700, 
+              mb: 1, 
+              color: '#1F2937',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+            }}>
               Trading Strategies 🎯
             </Typography>
             <Typography variant="body1" sx={{ color: '#6B7280' }}>
@@ -612,20 +642,39 @@ const Strategies: React.FC = () => {
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Chip 
               label={tierFeatures.label} 
-              color={tierFeatures.color as any} 
-              sx={{ fontWeight: 600, fontSize: '0.875rem' }} 
+              sx={{ 
+                fontWeight: 600, 
+                fontSize: '0.875rem',
+                backgroundColor: '#f3f4f6',
+                color: '#1F2937',
+                border: '1px solid #d1d5db'
+              }} 
             />
             <Button
               variant="contained"
               startIcon={<Add />}
               onClick={() => setCreateDialogOpen(true)}
               disabled={tierFeatures.maxStrategies !== -1 && strategies.length >= tierFeatures.maxStrategies}
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  transform: 'translateY(-1px)',
+                },
+                '&:disabled': {
+                  background: '#9CA3AF',
+                  color: 'white'
+                }
+              }}
             >
               Create Strategy
             </Button>
           </Box>
         </Box>
-        <Divider />
       </Box>
 
       {/* Feedback Message */}
@@ -656,27 +705,95 @@ const Strategies: React.FC = () => {
         </Alert>
       )}
 
-      {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="strategy tabs">
-          <Tab label="Strategies" />
-          <Tab 
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                Notifications
-                {unreadCount > 0 && (
-                  <Badge 
-                    badgeContent={unreadCount} 
-                    color="error" 
-                    sx={{ '& .MuiBadge-badge': { fontSize: '0.625rem', height: 16, minWidth: 16 } }}
-                  >
-                    <></>  
-                  </Badge>
-                )}
-              </Box>
-            } 
-          />
-        </Tabs>
+      {/* Tabs with theme styling */}
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant={activeTab === 0 ? 'contained' : 'outlined'}
+            onClick={() => setActiveTab(0)}
+            startIcon={<Settings />}
+            sx={{
+              ...(activeTab === 0 ? {
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                borderRadius: '15px',
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  transform: 'translateY(-1px)',
+                },
+              } : {
+                color: '#1F2937',
+                borderColor: '#d1d5db',
+                backgroundColor: 'white',
+                borderRadius: '15px',
+                textTransform: 'none',
+                fontWeight: 600,
+                '&:hover': {
+                  borderColor: '#667eea',
+                  background: '#f8f9ff',
+                  color: '#667eea',
+                },
+              })
+            }}
+          >
+            Strategies
+          </Button>
+          <Button
+            variant={activeTab === 1 ? 'contained' : 'outlined'}
+            onClick={() => setActiveTab(1)}
+            startIcon={<NotificationsActive />}
+            sx={{
+              ...(activeTab === 1 ? {
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                borderRadius: '15px',
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  transform: 'translateY(-1px)',
+                },
+              } : {
+                color: '#1F2937',
+                borderColor: '#d1d5db',
+                backgroundColor: 'white',
+                borderRadius: '15px',
+                textTransform: 'none',
+                fontWeight: 600,
+                '&:hover': {
+                  borderColor: '#667eea',
+                  background: '#f8f9ff',
+                  color: '#667eea',
+                },
+              })
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              Notifications
+              {unreadCount > 0 && (
+                <Badge 
+                  badgeContent={unreadCount} 
+                  color="error" 
+                  sx={{ 
+                    '& .MuiBadge-badge': { 
+                      fontSize: '0.625rem', 
+                      height: 16, 
+                      minWidth: 16,
+                      backgroundColor: '#ef4444',
+                      color: 'white'
+                    } 
+                  }}
+                >
+                  <></>  
+                </Badge>
+              )}
+            </Box>
+          </Button>
+        </Box>
       </Box>
 
       {/* Tab Content */}
@@ -692,7 +809,13 @@ const Strategies: React.FC = () => {
       </Grid>
 
       {/* Strategies Table */}
-      <Paper sx={{ p: 3, background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', border: '1px solid #e0e0e0' }}>
+      <Paper sx={{ 
+        p: 3, 
+        borderRadius: '20px',
+        background: 'white', 
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+      }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
             Your Strategies
@@ -723,12 +846,13 @@ const Strategies: React.FC = () => {
                   borderRadius: '16px', 
                   px: 4, 
                   py: 1.5,
-                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                  
-                  border: '1px solid #e0e0e0',
-                  color: '#1F2937',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
                   '&:hover': {
-                    background: 'rgba(255,255,255,0.2)',
+                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 12px 30px rgba(102, 126, 234, 0.4)',
                   }
                 }}
               >
@@ -911,9 +1035,15 @@ const Strategies: React.FC = () => {
 
       {/* Notifications Tab */}
       {activeTab === 1 && (
-        <Paper sx={{ p: 3 }}>
+        <Paper sx={{ 
+          p: 3, 
+          borderRadius: '20px',
+          background: 'white', 
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+        }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
               Notifications {unreadCount > 0 && `(${unreadCount} unread)`}
             </Typography>
             {unreadCount > 0 && (
@@ -921,6 +1051,19 @@ const Strategies: React.FC = () => {
                 size="small" 
                 onClick={handleMarkAllAsRead}
                 disabled={notificationLoading}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  },
+                  '&:disabled': {
+                    background: '#9CA3AF',
+                    color: 'white'
+                  }
+                }}
               >
                 Mark All Read
               </Button>
@@ -951,12 +1094,11 @@ const Strategies: React.FC = () => {
                     borderRadius: '12px', 
                     mb: 1,
                     background: notification.is_read 
-                      ? 'rgba(255,255,255,0.05)' 
-                      : 'rgba(255,255,255,0.1)',
-                    
+                      ? '#f9fafb' 
+                      : 'white',
                     cursor: 'pointer',
                     '&:hover': {
-                      background: 'rgba(255,255,255,0.15)',
+                      background: '#f3f4f6',
                     }
                   }}
                   onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
@@ -1012,19 +1154,21 @@ const Strategies: React.FC = () => {
       {/* Strategy Actions Menu */}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={() => {
-          console.log('Viewing details for strategy:', selectedStrategyId);
-          // In real app, this would open strategy details dialog/page
-          setFeedbackMessage('Strategy details view coming soon!');
-          setTimeout(() => setFeedbackMessage(''), 3000);
+          const strategy = strategies.find(s => s.id === selectedStrategyId);
+          if (strategy) {
+            setSelectedStrategyForDetails(strategy);
+            setDetailsDialogOpen(true);
+          }
           handleMenuClose();
         }}>
           <Visibility sx={{ mr: 1 }} /> View Details
         </MenuItem>
         <MenuItem onClick={() => {
-          console.log('Editing strategy:', selectedStrategyId);
-          // In real app, this would open strategy edit dialog
-          setFeedbackMessage('Strategy editing coming soon!');
-          setTimeout(() => setFeedbackMessage(''), 3000);
+          const strategy = strategies.find(s => s.id === selectedStrategyId);
+          if (strategy) {
+            setSelectedStrategyForEdit(strategy);
+            setEditDialogOpen(true);
+          }
           handleMenuClose();
         }}>
           <Edit sx={{ mr: 1 }} /> Edit Strategy
@@ -1147,54 +1291,71 @@ const Strategies: React.FC = () => {
       </Menu>
 
       {/* Enhanced Create Strategy Dialog */}
-      <Dialog open={createDialogOpen} onClose={resetDialog} maxWidth="md" fullWidth>
+      <Dialog open={createDialogOpen} onClose={resetDialog} maxWidth="md" fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          }
+        }}
+      >
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Add color="primary" />
-            Create New Trading Strategy
+            <Add sx={{ color: '#667eea' }} />
+            <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
+              Create New Trading Strategy
+            </Typography>
           </Box>
         </DialogTitle>
         <DialogContent
           sx={{
             '& .MuiTextField-root': {
               '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white',
                 '& fieldset': {
-                  borderColor: 'rgba(255,255,255,0.3)',
+                  borderColor: '#d1d5db',
                 },
                 '&:hover fieldset': {
-                  borderColor: 'rgba(255,255,255,0.5)',
+                  borderColor: '#667eea',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: 'white',
+                  borderColor: '#667eea',
+                  borderWidth: '2px',
                 },
                 color: '#1F2937',
               },
               '& .MuiInputLabel-root': {
                 color: '#374151',
                 '&.Mui-focused': {
-                  color: '#1F2937',
+                  color: '#667eea',
                 },
               },
             },
-            '& .MuiFormControl-root .MuiInputLabel-root': {
-              color: '#374151',
-              '&.Mui-focused': {
-                color: '#1F2937',
-              },
-            },
-            '& .MuiSelect-root': {
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(255,255,255,0.3)',
-              },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(255,255,255,0.5)',
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'white',
-              },
-              color: '#1F2937',
-              '& .MuiSvgIcon-root': {
+            '& .MuiFormControl-root': {
+              '& .MuiInputLabel-root': {
                 color: '#374151',
+                '&.Mui-focused': {
+                  color: '#667eea',
+                },
+              },
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white',
+                '& fieldset': {
+                  borderColor: '#d1d5db',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#667eea',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#667eea',
+                  borderWidth: '2px',
+                },
+                color: '#1F2937',
+                '& .MuiSvgIcon-root': {
+                  color: '#374151',
+                },
               },
             },
           }}
@@ -1732,9 +1893,11 @@ const Strategies: React.FC = () => {
           <Button 
             onClick={resetDialog}
             sx={{
-              color: '#374151',
+              color: '#6B7280',
+              borderRadius: '8px',
+              textTransform: 'none',
               '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
+                backgroundColor: '#f3f4f6',
               }
             }}
           >
@@ -1744,12 +1907,14 @@ const Strategies: React.FC = () => {
             disabled={activeStep === 0} 
             onClick={handleBack}
             sx={{
-              color: '#374151',
+              color: '#6B7280',
+              borderRadius: '8px',
+              textTransform: 'none',
               '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
+                backgroundColor: '#f3f4f6',
               },
               '&:disabled': {
-                color: 'rgba(255,255,255,0.3)',
+                color: '#9CA3AF',
               }
             }}
           >
@@ -1761,17 +1926,20 @@ const Strategies: React.FC = () => {
               onClick={handleCreateStrategy}
               disabled={!newStrategy.name || !newStrategy.symbols}
               sx={{
-                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                
-                border: '1px solid #e0e0e0',
-                borderRadius: '16px',
-                color: '#1F2937',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
                 '&:hover': {
-                  background: 'rgba(255,255,255,0.2)',
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  transform: 'translateY(-1px)',
                 },
                 '&:disabled': {
-                  background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                  color: 'rgba(255,255,255,0.3)',
+                  background: '#9CA3AF',
+                  color: 'white',
+                  transform: 'none'
                 }
               }}
             >
@@ -1782,13 +1950,15 @@ const Strategies: React.FC = () => {
               variant="contained" 
               onClick={handleNext}
               sx={{
-                background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                
-                border: '1px solid #e0e0e0',
-                borderRadius: '16px',
-                color: '#1F2937',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
                 '&:hover': {
-                  background: 'rgba(255,255,255,0.2)',
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  transform: 'translateY(-1px)',
                 }
               }}
             >
@@ -1825,43 +1995,49 @@ const Strategies: React.FC = () => {
           sx={{
             '& .MuiTextField-root': {
               '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white',
                 '& fieldset': {
-                  borderColor: 'rgba(255,255,255,0.3)',
+                  borderColor: '#d1d5db',
                 },
                 '&:hover fieldset': {
-                  borderColor: 'rgba(255,255,255,0.5)',
+                  borderColor: '#667eea',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: 'white',
+                  borderColor: '#667eea',
+                  borderWidth: '2px',
                 },
                 color: '#1F2937',
               },
               '& .MuiInputLabel-root': {
                 color: '#374151',
                 '&.Mui-focused': {
-                  color: '#1F2937',
+                  color: '#667eea',
                 },
               },
             },
-            '& .MuiFormControl-root .MuiInputLabel-root': {
-              color: '#374151',
-              '&.Mui-focused': {
-                color: '#1F2937',
-              },
-            },
-            '& .MuiSelect-root': {
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(255,255,255,0.3)',
-              },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(255,255,255,0.5)',
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'white',
-              },
-              color: '#1F2937',
-              '& .MuiSvgIcon-root': {
+            '& .MuiFormControl-root': {
+              '& .MuiInputLabel-root': {
                 color: '#374151',
+                '&.Mui-focused': {
+                  color: '#667eea',
+                },
+              },
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white',
+                '& fieldset': {
+                  borderColor: '#d1d5db',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#667eea',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#667eea',
+                  borderWidth: '2px',
+                },
+                color: '#1F2937',
+                '& .MuiSvgIcon-root': {
+                  color: '#374151',
+                },
               },
             },
           }}
@@ -1915,65 +2091,14 @@ const Strategies: React.FC = () => {
                     defaultValue="RELIANCE"
                     fullWidth
                     size="small"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          borderColor: 'rgba(255,255,255,0.3)',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: 'rgba(255,255,255,0.5)',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: 'white',
-                        },
-                        color: '#1F2937',
-                      },
-                      '& .MuiInputLabel-root': {
-                        color: '#374151',
-                        '&.Mui-focused': {
-                          color: '#1F2937',
-                        },
-                      },
-                    }}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <FormControl fullWidth size="small">
-                    <InputLabel sx={{ color: '#374151', '&.Mui-focused': { color: '#1F2937' } }}>Action</InputLabel>
+                    <InputLabel>Action</InputLabel>
                     <Select 
                       defaultValue="BUY" 
                       label="Action"
-                      sx={{
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'rgba(255,255,255,0.3)',
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'rgba(255,255,255,0.5)',
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'white',
-                        },
-                        color: '#1F2937',
-                        '& .MuiSvgIcon-root': {
-                          color: '#374151',
-                        }
-                      }}
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                            
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '12px',
-                            '& .MuiMenuItem-root': {
-                              color: '#1F2937',
-                              '&:hover': {
-                                backgroundColor: 'rgba(255,255,255,0.1)'
-                              }
-                            }
-                          }
-                        }
-                      }}
                     >
                       <MenuItem value="BUY">Buy</MenuItem>
                       <MenuItem value="SELL">Sell</MenuItem>
@@ -2048,9 +2173,11 @@ const Strategies: React.FC = () => {
           <Button 
             onClick={() => setTradeDialogOpen(false)}
             sx={{
-              color: '#374151',
+              color: '#6B7280',
+              borderRadius: '8px',
+              textTransform: 'none',
               '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
+                backgroundColor: '#f3f4f6',
               }
             }}
           >
@@ -2058,7 +2185,6 @@ const Strategies: React.FC = () => {
           </Button>
           <Button 
             variant="contained" 
-            color="primary"
             onClick={() => {
               console.log('Executing manual trade for strategy:', selectedStrategyId);
               setTradeDialogOpen(false);
@@ -2066,17 +2192,451 @@ const Strategies: React.FC = () => {
             }}
             startIcon={<PlayArrow />}
             sx={{
-              background: 'white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-              
-              border: '1px solid #e0e0e0',
-              borderRadius: '16px',
-              color: '#1F2937',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
               '&:hover': {
-                background: 'rgba(255,255,255,0.2)',
+                background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                transform: 'translateY(-1px)',
               }
             }}
           >
             Execute Trade
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Strategy Details Dialog */}
+      <Dialog 
+        open={detailsDialogOpen} 
+        onClose={() => {
+          setDetailsDialogOpen(false);
+          setSelectedStrategyForDetails(null);
+        }} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          }
+        }}
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Visibility sx={{ color: '#667eea' }} />
+            <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
+              Strategy Details
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {selectedStrategyForDetails && (() => {
+            const strategy = selectedStrategyForDetails;
+            if (!strategy) return null;
+            
+            return (
+              <Box sx={{ pt: 2 }}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Card 
+                      variant="outlined"
+                      sx={{
+                        background: 'white', 
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '16px'
+                      }}
+                    >
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom sx={{ color: '#1F2937', display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Settings /> Strategy Information
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Name</Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>{strategy.name}</Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Type</Typography>
+                            <Chip label={strategy.type} size="small" variant="outlined" />
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Status</Typography>
+                            <Chip 
+                              label={strategy.status} 
+                              color={getStatusColor(strategy.status) as any} 
+                              size="small"
+                            />
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Risk Level</Typography>
+                            <Chip 
+                              label={strategy.riskLevel} 
+                              color={getRiskColor(strategy.riskLevel) as any} 
+                              size="small"
+                            />
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Timeframe</Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>{strategy.timeframe}</Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Created</Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>{strategy.createdAt}</Typography>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  
+                  <Grid item xs={12} md={6}>
+                    <Card 
+                      variant="outlined"
+                      sx={{
+                        background: 'white', 
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '16px'
+                      }}
+                    >
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom sx={{ color: '#1F2937', display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <BarChart /> Performance Metrics
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Total Return</Typography>
+                            <Typography 
+                              variant="h6" 
+                              sx={{ 
+                                color: strategy.performance >= 0 ? 'success.main' : 'error.main',
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5
+                              }}
+                            >
+                              {strategy.performance >= 0 ? '+' : ''}{strategy.performance}%
+                              {strategy.performance >= 0 ? 
+                                <TrendingUp sx={{ fontSize: 20 }} /> : 
+                                <TrendingDown sx={{ fontSize: 20 }} />
+                              }
+                            </Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Total Trades</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>{strategy.trades}</Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Win Rate</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>{strategy.winRate}%</Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Auto Trading</Typography>
+                            <Chip 
+                              icon={strategy.autoTrade ? <AutoMode /> : <PanTool />}
+                              label={strategy.autoTrade ? 'ENABLED' : 'DISABLED'} 
+                              color={strategy.autoTrade ? 'success' : 'default'}
+                              size="small"
+                            />
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Last Trade</Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>{strategy.lastTrade}</Typography>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  
+                  <Grid item xs={12}>
+                    <Card 
+                      variant="outlined"
+                      sx={{
+                        background: 'white', 
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '16px'
+                      }}
+                    >
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom sx={{ color: '#1F2937', display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <TrendingUp /> Current Signal Status
+                        </Typography>
+                        <Box sx={{ 
+                          p: 2, 
+                          background: '#f8f9ff', 
+                          borderRadius: '8px',
+                          border: '1px solid #e0e0e0'
+                        }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>
+                            {strategy.nextSignal}
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+              </Box>
+            );
+          })()}
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={() => setDetailsDialogOpen(false)}
+            sx={{
+              color: '#6B7280',
+              borderRadius: '8px',
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: '#f3f4f6',
+              }
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Strategy Dialog */}
+      <Dialog 
+        open={editDialogOpen} 
+        onClose={() => {
+          setEditDialogOpen(false);
+          setSelectedStrategyForEdit(null);
+        }} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          }
+        }}
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Edit sx={{ color: '#667eea' }} />
+            <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
+              Edit Strategy: {selectedStrategyForEdit?.name}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            '& .MuiTextField-root': {
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white',
+                '& fieldset': {
+                  borderColor: '#d1d5db',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#667eea',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#667eea',
+                  borderWidth: '2px',
+                },
+                color: '#1F2937',
+              },
+              '& .MuiInputLabel-root': {
+                color: '#374151',
+                '&.Mui-focused': {
+                  color: '#667eea',
+                },
+              },
+            },
+            '& .MuiFormControl-root': {
+              '& .MuiInputLabel-root': {
+                color: '#374151',
+                '&.Mui-focused': {
+                  color: '#667eea',
+                },
+              },
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'white',
+                '& fieldset': {
+                  borderColor: '#d1d5db',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#667eea',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#667eea',
+                  borderWidth: '2px',
+                },
+                color: '#1F2937',
+                '& .MuiSvgIcon-root': {
+                  color: '#374151',
+                },
+              },
+            },
+          }}
+        >
+          {selectedStrategyForEdit && (
+            <Box sx={{ pt: 2 }}>
+              <Card 
+                variant="outlined"
+                sx={{
+                  background: 'white', 
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '16px'
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>
+                    Edit Strategy Settings
+                  </Typography>
+                  
+                  <GuidelineBox title="Strategy Editing" icon={<Info />}>
+                    You can modify your strategy settings here. Changes will take effect immediately and may affect any active trades.
+                  </GuidelineBox>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Strategy Name"
+                        defaultValue={selectedStrategyForEdit.name}
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Strategy Type</InputLabel>
+                        <Select
+                          defaultValue={selectedStrategyForEdit.type}
+                          label="Strategy Type"
+                        >
+                          <MenuItem value="TECHNICAL">Technical Analysis</MenuItem>
+                          <MenuItem value="FUNDAMENTAL">Fundamental Analysis</MenuItem>
+                          {tierFeatures.customIndicators && <MenuItem value="AI_POWERED">AI-Powered</MenuItem>}
+                          {tierFeatures.customIndicators && <MenuItem value="OPTIONS">Options Strategy</MenuItem>}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Timeframe</InputLabel>
+                        <Select
+                          defaultValue={selectedStrategyForEdit.timeframe}
+                          label="Timeframe"
+                        >
+                          <MenuItem value="1M">1 Minute</MenuItem>
+                          <MenuItem value="5M">5 Minutes</MenuItem>
+                          <MenuItem value="15M">15 Minutes</MenuItem>
+                          <MenuItem value="1H">1 Hour</MenuItem>
+                          <MenuItem value="4H">4 Hours</MenuItem>
+                          <MenuItem value="1D">1 Day</MenuItem>
+                          <MenuItem value="1W">1 Week</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth>
+                        <InputLabel>Risk Level</InputLabel>
+                        <Select
+                          defaultValue={selectedStrategyForEdit.riskLevel}
+                          label="Risk Level"
+                        >
+                          <MenuItem value="LOW">Low Risk</MenuItem>
+                          <MenuItem value="MEDIUM">Medium Risk</MenuItem>
+                          <MenuItem value="HIGH">High Risk</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                          defaultValue={selectedStrategyForEdit.status}
+                          label="Status"
+                        >
+                          <MenuItem value="ACTIVE">Active</MenuItem>
+                          <MenuItem value="PAUSED">Paused</MenuItem>
+                          <MenuItem value="STOPPED">Stopped</MenuItem>
+                          <MenuItem value="BACKTESTING">Backtesting</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Auto Trading</InputLabel>
+                        <Select
+                          defaultValue={selectedStrategyForEdit.autoTrade ? 'true' : 'false'}
+                          label="Auto Trading"
+                        >
+                          <MenuItem value="true">Enabled</MenuItem>
+                          <MenuItem value="false">Disabled</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={() => {
+              setEditDialogOpen(false);
+              setSelectedStrategyForEdit(null);
+            }}
+            sx={{
+              color: '#6B7280',
+              borderRadius: '8px',
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: '#f3f4f6',
+              }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={() => {
+              console.log('Saving strategy changes:', selectedStrategyForEdit);
+              
+              // Update the strategy in state (in real app, this would be API call)
+              setStrategiesState(prevStrategies => 
+                prevStrategies.map(strategy => 
+                  strategy.id === selectedStrategyForEdit?.id 
+                    ? { ...strategy, /* updated fields would go here */ }
+                    : strategy
+                )
+              );
+              
+              setFeedbackMessage(`Strategy "${selectedStrategyForEdit?.name}" updated successfully!`);
+              setTimeout(() => setFeedbackMessage(''), 3000);
+              
+              setEditDialogOpen(false);
+              setSelectedStrategyForEdit(null);
+            }}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                transform: 'translateY(-1px)',
+              }
+            }}
+          >
+            Save Changes
           </Button>
         </DialogActions>
       </Dialog>

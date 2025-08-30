@@ -295,6 +295,34 @@ class ApiService {
     return response.data;
   }
 
+  // Admin User Management methods
+  async getAllUsers(): Promise<any> {
+    const response = await this.api.get('/users/admin/all-users/');
+    return response.data;
+  }
+
+  async createUser(userData: {
+    email: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
+    role: string;
+    subscription_tier: string;
+    password: string;
+  }): Promise<any> {
+    const response = await this.api.post('/users/admin/create-user/', {
+      email: userData.email,
+      username: userData.email, // Use email as username
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      phone_number: userData.phone_number,
+      role: userData.role,
+      subscription_tier: userData.subscription_tier,
+      password: userData.password,
+    });
+    return response.data;
+  }
+
   // Trading signals methods
   async getSignals(params?: any): Promise<any> {
     const response = await this.api.get('/trading/signals/', { params });

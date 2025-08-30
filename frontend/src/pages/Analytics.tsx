@@ -24,6 +24,18 @@ import {
   Chip,
   LinearProgress,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Switch,
+  FormControlLabel,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  Divider,
 } from '@mui/material';
 import {
   BarChart,
@@ -39,6 +51,12 @@ import {
   TrendingDown,
   AccountBalance,
   Speed,
+  Add,
+  Edit,
+  Delete,
+  Schedule,
+  Email,
+  AccessTime,
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
@@ -58,16 +76,26 @@ function TabPanel({ children, value, index }: TabPanelProps) {
       id={`analytics-tabpanel-${index}`}
       style={{ 
         flex: 1, 
-        overflow: 'auto', 
         display: value === index ? 'block' : 'none',
-        height: '100%',
         margin: 0,
         padding: 0
       }}
     >
-      {value === index && <Box sx={{ p: 1.5, height: '100%', overflow: 'auto', m: 0 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 1.5, m: 0 }}>{children}</Box>}
     </div>
   );
+}
+
+interface ScheduledReport {
+  id: string;
+  name: string;
+  type: string;
+  frequency: string;
+  format: string;
+  lastSent: string;
+  nextScheduled: string;
+  active: boolean;
+  email: string;
 }
 
 const Analytics: React.FC = () => {
@@ -75,6 +103,55 @@ const Analytics: React.FC = () => {
   const { isTestingMode, selectedUser } = testingState;
   const [tabValue, setTabValue] = useState(0);
   const [timeframe, setTimeframe] = useState('1M');
+  
+  // Schedule Management State
+  const [manageSchedulesDialog, setManageSchedulesDialog] = useState(false);
+  const [createScheduleDialog, setCreateScheduleDialog] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<ScheduledReport | null>(null);
+  const [schedules, setSchedules] = useState<ScheduledReport[]>([
+    {
+      id: '1',
+      name: 'Daily Performance Summary',
+      type: 'performance',
+      frequency: 'daily',
+      format: 'email',
+      lastSent: 'Today 6:00 AM',
+      nextScheduled: 'Tomorrow 6:00 AM',
+      active: true,
+      email: 'user@example.com'
+    },
+    {
+      id: '2',
+      name: 'Weekly Risk Report',
+      type: 'risk',
+      frequency: 'weekly',
+      format: 'pdf',
+      lastSent: 'Monday 8:00 AM',
+      nextScheduled: 'Next Monday 8:00 AM',
+      active: true,
+      email: 'user@example.com'
+    },
+    {
+      id: '3',
+      name: 'Monthly Attribution',
+      type: 'attribution',
+      frequency: 'monthly',
+      format: 'excel',
+      lastSent: 'Last month',
+      nextScheduled: '1st of next month',
+      active: false,
+      email: 'user@example.com'
+    }
+  ]);
+  
+  const [newSchedule, setNewSchedule] = useState<Partial<ScheduledReport>>({
+    name: '',
+    type: 'performance',
+    frequency: 'weekly',
+    format: 'email',
+    active: true,
+    email: ''
+  });
 
   const handleExportData = () => {
     // Create comprehensive analytics data
@@ -205,6 +282,102 @@ const Analytics: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  // Schedule Management Functions
+  const handleManageSchedules = () => {
+    setManageSchedulesDialog(true);
+  };
+
+  const handleCloseManageSchedules = () => {
+    setManageSchedulesDialog(false);
+    setEditingSchedule(null);
+  };
+
+  const handleCreateNewSchedule = () => {
+    setCreateScheduleDialog(true);
+    setNewSchedule({
+      name: '',
+      type: 'performance',
+      frequency: 'weekly',
+      format: 'email',
+      active: true,
+      email: ''
+    });
+  };
+
+  const handleSaveSchedule = () => {
+    if (newSchedule.name && newSchedule.email) {
+      const schedule: ScheduledReport = {
+        id: Date.now().toString(),
+        name: newSchedule.name!,
+        type: newSchedule.type!,
+        frequency: newSchedule.frequency!,
+        format: newSchedule.format!,
+        lastSent: 'Never',
+        nextScheduled: getNextScheduledTime(newSchedule.frequency!),
+        active: newSchedule.active!,
+        email: newSchedule.email!
+      };
+      
+      setSchedules([...schedules, schedule]);
+      setCreateScheduleDialog(false);
+      setNewSchedule({
+        name: '',
+        type: 'performance',
+        frequency: 'weekly',
+        format: 'email',
+        active: true,
+        email: ''
+      });
+    }
+  };
+
+  const handleEditSchedule = (schedule: ScheduledReport) => {
+    setEditingSchedule(schedule);
+    setNewSchedule(schedule);
+    setCreateScheduleDialog(true);
+  };
+
+  const handleUpdateSchedule = () => {
+    if (editingSchedule && newSchedule.name && newSchedule.email) {
+      const updatedSchedules = schedules.map(schedule => 
+        schedule.id === editingSchedule.id 
+          ? { ...schedule, ...newSchedule, nextScheduled: getNextScheduledTime(newSchedule.frequency!) }
+          : schedule
+      );
+      setSchedules(updatedSchedules);
+      setCreateScheduleDialog(false);
+      setEditingSchedule(null);
+    }
+  };
+
+  const handleDeleteSchedule = (id: string) => {
+    setSchedules(schedules.filter(schedule => schedule.id !== id));
+  };
+
+  const handleToggleSchedule = (id: string) => {
+    setSchedules(schedules.map(schedule => 
+      schedule.id === id ? { ...schedule, active: !schedule.active } : schedule
+    ));
+  };
+
+  const getNextScheduledTime = (frequency: string) => {
+    const now = new Date();
+    switch (frequency) {
+      case 'daily':
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+        return `Tomorrow ${now.getHours()}:00`;
+      case 'weekly':
+        return 'Next Monday 8:00 AM';
+      case 'monthly':
+        return '1st of next month';
+      case 'quarterly':
+        return 'Next quarter';
+      default:
+        return 'Not scheduled';
+    }
+  };
+
   const handlePreviewReport = () => {
     // Open preview in new window
     console.log('Opening report preview...');
@@ -293,14 +466,13 @@ const Analytics: React.FC = () => {
 
   return (
     <Box sx={{ 
-      height: '100vh',
+      minHeight: '100vh',
       background: '#f5f7fa',
       position: 'relative',
-      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
     }}>
-      <Container maxWidth="xl" sx={{ py: 2, position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <Container maxWidth="xl" sx={{ py: 2, position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box sx={{ 
           mb: 2,
@@ -433,10 +605,9 @@ const Analytics: React.FC = () => {
           background: 'white',
           border: '1px solid #e0e0e0',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-          flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',
+          minHeight: '600px',
         }}>
         <Tabs
           value={tabValue}
@@ -883,37 +1054,66 @@ const Analytics: React.FC = () => {
               background: 'white',
               border: '1px solid #e0e0e0',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+              height: 'auto',
+              minHeight: '400px'
             }}>
-              <CardContent sx={{ p: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
+              <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
                   Scheduled Reports
                 </Typography>
 
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: '#1F2937' }}>Daily Performance Summary</Typography>
-                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                    Last sent: Today 6:00 AM
-                  </Typography>
-                  <Chip label="Active" size="small" sx={{ mt: 1, backgroundColor: '#00e676', color: 'black', fontWeight: 600 }} />
+                <Box sx={{ mb: 3, flex: '1 0 auto' }}>
+                  {schedules.filter(s => s.active).slice(0, 3).map((schedule, index) => (
+                    <Box key={schedule.id} sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: '12px', border: '1px solid #e9ecef' }}>
+                      <Typography variant="subtitle2" sx={{ color: '#1F2937', fontWeight: 600, mb: 1 }}>
+                        {schedule.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280', mb: 2 }}>
+                        {schedule.lastSent !== 'Never' ? `Last sent: ${schedule.lastSent}` : `Next: ${schedule.nextScheduled}`}
+                      </Typography>
+                      <Chip 
+                        label={schedule.active ? "Active" : "Paused"} 
+                        size="small" 
+                        sx={{ 
+                          backgroundColor: schedule.active ? '#00e676' : '#e0e0e0', 
+                          color: schedule.active ? 'black' : '#6B7280', 
+                          fontWeight: 600 
+                        }} 
+                      />
+                    </Box>
+                  ))}
+                  
+                  {schedules.filter(s => s.active).length === 0 && (
+                    <Box sx={{ textAlign: 'center', py: 3 }}>
+                      <Schedule sx={{ fontSize: 48, color: '#6B7280', mb: 2 }} />
+                      <Typography variant="body2" sx={{ color: '#6B7280', mb: 2 }}>
+                        No active schedules
+                      </Typography>
+                      <Button
+                        size="small"
+                        onClick={handleCreateNewSchedule}
+                        sx={{ color: '#667eea', textTransform: 'none' }}
+                      >
+                        Create your first schedule
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
 
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: '#1F2937' }}>Weekly Risk Report</Typography>
-                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                    Last sent: Monday 8:00 AM
-                  </Typography>
-                  <Chip label="Active" size="small" sx={{ mt: 1, backgroundColor: '#00e676', color: 'black', fontWeight: 600 }} />
-                </Box>
-
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" sx={{ color: '#1F2937' }}>Monthly Attribution</Typography>
-                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                    Next: 1st of next month
-                  </Typography>
-                  <Chip label="Scheduled" color="info" size="small" sx={{ mt: 1 }} />
-                </Box>
-
-                <Button variant="outlined" fullWidth startIcon={<FilterList />}>
+                <Button 
+                  variant="contained" 
+                  fullWidth 
+                  startIcon={<Schedule />}
+                  onClick={handleManageSchedules}
+                  sx={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '12px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    py: 1.5,
+                    mt: 'auto'
+                  }}
+                >
                   Manage Schedules
                 </Button>
               </CardContent>
@@ -923,6 +1123,264 @@ const Analytics: React.FC = () => {
         </TabPanel>
       </Paper>
       </Container>
+
+      {/* Manage Schedules Dialog */}
+      <Dialog
+        open={manageSchedulesDialog}
+        onClose={handleCloseManageSchedules}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              📋 Manage Scheduled Reports
+            </Typography>
+            <Button
+              startIcon={<Add />}
+              onClick={handleCreateNewSchedule}
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600
+              }}
+            >
+              Create New
+            </Button>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <List>
+            {schedules.map((schedule, index) => (
+              <Box key={schedule.id}>
+                <ListItem>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                          {schedule.name}
+                        </Typography>
+                        <Chip 
+                          label={schedule.active ? 'Active' : 'Paused'} 
+                          size="small" 
+                          color={schedule.active ? 'success' : 'default'}
+                        />
+                      </Box>
+                    }
+                    secondary={
+                      <Box sx={{ mt: 1 }}>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                          📊 {schedule.type.charAt(0).toUpperCase() + schedule.type.slice(1)} • 🔄 {schedule.frequency} • 📧 {schedule.format}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                          Last sent: {schedule.lastSent} • Next: {schedule.nextScheduled}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                          📧 {schedule.email}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                  <ListItemSecondaryAction>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={schedule.active}
+                            onChange={() => handleToggleSchedule(schedule.id)}
+                            size="small"
+                          />
+                        }
+                        label=""
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditSchedule(schedule)}
+                        sx={{ color: '#667eea' }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteSchedule(schedule.id)}
+                        sx={{ color: '#ef4444' }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </ListItemSecondaryAction>
+                </ListItem>
+                {index < schedules.length - 1 && <Divider />}
+              </Box>
+            ))}
+          </List>
+          
+          {schedules.length === 0 && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Schedule sx={{ fontSize: 64, color: '#6B7280', mb: 2 }} />
+              <Typography variant="h6" sx={{ color: '#1F2937', mb: 1 }}>
+                No Scheduled Reports
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
+                Create your first automated report schedule to get regular insights delivered to your inbox.
+              </Typography>
+              <Button
+                startIcon={<Add />}
+                onClick={handleCreateNewSchedule}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  borderRadius: '12px',
+                  textTransform: 'none',
+                  fontWeight: 600
+                }}
+              >
+                Create Your First Schedule
+              </Button>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={handleCloseManageSchedules} sx={{ borderRadius: '12px' }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Create/Edit Schedule Dialog */}
+      <Dialog
+        open={createScheduleDialog}
+        onClose={() => {
+          setCreateScheduleDialog(false);
+          setEditingSchedule(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {editingSchedule ? '✏️ Edit Schedule' : '➕ Create New Schedule'}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Report Name"
+                value={newSchedule.name || ''}
+                onChange={(e) => setNewSchedule({ ...newSchedule, name: e.target.value })}
+                placeholder="e.g., Weekly Performance Summary"
+                required
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Report Type</InputLabel>
+                <Select
+                  value={newSchedule.type || 'performance'}
+                  onChange={(e) => setNewSchedule({ ...newSchedule, type: e.target.value })}
+                  label="Report Type"
+                >
+                  <MenuItem value="performance">📈 Performance Summary</MenuItem>
+                  <MenuItem value="risk">⚠️ Risk Analysis</MenuItem>
+                  <MenuItem value="attribution">🎯 Attribution Report</MenuItem>
+                  <MenuItem value="custom">⚙️ Custom Metrics</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Frequency</InputLabel>
+                <Select
+                  value={newSchedule.frequency || 'weekly'}
+                  onChange={(e) => setNewSchedule({ ...newSchedule, frequency: e.target.value })}
+                  label="Frequency"
+                >
+                  <MenuItem value="daily">📅 Daily</MenuItem>
+                  <MenuItem value="weekly">📊 Weekly</MenuItem>
+                  <MenuItem value="monthly">📆 Monthly</MenuItem>
+                  <MenuItem value="quarterly">📋 Quarterly</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Format</InputLabel>
+                <Select
+                  value={newSchedule.format || 'email'}
+                  onChange={(e) => setNewSchedule({ ...newSchedule, format: e.target.value })}
+                  label="Format"
+                >
+                  <MenuItem value="email">📧 Email Summary</MenuItem>
+                  <MenuItem value="pdf">📄 PDF Report</MenuItem>
+                  <MenuItem value="excel">📊 Excel Spreadsheet</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Email Address"
+                type="email"
+                value={newSchedule.email || ''}
+                onChange={(e) => setNewSchedule({ ...newSchedule, email: e.target.value })}
+                placeholder="your@email.com"
+                required
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={newSchedule.active || false}
+                    onChange={(e) => setNewSchedule({ ...newSchedule, active: e.target.checked })}
+                  />
+                }
+                label="Active (Start sending reports immediately)"
+              />
+            </Grid>
+          </Grid>
+          
+          <Alert severity="info" sx={{ mt: 3 }}>
+            <Typography variant="body2">
+              <strong>📧 Delivery Info:</strong> Reports will be sent to your email at the scheduled time. 
+              You can pause or modify schedules anytime.
+            </Typography>
+          </Alert>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={() => {
+              setCreateScheduleDialog(false);
+              setEditingSchedule(null);
+            }}
+            sx={{ borderRadius: '12px' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={editingSchedule ? handleUpdateSchedule : handleSaveSchedule}
+            variant="contained"
+            disabled={!newSchedule.name || !newSchedule.email}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600
+            }}
+          >
+            {editingSchedule ? 'Update Schedule' : 'Create Schedule'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

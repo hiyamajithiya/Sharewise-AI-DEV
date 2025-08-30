@@ -112,186 +112,278 @@ const Marketplace: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-        <Box>
-          <Typography variant="h5">AI Model Marketplace 🛒</Typography>
-          <Typography variant="body2" color="text.secondary" paragraph>
-            Discover and lease proven AI trading models from experienced creators.
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {/* Quick Help - Top Right */}
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: 2, 
-              bgcolor: 'info.light', 
-              borderRadius: 2, 
-              maxWidth: 300,
-              border: '1px solid',
-              borderColor: 'info.main'
-            }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'info.main' }}>
-              💡 Quick Start
+      {/* Header Section */}
+      <Paper sx={{
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        borderRadius: '20px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        p: 3,
+        mb: 3
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#1F2937', mb: 1 }}>
+              🛒 AI Model Marketplace
             </Typography>
-            <Typography variant="body2" sx={{ color: 'info.dark', fontSize: '0.8rem' }}>
-              Rent proven AI models instead of building your own. Look for high returns, good ratings, and positive reviews.
+            <Typography variant="body1" sx={{ color: '#6B7280' }}>
+              Discover and lease proven AI trading models from experienced creators
             </Typography>
-          </Paper>
-          
+          </Box>
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<ShoppingCartIcon />}
             href="/ai-studio?tab=4"
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3
+            }}
           >
             My Leases
           </Button>
         </Box>
-      </Box>
+      </Paper>
+
+      {/* Quick Help Guide */}
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 2, 
+          bgcolor: 'info.light', 
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'info.main',
+          mb: 3
+        }}
+      >
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'info.main' }}>
+          💡 Marketplace Guide
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'info.dark', fontSize: '0.875rem' }}>
+          Rent proven AI models instead of building your own. Look for high returns, good ratings, and positive reviews. Start with Classification models for beginners.
+        </Typography>
+      </Paper>
 
 
 
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+      <Paper sx={{
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        borderRadius: '20px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        p: 3,
+        mb: 3
+      }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1F2937' }}>
           🔎 Search & Filter AI Models
         </Typography>
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
           <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              fullWidth
-              placeholder="Search models (e.g., NIFTY, Banking)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-              }}
-              helperText="Try: RELIANCE, NIFTY, day trading"
-            />
+            <Box sx={{ height: '100%' }}>
+              <TextField
+                fullWidth
+                placeholder="Search models (e.g., NIFTY, Banking)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                }}
+                helperText="Try: RELIANCE, NIFTY, day trading"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    height: '56px'
+                  }
+                }}
+              />
+            </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
-              <InputLabel>Model Type</InputLabel>
-              <Select
-                value={modelTypeFilter}
-                onChange={(e) => setModelTypeFilter(e.target.value)}
-                label="Model Type"
-              >
-                <MenuItem value="">All Types</MenuItem>
-                <MenuItem value="CLASSIFICATION">
-                  <Box>
-                    <Typography variant="body2">Classification</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      🟢 Best for beginners
-                    </Typography>
-                  </Box>
-                </MenuItem>
-                <MenuItem value="REGRESSION">
-                  <Box>
-                    <Typography variant="body2">Regression</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      🟡 Price predictions
-                    </Typography>
-                  </Box>
-                </MenuItem>
-                <MenuItem value="CLUSTERING">
-                  <Box>
-                    <Typography variant="body2">Clustering</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      🔴 Pattern analysis
-                    </Typography>
-                  </Box>
-                </MenuItem>
-              </Select>
-            </FormControl>
+            <Box sx={{ height: '100%' }}>
+              <FormControl fullWidth sx={{
+                '& .MuiInputBase-root': {
+                  height: '56px'
+                }
+              }}>
+                <InputLabel>Model Type</InputLabel>
+                <Select
+                  value={modelTypeFilter}
+                  onChange={(e) => setModelTypeFilter(e.target.value)}
+                  label="Model Type"
+                >
+                  <MenuItem value="">All Types</MenuItem>
+                  <MenuItem value="CLASSIFICATION">
+                    <Box>
+                      <Typography variant="body2">Classification</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        🟢 Best for beginners
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem value="REGRESSION">
+                    <Box>
+                      <Typography variant="body2">Regression</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        🟡 Price predictions
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem value="CLUSTERING">
+                    <Box>
+                      <Typography variant="body2">Clustering</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        🔴 Pattern analysis
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            <TextField
-              fullWidth
-              label="Max Price (₹)"
-              type="number"
-              value={maxPriceFilter}
-              onChange={(e) => setMaxPriceFilter(e.target.value)}
-              helperText="Monthly budget"
-            />
+            <Box sx={{ height: '100%' }}>
+              <TextField
+                fullWidth
+                label="Max Price (₹)"
+                type="number"
+                value={maxPriceFilter}
+                onChange={(e) => setMaxPriceFilter(e.target.value)}
+                helperText="Monthly budget"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    height: '56px'
+                  }
+                }}
+              />
+            </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
-              <InputLabel>Sort By</InputLabel>
-              <Select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                label="Sort By"
-              >
-                <MenuItem value="-total_return">
-                  <Box>
-                    <Typography variant="body2">Best Return</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      🟢 Recommended for beginners
-                    </Typography>
-                  </Box>
-                </MenuItem>
-                <MenuItem value="-sharpe_ratio">Best Sharpe Ratio</MenuItem>
-                <MenuItem value="-win_rate">Highest Win Rate</MenuItem>
-                <MenuItem value="monthly_lease_price">Lowest Price</MenuItem>
-                <MenuItem value="-monthly_lease_price">Highest Price</MenuItem>
-                <MenuItem value="-total_leases">Most Popular</MenuItem>
-              </Select>
-            </FormControl>
+            <Box sx={{ height: '100%' }}>
+              <FormControl fullWidth sx={{
+                '& .MuiInputBase-root': {
+                  height: '56px'
+                }
+              }}>
+                <InputLabel>Sort By</InputLabel>
+                <Select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  label="Sort By"
+                >
+                  <MenuItem value="-total_return">
+                    <Box>
+                      <Typography variant="body2">Best Return</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        🟢 Recommended
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem value="-sharpe_ratio">Best Sharpe Ratio</MenuItem>
+                  <MenuItem value="-win_rate">Highest Win Rate</MenuItem>
+                  <MenuItem value="monthly_lease_price">Lowest Price</MenuItem>
+                  <MenuItem value="-monthly_lease_price">Highest Price</MenuItem>
+                  <MenuItem value="-total_leases">Most Popular</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={3}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <FilterIcon />
-              <Typography variant="body2">
-                {marketplace.length} AI models found
-              </Typography>
+            <Box sx={{ 
+              height: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              background: '#f8f9ff',
+              borderRadius: '12px',
+              p: 2
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FilterIcon sx={{ color: '#667eea' }} />
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
+                  {marketplace.length} AI models found
+                </Typography>
+              </Box>
             </Box>
           </Grid>
         </Grid>
       </Paper>
 
       {marketplace.length === 0 ? (
-        <Card>
-          <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <TrendingUpIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              No AI models found 🔍
+        <Paper sx={{
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          p: 4,
+          textAlign: 'center'
+        }}>
+          <TrendingUpIcon sx={{ fontSize: 64, color: '#6B7280', mb: 2 }} />
+          <Typography variant="h5" sx={{ fontWeight: 600, color: '#1F2937', mb: 2 }}>
+            No AI models found 🔍
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#6B7280', mb: 3 }}>
+            Try adjusting your search filters to find more models, or check back later as new AI models are added daily.
+          </Typography>
+          
+          <Paper elevation={0} sx={{ 
+            p: 3, 
+            mb: 3, 
+            bgcolor: 'warning.light', 
+            borderRadius: '16px',
+            textAlign: 'left', 
+            maxWidth: 500, 
+            mx: 'auto' 
+          }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: 'warning.main' }}>
+              💡 Search Tips:
             </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Try adjusting your search filters to find more models, or check back later as new AI models are added daily.
+            <Typography variant="body2" sx={{ color: 'warning.dark', lineHeight: 1.6 }}>
+              • Remove price filters to see more options<br/>
+              • Try broader search terms (e.g., just "NIFTY")<br/>
+              • Select "All Types" for model type<br/>
+              • New AI models are added weekly!
             </Typography>
-            
-            <Paper elevation={0} sx={{ p: 2, mb: 3, bgcolor: 'warning.light', textAlign: 'left', maxWidth: 400, mx: 'auto' }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'warning.main' }}>
-                💡 Search Tips:
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'warning.dark' }}>
-                • Remove price filters to see more options<br/>
-                • Try broader search terms (e.g., just "NIFTY")<br/>
-                • Select "All Types" for model type<br/>
-                • New AI models are added weekly!
-              </Typography>
-            </Paper>
+          </Paper>
 
-            <Button
-              variant="contained"
-              color="primary"
-              href="/ai-studio?tab=2"
-              sx={{ px: 4 }}
-            >
-              Create Your Own AI Model Instead
-            </Button>
-          </CardContent>
-        </Card>
+          <Button
+            variant="contained"
+            color="primary"
+            href="/ai-studio?tab=2"
+            sx={{ 
+              px: 4, 
+              py: 1.5,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600
+            }}
+          >
+            Create Your Own AI Model Instead
+          </Button>
+        </Paper>
       ) : (
         <Grid container spacing={3}>
           {marketplace.map((model) => (
             <Grid item xs={12} md={6} lg={4} key={model.id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flexGrow: 1 }}>
+              <Paper sx={{ 
+                height: '100%', 
+                display: 'flex', 
+                flexDirection: 'column',
+                background: 'white',
+                border: '1px solid #e0e0e0',
+                borderRadius: '20px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+                }
+              }}>
+                <Box sx={{ flexGrow: 1, p: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                     <Typography variant="h6" component="div" noWrap>
                       {model.name}
@@ -394,7 +486,7 @@ const Marketplace: React.FC = () => {
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
-                      <Typography variant="h6" color="primary.main">
+                      <Typography variant="h6" sx={{ color: '#667eea', fontWeight: 700 }}>
                         {formatCurrency(model.monthly_lease_price)}/month
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
@@ -403,18 +495,24 @@ const Marketplace: React.FC = () => {
                     </Box>
                     <Button
                       variant="contained"
-                      color="primary"
                       startIcon={<ShoppingCartIcon />}
                       onClick={() => {
                         setSelectedModel(model);
                         setLeaseDialog(true);
                       }}
+                      sx={{
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        borderRadius: '12px',
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        px: 3
+                      }}
                     >
                       Lease
                     </Button>
                   </Box>
-                </CardContent>
-              </Card>
+                </Box>
+              </Paper>
             </Grid>
           ))}
         </Grid>
@@ -520,59 +618,6 @@ const Marketplace: React.FC = () => {
         <Alert severity="error" sx={{ mt: 2 }}>
           {error}
         </Alert>
-      )}
-      
-      {/* Bottom Help Guide - Only show when models exist */}
-      {marketplace.length > 0 && (
-        <Paper 
-          elevation={1} 
-          sx={{ 
-            p: 2, 
-            mt: 3, 
-            bgcolor: 'success.light', 
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'success.main'
-          }}
-        >
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: 'success.main' }}>
-            🎯 Model Selection Tips
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                Total Return
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Higher = more profitable
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                Win Rate
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                60%+ is good
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                User Reviews
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Check ratings & feedback
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                Model Type
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Classification = beginner friendly
-              </Typography>
-            </Grid>
-          </Grid>
-        </Paper>
       )}
     </Box>
   );

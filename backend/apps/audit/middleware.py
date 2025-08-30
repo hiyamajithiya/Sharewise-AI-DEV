@@ -96,7 +96,7 @@ class AuditMiddleware(MiddlewareMixin):
             # Log the error
             audit_logger.log_event(
                 event_type=AuditEvent.EventType.SECURITY_VIOLATION,
-                user=getattr(request, 'user', None) if hasattr(request, 'user') and request.user.is_authenticated else None,
+                user=getattr(request, 'user', None) if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated else None,
                 description=f"Request exception: {str(exception)}",
                 details={
                     'exception_type': type(exception).__name__,
@@ -327,7 +327,7 @@ class SecurityMiddleware(MiddlewareMixin):
                     threat_level='HIGH',
                     title='Suspicious request patterns detected',
                     description=f"Detected patterns: {', '.join(detected_patterns)}",
-                    user=getattr(request, 'user', None) if hasattr(request, 'user') and request.user.is_authenticated else None,
+                    user=getattr(request, 'user', None) if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated else None,
                     request=request,
                     indicators=detected_patterns,
                     attack_vector='HTTP_REQUEST',
