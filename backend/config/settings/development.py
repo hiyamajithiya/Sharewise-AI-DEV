@@ -81,7 +81,7 @@ try:
     import redis
     redis_client = redis.Redis.from_url(REDIS_URL + '/1')
     redis_client.ping()
-    print("✓ Redis connection successful for Cache")
+    print("Redis connection successful for Cache")
     # Use Redis cache configuration from base.py
 except (ImportError, redis.ConnectionError):
     print("WARNING: Redis not available. Using dummy cache for development")
@@ -96,7 +96,7 @@ except (ImportError, redis.ConnectionError):
     }
     # Use database-backed sessions when Redis is not available
     SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-    SESSION_CACHE_ALIAS = 'default'
+    SESSION_CACHE_ALIAS = 'sessions'
     # Also fallback Channels to in-memory
     CHANNEL_LAYERS = {
         'default': {

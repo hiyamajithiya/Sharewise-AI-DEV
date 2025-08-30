@@ -110,12 +110,17 @@ export const fetchUserProfile = createAsyncThunk(
 
 export const updateUserProfile = createAsyncThunk(
   'auth/updateProfile',
-  async (profileData: Partial<UserProfile>, { rejectWithValue }) => {
+  async (profileData: any, { rejectWithValue }) => {
     try {
       const updatedProfile = await apiService.updateUserProfile(profileData);
       return updatedProfile;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update profile');
+      console.error('Profile update error:', error.response?.data);
+      const errorMessage = error.response?.data?.message || 
+                          JSON.stringify(error.response?.data) || 
+                          error.message || 
+                          'Failed to update profile';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -238,7 +243,14 @@ const authSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.profile = action.payload;
+        // Update both profile and user data
+        if (action.payload.user) {
+          state.user = action.payload.user;
+        } else {
+          // If backend returns just the user object directly
+          state.user = { ...state.user, ...action.payload };
+        }
+        state.profile = action.payload.profile || action.payload;
         state.error = null;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {

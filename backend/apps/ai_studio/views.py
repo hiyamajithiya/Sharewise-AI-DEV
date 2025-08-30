@@ -2,6 +2,7 @@ import os
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.conf import settings
+from django.core.cache import cache
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
@@ -781,7 +782,14 @@ class ModelReviewViewSet(ModelViewSet):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def available_features(request):
-    """Get list of available features for model training"""
+    """Get list of available features for model training with Redis caching"""
+    cache_key = "available_features_list"
+    
+    # Check cache first (feature list rarely changes)
+    cached_features = cache.get(cache_key)
+    if cached_features:
+        return Response(cached_features, status=status.HTTP_200_OK)
+    
     features = [
         # Technical Indicators
         {'name': 'rsi', 'display_name': 'RSI (14)', 'category': 'Technical', 'description': 'Relative Strength Index'},
@@ -854,17 +862,30 @@ def available_features(request):
         {'name': 'margin_utilization', 'display_name': 'Margin Utilization', 'category': 'Risk Management', 'description': 'Margin usage percentage'},
     ]
     
-    return Response({
+    feature_response = {
         'features': features,
         'categories': ['Technical', 'Price', 'Market', 'Sentiment', 'Options Greeks', 'Options Pricing', 'Options Chain', 'Futures', 'Strategy', 'Risk Management']
-    }, status=status.HTTP_200_OK)
+    }
+    
+    # Cache for 1 hour (features rarely change)
+    cache.set(cache_key, feature_response, timeout=3600)
+    
+    return Response(feature_response, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def studio_dashboard(request):
-    """Get AI Studio dashboard data"""
+    """Get AI Studio dashboard data with Redis caching"""
     user = request.user
+    cache_key = f"studio_dashboard_{user.id}"
+    
+    # Check cache first (dashboard data can be cached for 5 minutes)
+    cached_dashboard = cache.get(cache_key)
+    if cached_dashboard:
+        cached_dashboard['cached'] = True
+        return Response(cached_dashboard, status=status.HTTP_200_OK)
+    
     user_models = MLModel.objects.filter(user=user)
     
     dashboard_data = {
@@ -889,6 +910,9 @@ def studio_dashboard(request):
             many=True
         ).data
     }
+    
+    # Cache for 5 minutes
+    cache.set(cache_key, dashboard_data, timeout=300)
     
     return Response(dashboard_data, status=status.HTTP_200_OK)
 

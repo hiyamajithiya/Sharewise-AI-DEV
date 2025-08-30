@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -75,15 +76,18 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const Trading: React.FC = () => {
+  const location = useLocation();
   const [selectedSignal, setSelectedSignal] = useState<any>(null);
   const [orderAmount, setOrderAmount] = useState('');
   const [orderType, setOrderType] = useState('MARKET');
   const [activeTab, setActiveTab] = useState(0);
+  const [quickTradeMode, setQuickTradeMode] = useState(false);
   const [instrumentType, setInstrumentType] = useState('EQUITY');
   const [selectedUnderlying, setSelectedUnderlying] = useState('NIFTY');
   const [selectedExpiry, setSelectedExpiry] = useState('');
   const [foDialogOpen, setFoDialogOpen] = useState(false);
   const [selectedFoInstrument, setSelectedFoInstrument] = useState<any>(null);
+  const [algoStrategy, setAlgoStrategy] = useState('');
   
   // Real-time data states
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
@@ -161,6 +165,15 @@ const Trading: React.FC = () => {
   const handleConnectionStatusChange = useCallback((status: string) => {
     setConnectionStatus(status);
   }, []);
+
+  // Check URL parameters for Quick Trade mode
+  const isQuickTradeUrl = new URLSearchParams(location.search).get('mode') === 'quick';
+  
+  useEffect(() => {
+    if (isQuickTradeUrl) {
+      setQuickTradeMode(true);
+    }
+  }, [isQuickTradeUrl]);
 
   // Initialize real-time connections
   useEffect(() => {
@@ -473,20 +486,43 @@ const Trading: React.FC = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
             <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
-              Trading Dashboard 📈
+              {isQuickTradeUrl ? 'Quick Trade Dashboard ⚡' : 'Trading Dashboard 📈'}
             </Typography>
             <Typography variant="body1" sx={{ color: '#6B7280' }}>
               {isTestingMode && selectedUser
-                ? `Testing trading interface for ${selectedUser.role} role - ${subscriptionTier} tier`
-                : `Your ${subscriptionTier} trading interface with advanced tools`
+                ? `Testing ${isQuickTradeUrl ? 'quick trade' : 'trading'} interface for ${selectedUser.role} role - ${subscriptionTier} tier`
+                : isQuickTradeUrl 
+                  ? `Execute trades instantly with your ${subscriptionTier} quick trading interface`
+                  : `Your ${subscriptionTier} trading interface with advanced tools`
               }
             </Typography>
           </Box>
-          <Chip 
-            label={`${subscriptionTier} Plan`} 
-            color={tierFeatures.color as any} 
-            sx={{ fontWeight: 600, fontSize: '0.875rem' }} 
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {!isQuickTradeUrl && (
+              <Button
+                variant={quickTradeMode ? "contained" : "outlined"}
+                onClick={() => setQuickTradeMode(!quickTradeMode)}
+                sx={{ 
+                  borderRadius: '12px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  ...(quickTradeMode && {
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                    }
+                  })
+                }}
+              >
+                ⚡ Quick Trade
+              </Button>
+            )}
+            <Chip 
+              label={`${subscriptionTier} Plan`} 
+              color={tierFeatures.color as any} 
+              sx={{ fontWeight: 600, fontSize: '0.875rem' }} 
+            />
+          </Box>
         </Box>
         <Divider />
       </Box>
@@ -514,764 +550,704 @@ const Trading: React.FC = () => {
         </Alert>
       )}
 
-      {/* Trading Tabs */}
-      <Paper sx={{ 
-        mb: 3,
-        background: 'white',
-        border: '1px solid #e0e0e0',
-        borderRadius: '16px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
-      }}>
-        <Tabs 
-          value={activeTab} 
-          onChange={handleTabChange} 
-          aria-label="trading tabs"
-          sx={{
-            '& .MuiTab-root': {
-              color: '#6B7280',
-              '&.Mui-selected': {
-                color: '#667eea'
-              },
-              '&:hover': {
-                color: '#374151'
-              }
-            },
-            '& .MuiTabs-indicator': {
-              backgroundColor: '#667eea'
-            }
-          }}
-        >
-          <Tab label="All Signals" />
-          <Tab label="Options Chain" />
-          <Tab label="Futures" />
-          <Tab label="F&O Positions" />
-        </Tabs>
-      </Paper>
-
-      <Grid container spacing={3}>
-        {/* Trading Signals */}
-        <Grid item xs={12} lg={8}>
-          <TabPanel value={activeTab} index={0}>
-            <Paper sx={{ 
-              p: 3,
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '16px'
+      {/* Quick Trade Interface */}
+      {quickTradeMode && (
+        <Paper sx={{ 
+          p: 4, 
+          mb: 4,
+          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+          border: '2px solid rgba(102, 126, 234, 0.2)',
+          borderRadius: '16px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Box sx={{
+              p: 2,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              mr: 2
             }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Live Trading Signals
-                  <Badge badgeContent={availableSignals.length} color="primary" sx={{ ml: 2 }}>
-                    <ShowChart />
-                  </Badge>
-                </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                {/* Connection Status Indicator */}
-                <Chip
-                  icon={getConnectionStatusDisplay().icon}
-                  label={getConnectionStatusDisplay().text}
-                  color={getConnectionStatusDisplay().color as any}
-                  size="small"
-                  variant="outlined"
-                />
-                <Button
-                  variant="outlined"
-                  startIcon={isLoadingQuotes ? <CircularProgress size={16} /> : <Refresh />}
-                  size="small"
-                  onClick={async () => {
-                    setIsLoadingQuotes(true);
-                    try {
-                      const symbols = ['NIFTY', 'BANKNIFTY', 'RELIANCE', 'TCS'];
-                      const quotes = await MarketDataAPI.getBulkQuotes(symbols);
-                      setMarketQuotes(prev => ({ ...prev, ...quotes }));
-                    } catch (error) {
-                      console.error('Error refreshing quotes:', error);
-                    } finally {
-                      setIsLoadingQuotes(false);
-                    }
-                  }}
-                  disabled={isLoadingQuotes}
-                >
-                  Refresh Data
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => {
-                    if (connectionStatus !== 'connected') {
-                      marketDataService.reconnect();
-                    }
-                  }}
-                  disabled={connectionStatus === 'connecting'}
-                >
-                  {connectionStatus === 'connected' ? 'Connected' : 'Reconnect'}
-                </Button>
-              </Box>
+              <PlayArrow sx={{ color: 'white', fontSize: 28 }} />
             </Box>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#1F2937' }}>
+              Quick Trade Execution
+            </Typography>
+          </Box>
 
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell><strong>Symbol</strong></TableCell>
-                    <TableCell><strong>Type</strong></TableCell>
-                    <TableCell><strong>Price</strong></TableCell>
-                    <TableCell><strong>Target</strong></TableCell>
-                    <TableCell><strong>Stop Loss</strong></TableCell>
-                    <TableCell><strong>Confidence</strong></TableCell>
-                    <TableCell><strong>Status</strong></TableCell>
-                    <TableCell><strong>Action</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {availableSignals.map((signal) => (
-                    <TableRow key={signal.id} hover>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Box sx={{ mr: 1 }}>
-                            {renderInstrumentSymbol(signal)}
-                          </Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {signal.change}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
+          {/* Signal Selection - Horizontal Layout */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#374151' }}>
+              Active Signals for Quick Trading
+            </Typography>
+            <Grid container spacing={2}>
+              {mockSignals.slice(0, 3).map((signal: any, index: number) => (
+                <Grid item xs={12} sm={4} key={index}>
+                  <Card sx={{
+                    p: 2,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    border: selectedSignal?.id === signal.id ? '2px solid #667eea' : '1px solid #e2e8f0',
+                    background: selectedSignal?.id === signal.id ? 'rgba(102, 126, 234, 0.1)' : 'white',
+                    minHeight: '160px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    }
+                  }}
+                  onClick={() => setSelectedSignal(signal)}
+                  >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1F2937' }}>
+                          {signal.symbol}
+                        </Typography>
                         <Chip 
                           label={signal.type} 
-                          color={signal.type === 'BUY' ? 'success' : 'error'} 
                           size="small"
-                          icon={signal.type === 'BUY' ? <TrendingUp /> : <TrendingDown />}
+                          color={signal.type === 'BUY' ? 'success' : 'error'}
+                          sx={{ fontWeight: 600 }}
                         />
-                      </TableCell>
-                      <TableCell>₹{signal.price.toLocaleString()}</TableCell>
-                      <TableCell>₹{signal.target.toLocaleString()}</TableCell>
-                      <TableCell>₹{signal.stopLoss.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {signal.confidence}%
-                          </Typography>
-                          {signal.confidence > 85 && <CheckCircle color="success" sx={{ ml: 1, fontSize: 16 }} />}
-                          {signal.confidence < 80 && <Warning color="warning" sx={{ ml: 1, fontSize: 16 }} />}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
+                      </Box>
+                      <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
+                        Entry: ₹{signal.price}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
+                        Target: ₹{signal.target}
+                      </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Chip 
-                          label={signal.status} 
-                          color={getStatusColor(signal.status) as any} 
+                          label={`${signal.confidence}% Confidence`}
                           size="small"
+                          sx={{ 
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            color: '#10B981',
+                            fontWeight: 600 
+                          }}
                         />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => setSelectedSignal(signal)}
-                          disabled={signal.status !== 'ACTIVE'}
-                        >
-                          {signal.status === 'ACTIVE' ? 'Trade' : 'View'}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                        <Typography variant="caption" sx={{ color: signal.type === 'BUY' ? '#10B981' : '#EF4444', fontWeight: 600 }}>
+                          {signal.type === 'BUY' ? '↗' : '↘'} {signal.type}
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
 
-              {availableSignals.length === 0 && (
-                <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                  <ShowChart sx={{ fontSize: 48, mb: 2 }} />
-                  <Typography variant="h6">No signals available for your tier</Typography>
-                  <Typography variant="body2">Upgrade your plan to access more trading signals</Typography>
-                </Box>
-              )}
-            </Paper>
-          </TabPanel>
-
-          {/* Options Chain Tab */}
-          <TabPanel value={activeTab} index={1}>
-            <Paper sx={{ 
-              p: 3,
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '16px'
-            }}>
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
-                  Options Chain
+          {/* Extended Signals Table - Full Width */}
+          <Box sx={{ mb: 4 }}>
+            <Card sx={{ p: 3, background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#374151' }}>
+                  All Trading Signals
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel sx={{ color: '#6B7280' }}>Underlying</InputLabel>
-                    <Select
-                      value={selectedUnderlying}
-                      label="Underlying"
-                      onChange={(e) => setSelectedUnderlying(e.target.value)}
-                      sx={{
-                        color: '#1F2937',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#e0e0e0'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d0d0d0'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#667eea'
-                        }
-                      }}
-                    >
-                      <MenuItem value="NIFTY">NIFTY</MenuItem>
-                      <MenuItem value="BANKNIFTY">BANKNIFTY</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <TextField
-                    label="Expiry Date"
-                    type="date"
-                    value={selectedExpiry}
-                    onChange={(e) => setSelectedExpiry(e.target.value)}
-                    size="small"
-                    InputLabelProps={{ shrink: true, style: { color: '#6B7280' } }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        color: '#1F2937',
-                        '& fieldset': {
-                          borderColor: 'rgba(255,255,255,0.3)'
-                        },
-                        '&:hover fieldset': {
-                          borderColor: 'rgba(255,255,255,0.5)'
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: 'rgba(255,255,255,0.8)'
-                        }
-                      }
-                    }}
-                  />
-                </Box>
+                <Badge badgeContent={mockSignals.filter(s => s.status === 'ACTIVE').length} color="primary">
+                  <ShowChart sx={{ color: '#667eea' }} />
+                </Badge>
               </Box>
-
-              <TableContainer>
-                <Table size="small">
+              
+              <TableContainer sx={{ maxHeight: 450, overflowX: 'auto' }}>
+                <Table size="small" sx={{ minWidth: 650 }}>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Call OI</strong></TableCell>
-                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Call Price</strong></TableCell>
-                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Strike</strong></TableCell>
-                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Put Price</strong></TableCell>
-                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Put OI</strong></TableCell>
-                      <TableCell align="center" sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Actions</strong></TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem' }}>Symbol</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem' }}>Type</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem' }}>Price</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem' }}>Target</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem' }}>Stop Loss</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem' }}>Confidence</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem' }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem' }}>Action</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {getOptionChainForUnderlying(selectedUnderlying).map((option, index) => (
+                    {mockSignals.map((signal: any) => (
                       <TableRow 
-                        key={index} 
+                        key={signal.id} 
                         hover
-                        sx={{
-                          '& .MuiTableCell-root': {
-                            color: '#374151',
-                            borderBottom: '1px solid #e2e8f0'
-                          },
-                          '&:hover': {
-                            backgroundColor: '#f8fafc'
+                        sx={{ 
+                          cursor: 'pointer',
+                          backgroundColor: selectedSignal?.id === signal.id ? 'rgba(102, 126, 234, 0.1)' : 'transparent',
+                          '&:hover': { 
+                            backgroundColor: selectedSignal?.id === signal.id ? 'rgba(102, 126, 234, 0.15)' : 'rgba(0, 0, 0, 0.04)' 
                           }
                         }}
+                        onClick={() => setSelectedSignal(signal)}
                       >
-                        <TableCell align="center" sx={{ color: '#374151' }}>{(option.callOI / 100000).toFixed(1)}L</TableCell>
-                        <TableCell align="center">
-                          <Button
-                            variant="text"
-                            size="small"
-                            onClick={() => handleFoInstrumentSelect({
-                              type: 'CALL',
-                              strike: option.strike,
-                              price: option.callPrice,
-                              underlying: selectedUnderlying
-                            })}
-                            sx={{ color: 'success.main' }}
-                          >
-                            ₹{option.callPrice}
-                          </Button>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
+                              {signal.symbol}
+                            </Typography>
+                            {signal.instrument_type && (
+                              <Chip 
+                                label={signal.instrument_type} 
+                                size="small" 
+                                variant="outlined"
+                                sx={{ ml: 1, height: '18px', fontSize: '0.6rem' }}
+                              />
+                            )}
+                          </Box>
                         </TableCell>
-                        <TableCell align="center">
-                          <Typography sx={{ fontWeight: 600, fontSize: '1.1rem', color: '#1F2937' }}>
-                            {option.strike}
+                        <TableCell>
+                          <Chip 
+                            label={signal.type} 
+                            size="small"
+                            color={signal.type === 'BUY' ? 'success' : 'error'}
+                            sx={{ fontSize: '0.65rem', height: '20px' }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                            ₹{typeof signal.price === 'number' ? signal.price.toFixed(2) : signal.price}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '0.65rem' }}>
+                            {signal.change || '+2.4%'}
                           </Typography>
                         </TableCell>
-                        <TableCell align="center">
-                          <Button
-                            variant="text"
-                            size="small"
-                            onClick={() => handleFoInstrumentSelect({
-                              type: 'PUT',
-                              strike: option.strike,
-                              price: option.putPrice,
-                              underlying: selectedUnderlying
-                            })}
-                            sx={{ color: 'error.main' }}
-                          >
-                            ₹{option.putPrice}
-                          </Button>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 600 }}>
+                            ₹{typeof signal.target === 'number' ? signal.target.toFixed(2) : signal.target}
+                          </Typography>
                         </TableCell>
-                        <TableCell align="center" sx={{ color: '#374151' }}>{(option.putOI / 100000).toFixed(1)}L</TableCell>
-                        <TableCell align="center">
-                          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                            <Button size="small" variant="outlined" color="success">
-                              Buy Call
-                            </Button>
-                            <Button size="small" variant="outlined" color="error">
-                              Buy Put
-                            </Button>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#EF4444', fontWeight: 600 }}>
+                            ₹{typeof signal.stopLoss === 'number' ? signal.stopLoss.toFixed(2) : signal.stopLoss}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 600, mr: 1 }}>
+                              {signal.confidence}%
+                            </Typography>
+                            <Box 
+                              sx={{ 
+                                width: 40, 
+                                height: 4, 
+                                backgroundColor: '#E5E7EB', 
+                                borderRadius: 2,
+                                overflow: 'hidden'
+                              }}
+                            >
+                              <Box 
+                                sx={{ 
+                                  width: `${signal.confidence}%`, 
+                                  height: '100%', 
+                                  backgroundColor: signal.confidence >= 80 ? '#10B981' : signal.confidence >= 60 ? '#F59E0B' : '#EF4444',
+                                  transition: 'width 0.3s ease'
+                                }}
+                              />
+                            </Box>
                           </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={signal.status} 
+                            size="small"
+                            color={signal.status === 'ACTIVE' ? 'success' : 'default'}
+                            variant={signal.status === 'ACTIVE' ? 'filled' : 'outlined'}
+                            sx={{ fontSize: '0.65rem', height: '20px' }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedSignal(signal);
+                            }}
+                            sx={{ 
+                              minWidth: 'auto',
+                              px: 1,
+                              py: 0.5,
+                              fontSize: '0.65rem',
+                              borderColor: selectedSignal?.id === signal.id ? '#667eea' : '#d1d5db',
+                              color: selectedSignal?.id === signal.id ? '#667eea' : '#6b7280',
+                              '&:hover': { 
+                                borderColor: '#667eea',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)'
+                              }
+                            }}
+                          >
+                            {selectedSignal?.id === signal.id ? 'Selected' : 'Select'}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </TableContainer>
-            </Paper>
-          </TabPanel>
-
-          {/* Futures Tab */}
-          <TabPanel value={activeTab} index={2}>
-            <Paper sx={{ 
-              p: 3,
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '16px'
-            }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
-                Futures Chain
-              </Typography>
               
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Symbol</strong></TableCell>
-                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Price</strong></TableCell>
-                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Expiry</strong></TableCell>
-                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Open Interest</strong></TableCell>
-                      <TableCell sx={{ color: '#1F2937', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}><strong>Actions</strong></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {Object.entries(mockFuturesChain).flatMap(([underlying, contracts]) =>
-                      contracts.map((contract, index) => (
-                        <TableRow 
-                          key={`${underlying}-${index}`} 
-                          hover
-                          sx={{
-                            '& .MuiTableCell-root': {
-                              color: '#374151',
-                              borderBottom: '1px solid #e2e8f0'
-                            },
-                            '&:hover': {
-                              backgroundColor: '#f8fafc'
+              {/* Summary Row */}
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                mt: 2, 
+                pt: 2, 
+                borderTop: '1px solid #e2e8f0' 
+              }}>
+                <Typography variant="caption" sx={{ color: '#6B7280' }}>
+                  Total: {mockSignals.length} signals | Active: {mockSignals.filter(s => s.status === 'ACTIVE').length}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#667eea', fontWeight: 600 }}>
+                  Avg. Confidence: {Math.round(mockSignals.reduce((acc, s) => acc + s.confidence, 0) / mockSignals.length)}%
+                </Typography>
+              </Box>
+            </Card>
+          </Box>
+
+          {/* Quick Trade Execution Panel - Below Table */}
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card sx={{ p: 3, background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#374151' }}>
+                  Execute Trade
+                </Typography>
+                
+                {selectedSignal ? (
+                  <Box>
+                    <Box sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: '8px', 
+                      background: 'rgba(102, 126, 234, 0.05)',
+                      border: '1px solid rgba(102, 126, 234, 0.2)'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1F2937' }}>
+                        Selected: {selectedSignal.symbol}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                        {selectedSignal.type} at ₹{selectedSignal.price}
+                      </Typography>
+                    </Box>
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth>
+                          <InputLabel sx={{ color: '#6B7280' }}>Order Type</InputLabel>
+                          <Select
+                            value={orderType}
+                            label="Order Type"
+                            onChange={(e) => setOrderType(e.target.value)}
+                            sx={{
+                              color: '#1F2937',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#d1d5db'
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#667eea'
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#667eea'
+                              }
+                            }}
+                          >
+                            {tierFeatures.allowedOrderTypes.map(type => (
+                              <MenuItem key={type} value={type} sx={{ color: '#1F2937' }}>{type}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Investment Amount"
+                          value={orderAmount}
+                          onChange={(e) => setOrderAmount(e.target.value)}
+                          type="number"
+                          sx={{ 
+                            '& .MuiOutlinedInput-root': {
+                              color: '#1F2937',
+                              '& fieldset': {
+                                borderColor: '#d1d5db'
+                              },
+                              '&:hover fieldset': {
+                                borderColor: '#667eea'
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#667eea'
+                              }
                             }
                           }}
-                        >
-                          <TableCell>
-                            <Typography sx={{ fontWeight: 600, color: '#1F2937' }}>
-                              {contract.symbol}
+                          InputLabelProps={{ style: { color: '#6B7280' } }}
+                          FormHelperTextProps={{ style: { color: '#6B7280' } }}
+                          helperText={`Max: ₹${tierFeatures.maxOrderValue.toLocaleString()}`}
+                          InputProps={{
+                            startAdornment: <Typography sx={{ color: '#6B7280' }}>₹</Typography>,
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+
+                    {/* Algorithm Strategy Selection - Only for ALGO order type */}
+                    {orderType === 'ALGO' && (
+                      <Box sx={{ mt: 2 }}>
+                        <FormControl fullWidth>
+                          <InputLabel sx={{ color: '#6B7280' }}>Algorithm Strategy</InputLabel>
+                          <Select
+                            value={algoStrategy}
+                            label="Algorithm Strategy"
+                            onChange={(e) => setAlgoStrategy(e.target.value)}
+                            sx={{
+                              color: '#1F2937',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#d1d5db'
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#667eea'
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#667eea'
+                              }
+                            }}
+                          >
+                            <MenuItem value="TWAP" sx={{ color: '#1F2937' }}>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>TWAP (Time Weighted Average Price)</Typography>
+                                <Typography variant="caption" sx={{ color: '#6B7280' }}>Executes orders over time to minimize market impact</Typography>
+                              </Box>
+                            </MenuItem>
+                            <MenuItem value="VWAP" sx={{ color: '#1F2937' }}>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>VWAP (Volume Weighted Average Price)</Typography>
+                                <Typography variant="caption" sx={{ color: '#6B7280' }}>Matches volume patterns for optimal execution</Typography>
+                              </Box>
+                            </MenuItem>
+                            <MenuItem value="ICEBERG" sx={{ color: '#1F2937' }}>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>Iceberg Strategy</Typography>
+                                <Typography variant="caption" sx={{ color: '#6B7280' }}>Hides large orders by showing small portions</Typography>
+                              </Box>
+                            </MenuItem>
+                            <MenuItem value="IMPLEMENTATION_SHORTFALL" sx={{ color: '#1F2937' }}>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>Implementation Shortfall</Typography>
+                                <Typography variant="caption" sx={{ color: '#6B7280' }}>Balances market impact vs timing risk</Typography>
+                              </Box>
+                            </MenuItem>
+                            <MenuItem value="MOMENTUM" sx={{ color: '#1F2937' }}>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>Momentum Strategy</Typography>
+                                <Typography variant="caption" sx={{ color: '#6B7280' }}>Follows price momentum for execution timing</Typography>
+                              </Box>
+                            </MenuItem>
+                          </Select>
+                        </FormControl>
+
+                        {/* Algorithm Parameters */}
+                        {algoStrategy && (
+                          <Box sx={{ mt: 2, p: 2, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#374151', mb: 2 }}>
+                              Algorithm Parameters
                             </Typography>
-                          </TableCell>
-                          <TableCell>₹{contract.price.toLocaleString()}</TableCell>
-                          <TableCell>
-                            {new Date(contract.expiry).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>{(contract.oi / 100000).toFixed(1)}L</TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                              <Button
-                                size="small"
-                                variant="contained"
-                                color="success"
-                                onClick={() => handleFoInstrumentSelect({
-                                  type: 'FUTURES',
-                                  symbol: contract.symbol,
-                                  price: contract.price,
-                                  underlying: underlying
-                                })}
-                              >
-                                Buy
-                              </Button>
-                              <Button
-                                size="small"
-                                variant="contained"
-                                color="error"
-                                onClick={() => handleFoInstrumentSelect({
-                                  type: 'FUTURES',
-                                  symbol: contract.symbol,
-                                  price: contract.price,
-                                  underlying: underlying
-                                })}
-                              >
-                                Sell
-                              </Button>
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                            <Grid container spacing={2}>
+                              {algoStrategy === 'TWAP' && (
+                                <>
+                                  <Grid item xs={6}>
+                                    <TextField
+                                      fullWidth
+                                      label="Duration (minutes)"
+                                      type="number"
+                                      defaultValue="30"
+                                      size="small"
+                                      InputLabelProps={{ style: { color: '#6B7280' } }}
+                                      sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                          color: '#1F2937',
+                                          '& fieldset': { borderColor: '#d1d5db' },
+                                          '&:hover fieldset': { borderColor: '#667eea' },
+                                          '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                        }
+                                      }}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <TextField
+                                      fullWidth
+                                      label="Slice Size (%)"
+                                      type="number"
+                                      defaultValue="10"
+                                      size="small"
+                                      InputLabelProps={{ style: { color: '#6B7280' } }}
+                                      sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                          color: '#1F2937',
+                                          '& fieldset': { borderColor: '#d1d5db' },
+                                          '&:hover fieldset': { borderColor: '#667eea' },
+                                          '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                        }
+                                      }}
+                                    />
+                                  </Grid>
+                                </>
+                              )}
+                              {algoStrategy === 'VWAP' && (
+                                <>
+                                  <Grid item xs={6}>
+                                    <TextField
+                                      fullWidth
+                                      label="Participation Rate (%)"
+                                      type="number"
+                                      defaultValue="20"
+                                      size="small"
+                                      InputLabelProps={{ style: { color: '#6B7280' } }}
+                                      sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                          color: '#1F2937',
+                                          '& fieldset': { borderColor: '#d1d5db' },
+                                          '&:hover fieldset': { borderColor: '#667eea' },
+                                          '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                        }
+                                      }}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <TextField
+                                      fullWidth
+                                      label="Max Volume (%)"
+                                      type="number"
+                                      defaultValue="50"
+                                      size="small"
+                                      InputLabelProps={{ style: { color: '#6B7280' } }}
+                                      sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                          color: '#1F2937',
+                                          '& fieldset': { borderColor: '#d1d5db' },
+                                          '&:hover fieldset': { borderColor: '#667eea' },
+                                          '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                        }
+                                      }}
+                                    />
+                                  </Grid>
+                                </>
+                              )}
+                              {algoStrategy === 'ICEBERG' && (
+                                <>
+                                  <Grid item xs={6}>
+                                    <TextField
+                                      fullWidth
+                                      label="Visible Quantity"
+                                      type="number"
+                                      defaultValue="100"
+                                      size="small"
+                                      InputLabelProps={{ style: { color: '#6B7280' } }}
+                                      sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                          color: '#1F2937',
+                                          '& fieldset': { borderColor: '#d1d5db' },
+                                          '&:hover fieldset': { borderColor: '#667eea' },
+                                          '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                        }
+                                      }}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <TextField
+                                      fullWidth
+                                      label="Variance (%)"
+                                      type="number"
+                                      defaultValue="20"
+                                      size="small"
+                                      InputLabelProps={{ style: { color: '#6B7280' } }}
+                                      sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                          color: '#1F2937',
+                                          '& fieldset': { borderColor: '#d1d5db' },
+                                          '&:hover fieldset': { borderColor: '#667eea' },
+                                          '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                                        }
+                                      }}
+                                    />
+                                  </Grid>
+                                </>
+                              )}
+                            </Grid>
+                          </Box>
+                        )}
+                      </Box>
                     )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Paper>
-          </TabPanel>
 
-          {/* F&O Positions Tab */}
-          <TabPanel value={activeTab} index={3}>
-            <Paper sx={{ 
-              p: 3,
-              background: 'white',
-              border: '1px solid #e0e0e0',
-              borderRadius: '16px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
-            }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
-                F&O Positions
-              </Typography>
-              
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell><strong>Symbol</strong></TableCell>
-                      <TableCell><strong>Type</strong></TableCell>
-                      <TableCell><strong>Qty</strong></TableCell>
-                      <TableCell><strong>Avg Price</strong></TableCell>
-                      <TableCell><strong>LTP</strong></TableCell>
-                      <TableCell><strong>P&L</strong></TableCell>
-                      <TableCell><strong>Days to Expiry</strong></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>NIFTY24DEC19000CE</TableCell>
-                      <TableCell>
-                        <Chip label="CALL" color="success" size="small" />
-                      </TableCell>
-                      <TableCell>+50</TableCell>
-                      <TableCell>₹125.50</TableCell>
-                      <TableCell>₹140.75</TableCell>
-                      <TableCell>
-                        <Typography sx={{ color: 'success.main', fontWeight: 600 }}>
-                          +₹762.50 (12.15%)
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ color: 'white' }}>15</TableCell>
-                    </TableRow>
-                    <TableRow sx={{
-                      '& .MuiTableCell-root': {
-                        color: '#374151',
-                        borderBottom: '1px solid #e2e8f0'
-                      }
-                    }}>
-                      <TableCell sx={{ color: '#1F2937' }}>BANKNIFTY24DEC48000PE</TableCell>
-                      <TableCell>
-                        <Chip label="PUT" color="error" size="small" />
-                      </TableCell>
-                      <TableCell sx={{ color: '#1F2937' }}>-25</TableCell>
-                      <TableCell sx={{ color: '#1F2937' }}>₹180.25</TableCell>
-                      <TableCell sx={{ color: '#1F2937' }}>₹165.50</TableCell>
-                      <TableCell>
-                        <Typography sx={{ color: 'success.main', fontWeight: 600 }}>
-                          +₹368.75 (8.17%)
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ color: 'white' }}>15</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-
-              <Box sx={{ 
-                mt: 3, 
-                p: 2, 
-                background: '#f8fafc', 
-                border: '1px solid #e2e8f0', 
-                borderRadius: '12px' 
-              }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={4}>
-                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Total P&L</Typography>
-                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600 }}>
-                      +₹1,131.25
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Margin Used</Typography>
-                    <Typography variant="h6" sx={{ color: '#1F2937' }}>₹40,000</Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Available Margin</Typography>
-                    <Typography variant="h6" sx={{ color: '#1F2937' }}>₹1,60,000</Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Paper>
-          </TabPanel>
-        </Grid>
-
-        {/* Trading Panel & Active Orders */}
-        <Grid item xs={12} lg={4}>
-          {/* Order Placement Panel */}
-          {selectedSignal && (
-            <Paper sx={{ 
-              p: 3, 
-              mb: 3,
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '16px'
-            }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
-                Place Order - {selectedSignal.symbol}
-              </Typography>
-              
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                  Signal: {selectedSignal.type} at ₹{selectedSignal.price}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                  Target: ₹{selectedSignal.target} | Stop Loss: ₹{selectedSignal.stopLoss}
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  label="Order Amount (₹)"
-                  value={orderAmount}
-                  onChange={(e) => setOrderAmount(e.target.value)}
-                  type="number"
-                  size="small"
-                  fullWidth
-                  helperText={`Max: ₹${tierFeatures.maxOrderValue.toLocaleString()}`}
-                  InputLabelProps={{ style: { color: '#6B7280' } }}
-                  FormHelperTextProps={{ style: { color: '#6B7280' } }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      color: 'white',
-                      '& fieldset': {
-                        borderColor: 'rgba(255,255,255,0.3)'
-                      },
-                      '&:hover fieldset': {
-                        borderColor: 'rgba(255,255,255,0.5)'
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: 'rgba(255,255,255,0.8)'
-                      }
-                    }
-                  }}
-                />
-
-                <FormControl size="small" fullWidth>
-                  <InputLabel sx={{ color: '#6B7280' }}>Order Type</InputLabel>
-                  <Select
-                    value={orderType}
-                    label="Order Type"
-                    onChange={(e) => setOrderType(e.target.value)}
-                    sx={{
-                      color: 'white',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(255,255,255,0.3)'
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(255,255,255,0.5)'
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(255,255,255,0.8)'
-                      }
-                    }}
-                  >
-                    {tierFeatures.allowedOrderTypes.map((type: string) => (
-                      <MenuItem key={type} value={type} sx={{ color: 'black' }}>
-                        {type.replace('_', ' ')}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button
-                    variant="contained"
-                    onClick={() => handlePlaceOrder(selectedSignal)}
-                    disabled={!orderAmount || parseInt(orderAmount) > tierFeatures.maxOrderValue}
-                    fullWidth
-                  >
-                    Place Order
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setSelectedSignal(null)}
-                  >
-                    Cancel
-                  </Button>
-                </Box>
-              </Box>
-            </Paper>
-          )}
-
-          {/* Active Orders */}
-          <Paper sx={{ 
-            p: 3,
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '16px'
-          }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
-              Active Orders
-              <Badge badgeContent={activeOrders.length} color="primary" sx={{ ml: 1 }}>
-                <AccountBalance />
-              </Badge>
-            </Typography>
-
-            {activeOrders.map((order) => (
-              <Card key={order.id} sx={{ 
-                mb: 2, 
-                background: 'rgba(255,255,255,0.1)', 
-                backdropFilter: 'blur(10px)', 
-                border: '1px solid rgba(255,255,255,0.2)', 
-                borderRadius: '12px' 
-              }}>
-                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'white' }}>
-                      {order.symbol}
-                    </Typography>
-                    <Chip 
-                      label={order.status} 
-                      color={getStatusColor(order.status) as any} 
-                      size="small" 
-                    />
-                  </Box>
-                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                    {order.type} {order.quantity} @ ₹{order.price.toLocaleString()}
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                      {order.time}
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        fontWeight: 600, 
-                        color: order.pnl.includes('+') ? 'success.main' : 'text.secondary' 
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      size="large"
+                      onClick={() => {
+                        // Handle trade execution
+                        if (orderType === 'ALGO') {
+                          alert(`Launching ${algoStrategy || 'Algorithm'} strategy for ${selectedSignal.symbol} ${selectedSignal.type} with ₹${orderAmount}`);
+                        } else {
+                          alert(`Executing ${selectedSignal.type} order for ${selectedSignal.symbol} with ₹${orderAmount}`);
+                        }
+                      }}
+                      disabled={!orderAmount || parseInt(orderAmount) > tierFeatures.maxOrderValue || (orderType === 'ALGO' && !algoStrategy)}
+                      sx={{
+                        mt: 3,
+                        py: 1.5,
+                        borderRadius: '12px',
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        fontSize: '1rem',
+                        background: orderType === 'ALGO' 
+                          ? 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' 
+                          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        '&:hover': {
+                          background: orderType === 'ALGO' 
+                            ? 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)'
+                            : 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                          transform: 'translateY(-1px)',
+                          boxShadow: orderType === 'ALGO' 
+                            ? '0 4px 12px rgba(139, 92, 246, 0.4)'
+                            : '0 4px 12px rgba(102, 126, 234, 0.4)',
+                        },
+                        '&:disabled': {
+                          background: '#9CA3AF',
+                          color: 'white'
+                        }
                       }}
                     >
-                      {order.pnl}
+                      {orderType === 'ALGO' 
+                        ? `🤖 Launch ${algoStrategy || 'Algorithm'} Strategy`
+                        : `Execute ${selectedSignal.type} Order`
+                      }
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                      Select a signal to execute trade
                     </Typography>
                   </Box>
-                </CardContent>
-              </Card>
-            ))}
-
-            {activeOrders.length === 0 && (
-              <Box sx={{ textAlign: 'center', py: 3, color: '#6B7280' }}>
-                <Schedule sx={{ fontSize: 36, mb: 1, color: '#6B7280' }} />
-                <Typography variant="body2" sx={{ color: '#6B7280' }}>No active orders</Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-
-        {/* Market Overview */}
-        <Grid item xs={12}>
-          <Paper sx={{ 
-            p: 3,
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '16px'
-          }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
-                Market Overview & Charts
-              </Typography>
-              {tierFeatures.realTimeData && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                    Last Updated: {marketQuotes['NIFTY']?.timestamp ? new Date(marketQuotes['NIFTY'].timestamp).toLocaleTimeString() : 'Never'}
-                  </Typography>
-                  <Chip
-                    icon={getConnectionStatusDisplay().icon}
-                    label={getConnectionStatusDisplay().text}
-                    color={getConnectionStatusDisplay().color as any}
-                    size="small"
-                  />
-                </Box>
-              )}
-            </Box>
-            
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              <Button variant={tierFeatures.advancedCharts ? "contained" : "outlined"} size="small">
-                {tierFeatures.advancedCharts ? "Advanced Charts" : "Basic Charts"}
-              </Button>
-              <Button 
-                variant={tierFeatures.realTimeData && connectionStatus === 'connected' ? "contained" : "outlined"} 
-                size="small" 
-                color={connectionStatus === 'connected' ? 'success' : 'primary'}
-                disabled={!tierFeatures.realTimeData}
-              >
-                {tierFeatures.realTimeData 
-                  ? (connectionStatus === 'connected' ? "Real-time Data" : "Connecting...") 
-                  : "15min Delay"
-                }
-              </Button>
-              {tierFeatures.realTimeData && Object.keys(marketQuotes).length > 0 && (
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Typography variant="body2" sx={{ alignSelf: 'center', color: '#6B7280' }}>
-                    Live Quotes:
-                  </Typography>
-                  {Object.entries(marketQuotes).slice(0, 3).map(([symbol, quote]) => (
-                    <Chip
-                      key={symbol}
-                      label={`${symbol}: ₹${quote.last_price} (${formatChangeDisplay(quote.change, quote.change_percent)})`}
-                      size="small"
-                      color={quote.change >= 0 ? 'success' : 'error'}
-                      variant="outlined"
-                    />
-                  ))}
-                </Box>
-              )}
-            </Box>
-
-            <Box
-              sx={{
-                height: 300,
-                background: 'rgba(255,255,255,0.05)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#6B7280',
-              }}
-            >
-              <Box sx={{ textAlign: 'center' }}>
-                <ShowChart sx={{ fontSize: 48, mb: 2, color: '#6B7280' }} />
-                <Typography variant="h6" sx={{ color: 'white' }}>
-                  {tierFeatures.advancedCharts ? "Advanced" : "Basic"} Trading Charts
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                  Interactive market charts and technical indicators will be integrated here
-                </Typography>
-                {!tierFeatures.advancedCharts && (
-                  <Typography variant="body2" sx={{ color: '#ffb74d', mt: 1 }}>
-                    Upgrade to Pro/Elite for advanced charting tools
-                  </Typography>
                 )}
-              </Box>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+              </Card>
+            </Grid>
+
+            {/* Trading Summary & Stats */}
+            <Grid item xs={12} md={6}>
+              <Card sx={{ p: 3, background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#374151' }}>
+                  Trading Summary
+                </Typography>
+                
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, background: '#f8fafc', borderRadius: '8px' }}>
+                      <Typography variant="h4" sx={{ fontWeight: 700, color: '#10B981' }}>
+                        {mockSignals.filter(s => s.status === 'ACTIVE').length}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                        Active Signals
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, background: '#f8fafc', borderRadius: '8px' }}>
+                      <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
+                        {Math.round(mockSignals.reduce((acc, s) => acc + s.confidence, 0) / mockSignals.length)}%
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                        Avg. Confidence
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, background: '#f8fafc', borderRadius: '8px' }}>
+                      <Typography variant="h4" sx={{ fontWeight: 700, color: '#F59E0B' }}>
+                        ₹{tierFeatures.maxOrderValue.toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                        Max Order Value
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, background: '#f8fafc', borderRadius: '8px' }}>
+                      <Typography variant="h4" sx={{ fontWeight: 700, color: '#8B5CF6' }}>
+                        {subscriptionTier}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                        Plan Tier
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+
+                {selectedSignal && (
+                  <Box sx={{ 
+                    mt: 3, 
+                    p: 2, 
+                    background: 'rgba(102, 126, 234, 0.05)', 
+                    border: '1px solid rgba(102, 126, 234, 0.2)', 
+                    borderRadius: '8px' 
+                  }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1F2937', mb: 1 }}>
+                      Selected Signal Details
+                    </Typography>
+                    <Grid container spacing={1}>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>Target: ₹{selectedSignal.target}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>Stop Loss: ₹{selectedSignal.stopLoss}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>Confidence: {selectedSignal.confidence}%</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>Status: {selectedSignal.status}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+              </Card>
+            </Grid>
+          </Grid>
+        </Paper>
+      )}
+
+      {/* Show message when Quick Trade is not active */}
+      {!quickTradeMode && (
+        <Paper sx={{ 
+          p: 6,
+          textAlign: 'center',
+          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+          border: '2px solid rgba(102, 126, 234, 0.2)',
+          borderRadius: '16px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)'
+        }}>
+          <PlayArrow sx={{ fontSize: 64, color: '#667eea', mb: 2 }} />
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1F2937', mb: 2 }}>
+            Quick Trade Dashboard
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#6B7280', mb: 4 }}>
+            Enable Quick Trade mode to access instant signal execution and advanced trading features.
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => setQuickTradeMode(true)}
+            sx={{
+              px: 4,
+              py: 1.5,
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '1.1rem',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
+              }
+            }}
+          >
+            ⚡ Enable Quick Trade
+          </Button>
+        </Paper>
+      )}
 
       {/* F&O Trading Dialog */}
       <Dialog 
@@ -1295,7 +1271,7 @@ const Trading: React.FC = () => {
           }
         }}
       >
-        <DialogTitle sx={{ color: 'white' }}>
+        <DialogTitle sx={{ color: '#1F2937' }}>
           {selectedFoInstrument?.type === 'FUTURES' 
             ? `Trade ${selectedFoInstrument?.symbol}` 
             : `Trade ${selectedFoInstrument?.underlying} ${selectedFoInstrument?.strike} ${selectedFoInstrument?.type}`
@@ -1314,7 +1290,7 @@ const Trading: React.FC = () => {
                   InputLabelProps={{ style: { color: '#6B7280' } }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
-                      color: 'white',
+                      color: '#1F2937',
                       '& fieldset': {
                         borderColor: 'rgba(255,255,255,0.3)'
                       },
@@ -1338,7 +1314,7 @@ const Trading: React.FC = () => {
                   InputLabelProps={{ style: { color: '#6B7280' } }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
-                      color: 'white',
+                      color: '#1F2937',
                       '& fieldset': {
                         borderColor: 'rgba(255,255,255,0.3)'
                       },
@@ -1359,7 +1335,7 @@ const Trading: React.FC = () => {
                     defaultValue="MARKET" 
                     label="Order Type"
                     sx={{
-                      color: 'white',
+                      color: '#1F2937',
                       '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: 'rgba(255,255,255,0.3)'
                       },
@@ -1385,7 +1361,7 @@ const Trading: React.FC = () => {
                     defaultValue="INTRADAY" 
                     label="Product Type"
                     sx={{
-                      color: 'white',
+                      color: '#1F2937',
                       '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: 'rgba(255,255,255,0.3)'
                       },
@@ -1412,17 +1388,17 @@ const Trading: React.FC = () => {
                   border: '1px solid rgba(255,255,255,0.2)', 
                   borderRadius: '8px' 
                 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1, color: 'white' }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1, color: '#1F2937' }}>
                     Margin Information
                   </Typography>
                   <Grid container spacing={1}>
                     <Grid item xs={6}>
                       <Typography variant="body2" sx={{ color: '#6B7280' }}>Required Margin:</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'white' }}>₹25,000</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>₹25,000</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" sx={{ color: '#6B7280' }}>Available Balance:</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'white' }}>₹1,60,000</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>₹1,60,000</Typography>
                     </Grid>
                   </Grid>
                 </Box>

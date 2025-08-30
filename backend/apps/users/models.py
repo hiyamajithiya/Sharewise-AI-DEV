@@ -20,9 +20,9 @@ class CustomUser(AbstractUser):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
-    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', 
-                               message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
-    phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
+    phone_regex = RegexValidator(regex=r'^\+?[\d\s\-\(\)]{9,20}$', 
+                               message="Phone number must contain 9-20 digits and can include +, spaces, dashes, and parentheses.")
+    phone_number = models.CharField(validators=[phone_regex], max_length=25, blank=True)
     
     role = models.CharField(
         max_length=20,
@@ -40,6 +40,11 @@ class CustomUser(AbstractUser):
     email_verified = models.BooleanField(default=False)
     email_verification_token = models.CharField(max_length=100, blank=True, null=True)
     email_verification_sent_at = models.DateTimeField(blank=True, null=True)
+    
+    # Additional profile fields
+    timezone = models.CharField(max_length=50, default='Asia/Kolkata', blank=True)
+    language = models.CharField(max_length=20, default='English', blank=True)
+    currency = models.CharField(max_length=10, default='INR', blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -89,6 +89,7 @@ const Dashboard: React.FC = () => {
   const [systemInfo, setSystemInfo] = useState<any>(null);
   // Removed addUserModalOpen state - now navigating to User Management
   const [isLoading, setIsLoading] = useState(true);
+  const [marketPeriod, setMarketPeriod] = useState('1W'); // Add state for market period at component level
   
   const navigate = useNavigate();
   const user = useSelector((state: any) => state.auth.user);
@@ -1041,6 +1042,7 @@ const Dashboard: React.FC = () => {
                   </Box>
                   <Button 
                     size="small" 
+                    onClick={() => navigate('/trading', { state: { activeTab: 'signals' } })}
                     sx={{ 
                       ...styles.animatedButton,
                       py: 1,
@@ -1088,13 +1090,17 @@ const Dashboard: React.FC = () => {
                   </Box>
                   <Button 
                     size="small" 
+                    onClick={() => navigate('/portfolio', { state: { activeTab: 'holdings' } })}
                     sx={{ 
                       color: '#667eea',
                       fontWeight: 600,
                       textTransform: 'none',
                       '&:hover': {
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)'
-                      }
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 2px 8px rgba(102, 126, 234, 0.2)',
+                      },
+                      transition: 'all 0.3s ease'
                     }}
                   >
                     Portfolio
@@ -1121,7 +1127,7 @@ const Dashboard: React.FC = () => {
         {/* Market Overview */}
         <Grid item xs={12}>
           <Fade in timeout={1200}>
-            <Card sx={{ ...styles.glassCard, p: 4, height: 350 }}>
+            <Card sx={{ ...styles.glassCard, p: 4, minHeight: 450, height: 'auto' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Box sx={{
@@ -1141,18 +1147,24 @@ const Dashboard: React.FC = () => {
                     <Button 
                       key={period}
                       size="small" 
-                      variant={idx === 1 ? "contained" : "outlined"}
+                      variant={marketPeriod === period ? "contained" : "outlined"}
+                      onClick={() => setMarketPeriod(period)}
                       sx={{ 
-                        ...(idx === 1 ? styles.animatedButton : {
+                        ...(marketPeriod === period ? styles.animatedButton : {
                           borderColor: '#667eea',
                           color: '#667eea',
                           '&:hover': {
                             borderColor: '#5a67d8',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)'
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 2px 8px rgba(102, 126, 234, 0.2)',
                           }
                         }),
                         minWidth: 50,
-                        py: 1
+                        py: 1,
+                        transition: 'all 0.3s ease',
+                        textTransform: 'none',
+                        fontWeight: 600
                       }}
                     >
                       {period}
@@ -1163,9 +1175,10 @@ const Dashboard: React.FC = () => {
               <Box
                 sx={{
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: 250,
+                  minHeight: 320,
                   background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
                   borderRadius: '15px',
                   border: '2px dashed rgba(102, 126, 234, 0.2)',
@@ -1184,14 +1197,62 @@ const Dashboard: React.FC = () => {
                   }
                 }}
               >
-                <Box sx={{ textAlign: 'center', zIndex: 1 }}>
+                <Box sx={{ textAlign: 'center', zIndex: 1, p: 3 }}>
                   <ShowChart sx={{ fontSize: 64, color: '#667eea', mb: 2, opacity: 0.7 }} />
                   <Typography variant="h6" sx={{ color: '#667eea', fontWeight: 600, mb: 1 }}>
-                    Interactive Market Charts
+                    Interactive Market Charts - {marketPeriod}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                    Real-time market data and advanced analytics coming soon
+                  <Typography variant="body2" sx={{ color: 'rgba(102, 126, 234, 0.8)', mb: 2, lineHeight: 1.6 }}>
+                    Real-time market data and advanced analytics for {marketPeriod === '1D' ? 'daily' : marketPeriod === '1W' ? 'weekly' : 'monthly'} view
                   </Typography>
+                  
+                  {/* Market Stats Preview */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    gap: 3,
+                    mt: 3,
+                    flexWrap: 'wrap'
+                  }}>
+                    {[
+                      { label: 'NIFTY 50', value: '19,450.85', change: '+1.2%', color: '#10B981' },
+                      { label: 'SENSEX', value: '65,220.35', change: '+0.8%', color: '#10B981' },
+                      { label: 'BANK NIFTY', value: '44,180.90', change: '-0.3%', color: '#EF4444' },
+                    ].map((index, idx) => (
+                      <Box key={idx} sx={{ 
+                        textAlign: 'center',
+                        p: 2,
+                        borderRadius: '12px',
+                        background: 'rgba(255, 255, 255, 0.6)',
+                        minWidth: 120,
+                        boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
+                      }}>
+                        <Typography variant="caption" sx={{ 
+                          color: '#6B7280', 
+                          fontWeight: 600,
+                          display: 'block',
+                          mb: 0.5
+                        }}>
+                          {index.label}
+                        </Typography>
+                        <Typography variant="h6" sx={{ 
+                          color: '#1F2937', 
+                          fontWeight: 700,
+                          fontSize: '0.9rem',
+                          mb: 0.5
+                        }}>
+                          {index.value}
+                        </Typography>
+                        <Typography variant="caption" sx={{ 
+                          color: index.color,
+                          fontWeight: 600,
+                          fontSize: '0.75rem'
+                        }}>
+                          {index.change}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
               </Box>
             </Card>

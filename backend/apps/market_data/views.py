@@ -132,7 +132,19 @@ class NSEAPIConfigurationViewSet(ModelViewSet):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_live_quote(request, symbol):
-    """Get live quote for a symbol"""
+    """Get live quote for a symbol with Redis caching"""
+    
+    # Cache key for live quote (very short-lived)
+    cache_key = f"live_quote_{symbol.upper()}"
+    
+    # Check cache first (only 1-2 seconds to avoid stale data)
+    cached_quote = cache.get(cache_key)
+    if cached_quote:
+        cached_quote['cached'] = True
+        return Response({
+            'status': 'success',
+            'data': cached_quote
+        })
     
     async def fetch_quote():
         market_service = await get_market_data_service()
@@ -142,6 +154,9 @@ def get_live_quote(request, symbol):
         quote_data = asyncio.run(fetch_quote())
         
         if quote_data:
+            # Cache for 2 seconds (real-time data)
+            cache.set(cache_key, quote_data, timeout=2)
+            
             return Response({
                 'status': 'success',
                 'data': quote_data
@@ -208,8 +223,20 @@ def get_bulk_quotes(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_option_chain(request, underlying):
-    """Get options chain for an underlying"""
+    """Get options chain for an underlying with Redis caching"""
     expiry = request.query_params.get('expiry')
+    
+    # Cache key for options chain
+    cache_key = f"option_chain_{underlying.upper()}_{expiry or 'current'}"
+    
+    # Check cache first (5 seconds for options data)
+    cached_chain = cache.get(cache_key)
+    if cached_chain:
+        cached_chain['cached'] = True
+        return Response({
+            'status': 'success',
+            'data': cached_chain
+        })
     
     async def fetch_option_chain():
         market_service = await get_market_data_service()
@@ -219,6 +246,9 @@ def get_option_chain(request, underlying):
         option_data = asyncio.run(fetch_option_chain())
         
         if option_data:
+            # Cache for 5 seconds (options data changes frequently)
+            cache.set(cache_key, option_data, timeout=5)
+            
             return Response({
                 'status': 'success',
                 'data': option_data
@@ -575,7 +605,17 @@ def search_symbols(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_market_status(request):
-    """Get current market status"""
+    """Get current market status with Redis caching"""
+    
+    # Cache key for market status (changes every minute)
+    current_minute = timezone.now().strftime('%Y%m%d_%H%M')
+    cache_key = f"market_status_{current_minute}"
+    
+    # Check cache first
+    cached_status = cache.get(cache_key)
+    if cached_status:
+        return Response(cached_status)
+    
     import pytz
     
     # Indian market hours (9:15 AM to 3:30 PM IST)
@@ -601,7 +641,7 @@ def get_market_status(request):
     is_pre_market = is_weekday and pre_market_start <= now < market_open
     is_post_market = is_weekday and market_close < now <= post_market_end
     
-    return Response({
+    market_status = {
         'is_market_open': is_market_open,
         'is_pre_market': is_pre_market,
         'is_post_market': is_post_market,
@@ -610,4 +650,9 @@ def get_market_status(request):
         'market_close_time': market_close.isoformat() if is_weekday else None,
         'next_market_open': market_open.isoformat() if not is_weekday else None,
         'timezone': 'Asia/Kolkata'
-    })
+    }
+    
+    # Cache for 60 seconds (market status doesn't change that frequently)
+    cache.set(cache_key, market_status, timeout=60)
+    
+    return Response(market_status)

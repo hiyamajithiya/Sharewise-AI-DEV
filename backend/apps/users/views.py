@@ -1,5 +1,8 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.utils import timezone
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -253,22 +256,46 @@ def logout_user(request):
 @permission_classes([permissions.IsAuthenticated])
 def user_profile(request):
     """
-    Get current user profile
+    Get current user profile with Redis caching
     """
+    # Create cache key for user profile
+    cache_key = f"user_profile_{request.user.id}"
+    
+    # Try to get from cache first
+    cached_profile = cache.get(cache_key)
+    if cached_profile:
+        return Response(cached_profile, status=status.HTTP_200_OK)
+    
+    # If not cached, serialize user data
     serializer = UserSerializer(request.user)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    profile_data = serializer.data
+    
+    # Cache for 15 minutes
+    cache.set(cache_key, profile_data, timeout=900)
+    
+    return Response(profile_data, status=status.HTTP_200_OK)
 
 
 @api_view(['PATCH'])
 @permission_classes([permissions.IsAuthenticated])
 def update_profile(request):
     """
-    Update user profile
+    Update user profile and invalidate cache
     """
     serializer = UserSerializer(request.user, data=request.data, partial=True)
     
     if serializer.is_valid():
+        # Save the updated profile
         serializer.save()
+        
+        # Invalidate user profile cache
+        cache_key = f"user_profile_{request.user.id}"
+        cache.delete(cache_key)
+        
+        # Also invalidate related caches
+        cache.delete(f"user_roles_{request.user.id}")
+        cache.delete(f"user_permissions_{request.user.id}")
+        
         return Response({
             'message': 'Profile updated successfully!',
             'user': serializer.data
@@ -281,9 +308,15 @@ def update_profile(request):
 @permission_classes([IsAuthenticated])
 def get_user_roles(request):
     """
-    Get current user role information and permissions
+    Get current user role information and permissions with Redis caching
     """
     user = request.user
+    cache_key = f"user_roles_{user.id}"
+    
+    # Try to get from cache first
+    cached_roles = cache.get(cache_key)
+    if cached_roles:
+        return Response(cached_roles, status=status.HTTP_200_OK)
     
     role_info = {
         'user_id': str(user.id),
@@ -302,6 +335,9 @@ def get_user_roles(request):
         'subscription_tier': user.subscription_tier,
         'subscription_tier_display': user.get_subscription_tier_display(),
     }
+    
+    # Cache for 30 minutes (permissions don't change frequently)
+    cache.set(cache_key, role_info, timeout=1800)
     
     return Response(role_info, status=status.HTTP_200_OK)
 

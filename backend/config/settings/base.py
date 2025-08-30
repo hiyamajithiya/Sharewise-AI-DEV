@@ -107,10 +107,13 @@ CACHES = {
         'LOCATION': REDIS_URL + '/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 50,
+                'max_connections': 20,
                 'retry_on_timeout': True,
+                'socket_connect_timeout': 2,
+                'socket_timeout': 2,
+                'socket_keepalive': True,
+                'socket_keepalive_options': {},
             },
             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
         },
@@ -122,6 +125,13 @@ CACHES = {
         'LOCATION': REDIS_URL + '/2',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 10,
+                'socket_connect_timeout': 2,
+                'socket_timeout': 2,
+                'socket_keepalive': True,
+            },
+            'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
         },
         'KEY_PREFIX': 'sharewise_sessions',
         'TIMEOUT': 86400,  # 24 hours
@@ -308,13 +318,7 @@ LOGGING = {
 # Create logs directory if it doesn't exist
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 
-# Cache configuration (using local memory cache for development)
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    }
-}
+# Cache configuration is already defined above with Redis support
 
 # Email configuration (for development)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

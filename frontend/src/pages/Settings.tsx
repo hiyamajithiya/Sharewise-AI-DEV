@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  IconButton,
 } from '@mui/material';
 import {
   Person,
@@ -39,20 +40,28 @@ import {
   CheckCircle,
   Star,
   Email,
+  Link,
+  Add,
+  Refresh,
+  Close,
 } from '@mui/icons-material';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
 import { setThemeMode } from '../store/slices/themeSlice';
+import { updateUserProfile } from '../store/slices/authSlice';
 import { RootState } from '../store';
 import EmailConfiguration from '../components/settings/EmailConfiguration';
 
 const Settings: React.FC = () => {
   const dispatch = useDispatch();
-  const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'notifications' | 'preferences' | 'subscription' | 'billing' | 'email'>('profile');
+  const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'notifications' | 'preferences' | 'subscription' | 'billing' | 'email' | 'brokers'>('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [upgradeDialog, setUpgradeDialog] = useState(false);
   const [passwordDialog, setPasswordDialog] = useState(false);
   const [paymentDialog, setPaymentDialog] = useState(false);
+  const [brokerManageDialog, setBrokerManageDialog] = useState(false);
+  const [selectedBrokerForManage, setSelectedBrokerForManage] = useState<any>(null);
+  const [syncingAccounts, setSyncingAccounts] = useState(false);
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
@@ -60,20 +69,36 @@ const Settings: React.FC = () => {
     whatsapp: true
   });
   
-  const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+91-9876543210',
-    timezone: 'Asia/Kolkata',
-    language: 'English',
-    currency: 'INR',
-  });
-
   const user = useSelector((state: any) => state.auth.user);
   const testingState = useSelector(selectTestingState);
   const { isTestingMode, selectedUser } = testingState;
   const themeMode = useSelector((state: RootState) => state.theme.mode);
+  const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
+  
+  const [formData, setFormData] = useState({
+    firstName: effectiveUser?.first_name || 'John',
+    lastName: effectiveUser?.last_name || 'Doe',
+    email: effectiveUser?.email || 'john.doe@example.com',
+    phone: effectiveUser?.phone_number || '+91-9876543210',
+    timezone: effectiveUser?.timezone || 'Asia/Kolkata',
+    language: effectiveUser?.language || 'English',
+    currency: effectiveUser?.currency || 'INR',
+  });
+  
+  // Update form data when user data changes in Redux
+  useEffect(() => {
+    if (effectiveUser) {
+      setFormData({
+        firstName: effectiveUser.first_name || 'John',
+        lastName: effectiveUser.last_name || 'Doe',
+        email: effectiveUser.email || 'john.doe@example.com',
+        phone: effectiveUser.phone_number || '+91-9876543210',
+        timezone: effectiveUser.timezone || 'Asia/Kolkata',
+        language: effectiveUser.language || 'English',
+        currency: effectiveUser.currency || 'INR',
+      });
+    }
+  }, [effectiveUser]);
   
   // Theme configuration
   const getThemeColors = (mode: 'light' | 'dark' | 'auto') => {
@@ -111,8 +136,6 @@ const Settings: React.FC = () => {
   };
 
   const theme = getThemeColors(themeMode);
-  
-  const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
   const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
   
   // Check if user is super admin for email configuration
@@ -178,11 +201,38 @@ const Settings: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    console.log('Saving settings:', formData);
-    setIsEditing(false);
-    alert('Profile settings saved successfully!');
-    // In real app, this would make API call
+  const handleSave = async () => {
+    try {
+      console.log('Saving settings:', formData);
+      
+      // Prepare the data for API call
+      const profileData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone_number: formData.phone,
+        timezone: formData.timezone,
+        language: formData.language,
+        currency: formData.currency,
+      };
+      
+      // Dispatch Redux action to update profile
+      const resultAction = await dispatch(updateUserProfile(profileData) as any);
+      
+      if (updateUserProfile.fulfilled.match(resultAction)) {
+        console.log('Profile updated successfully:', resultAction.payload);
+        setIsEditing(false);
+        
+        // Show success message
+        alert('Profile settings saved successfully!');
+      } else {
+        throw new Error(resultAction.payload || 'Failed to update profile');
+      }
+      
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      alert(error.message || 'Failed to update profile. Please try again.');
+    }
   };
 
   const handleNotificationToggle = (type: keyof typeof notifications) => {
@@ -203,11 +253,69 @@ const Settings: React.FC = () => {
     setPasswordDialog(true);
   };
 
+  // Broker Integration Handlers
+  const handleAddBrokerAccount = () => {
+    // In a real app, this would navigate to broker integration page or open a proper connection flow
+    window.open('/broker-integration', '_blank');
+  };
+
+  const handleManageBroker = (brokerData: any) => {
+    // In a real app, this would navigate to broker management page
+    console.log('Managing broker account:', brokerData);
+    // For now, just show in-page management options
+    setSelectedBrokerForManage(brokerData);
+    setBrokerManageDialog(true);
+  };
+
+  const handleBrokerSecurity = () => {
+    // Navigate to the security section of settings
+    setActiveSection('security');
+  };
+
+  const handleSyncAllAccounts = async () => {
+    setSyncingAccounts(true);
+    try {
+      // Simulate actual API call to sync broker accounts
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update UI to show sync completed
+      console.log('Broker accounts synced successfully');
+      
+      // In a real app, you would update the account data from the API response
+      // setAccountData(syncedData);
+      
+    } catch (error) {
+      console.error('Failed to sync accounts:', error);
+    } finally {
+      setSyncingAccounts(false);
+    }
+  };
+
+  const handleConnectBroker = (brokerName: string) => {
+    // In a real app, this would start the OAuth flow or redirect to broker's API connection page
+    console.log(`Initiating connection to ${brokerName}`);
+    
+    // Example: redirect to broker's OAuth page
+    const brokerUrls = {
+      'Angel Broking': 'https://smartapi.angelbroking.com/oauth',
+      'Upstox': 'https://api.upstox.com/v2/login/authorization',
+      'ICICI Direct': '#' // Coming soon
+    };
+    
+    const url = brokerUrls[brokerName as keyof typeof brokerUrls];
+    if (url && url !== '#') {
+      // In a real implementation, you'd handle the OAuth flow properly
+      console.log(`Would redirect to: ${url}`);
+      // window.open(url, '_blank');
+    }
+  };
+
   const settingsSections = [
     { id: 'profile', label: 'Profile', icon: <Person /> },
     { id: 'security', label: 'Security', icon: <Security /> },
     { id: 'notifications', label: 'Notifications', icon: <Notifications /> },
     { id: 'preferences', label: 'Preferences', icon: <Palette /> },
+    { id: 'brokers', label: 'Broker Integration', icon: <Link /> },
     { id: 'subscription', label: 'Subscription', icon: <Star /> },
     { id: 'billing', label: 'Billing', icon: <AccountBalance /> },
     ...(isSuperAdmin ? [{ id: 'email', label: 'Email Configuration', icon: <Email /> }] : []),
@@ -879,12 +987,247 @@ const Settings: React.FC = () => {
     <EmailConfiguration />
   );
 
+  const renderBrokerIntegration = () => (
+    <Paper sx={{ 
+      p: 3,
+      borderRadius: '16px',
+      background: 'white',
+      border: '1px solid #e0e0e0',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+    }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
+        Broker Account Management
+      </Typography>
+
+      {/* Connected Accounts Summary */}
+      <Box sx={{ 
+        mb: 3, 
+        p: 2, 
+        background: '#f8fafc', 
+        borderRadius: '12px', 
+        border: '1px solid #e2e8f0' 
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#374151' }}>
+            Connected Accounts
+          </Typography>
+          {syncingAccounts && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Refresh sx={{ fontSize: 16, animation: 'spin 1s linear infinite', '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }} />
+              <Typography variant="caption" sx={{ color: '#667eea' }}>
+                Syncing...
+              </Typography>
+            </Box>
+          )}
+        </Box>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, color: '#10B981' }}>
+                1
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                Active Connections
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, color: '#667eea' }}>
+                ₹1.25L
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                Total Balance
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, color: '#F59E0B' }}>
+                Live
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                Trading Status
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* Connected Broker Accounts */}
+      <List>
+        <ListItem>
+          <ListItemIcon>
+            <AccountBalance sx={{ color: '#10B981' }} />
+          </ListItemIcon>
+          <ListItemText
+            primary={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>
+                  Zerodha
+                </Typography>
+                <Chip label="CONNECTED" color="success" size="small" />
+              </Box>
+            }
+            secondary={
+              <Box>
+                <Typography variant="body2" sx={{ color: '#374151' }}>
+                  Account: ZD1234 • Balance: ₹1,25,000
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#6B7280' }}>
+                  Last synced: 2 minutes ago
+                </Typography>
+              </Box>
+            }
+          />
+          <ListItemSecondaryAction>
+            <Button 
+              variant="outlined" 
+              size="small"
+              onClick={() => handleManageBroker({ name: 'Zerodha', accountId: 'ZD1234', status: 'CONNECTED', balance: 125000 })}
+              sx={{ 
+                color: '#667eea',
+                borderColor: '#667eea',
+                '&:hover': {
+                  backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                  borderColor: '#5a67d8'
+                }
+              }}
+            >
+              Manage
+            </Button>
+          </ListItemSecondaryAction>
+        </ListItem>
+      </List>
+
+      {/* Quick Actions */}
+      <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={handleAddBrokerAccount}
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            borderRadius: '12px',
+            textTransform: 'none',
+            fontWeight: 600,
+            '&:hover': {
+              background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+            },
+          }}
+        >
+          Add Broker Account
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<Security />}
+          onClick={handleBrokerSecurity}
+          sx={{
+            color: '#374151',
+            borderColor: '#d1d5db',
+            '&:hover': {
+              borderColor: '#9ca3af',
+              backgroundColor: '#f9fafb',
+            },
+          }}
+        >
+          Security Settings
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={syncingAccounts ? <Refresh sx={{ animation: 'spin 1s linear infinite', '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }} /> : <Refresh />}
+          onClick={handleSyncAllAccounts}
+          disabled={syncingAccounts}
+          sx={{
+            color: '#374151',
+            borderColor: '#d1d5db',
+            '&:hover': {
+              borderColor: '#9ca3af',
+              backgroundColor: '#f9fafb',
+            },
+            '&:disabled': {
+              color: '#9ca3af',
+              borderColor: '#e5e7eb'
+            }
+          }}
+        >
+          {syncingAccounts ? 'Syncing...' : 'Sync All Accounts'}
+        </Button>
+      </Box>
+
+      {/* Security Notice */}
+      <Alert severity="info" sx={{ mt: 3 }}>
+        <Typography variant="body2">
+          <strong>Security:</strong> Your broker credentials are encrypted and stored securely. 
+          ShareWise AI never stores your login passwords - only API tokens for authorized trading operations.
+        </Typography>
+      </Alert>
+
+      {/* Available Brokers */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#374151' }}>
+          Available Brokers
+        </Typography>
+        <Grid container spacing={2}>
+          {[
+            { name: 'Zerodha', status: 'Connected', color: '#10B981' },
+            { name: 'Angel Broking', status: 'Available', color: '#6B7280' },
+            { name: 'Upstox', status: 'Available', color: '#6B7280' },
+            { name: 'ICICI Direct', status: 'Coming Soon', color: '#9CA3AF' }
+          ].map((broker, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card 
+                variant="outlined"
+                sx={{ 
+                  p: 2, 
+                  textAlign: 'center', 
+                  borderRadius: '12px',
+                  cursor: broker.status === 'Available' ? 'pointer' : 'default',
+                  opacity: broker.status === 'Coming Soon' ? 0.6 : 1,
+                  '&:hover': broker.status === 'Available' ? {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    borderColor: '#667eea'
+                  } : {}
+                }}
+                onClick={() => {
+                  if (broker.status === 'Available') {
+                    handleConnectBroker(broker.name);
+                  } else if (broker.status === 'Coming Soon') {
+                    // Just log for coming soon brokers, no alert
+                    console.log(`${broker.name} integration is coming soon`);
+                  }
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: '#1F2937' }}>
+                  {broker.name}
+                </Typography>
+                <Chip 
+                  label={broker.status}
+                  size="small"
+                  sx={{ 
+                    backgroundColor: broker.status === 'Connected' ? '#dcfce7' : 
+                                   broker.status === 'Available' ? '#dbeafe' : '#f3f4f6',
+                    color: broker.color,
+                    fontWeight: 600
+                  }}
+                />
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    </Paper>
+  );
+
   const renderContent = () => {
     switch (activeSection) {
       case 'profile': return renderProfileSettings();
       case 'security': return renderSecuritySettings();
       case 'notifications': return renderNotificationSettings();
       case 'preferences': return renderPreferences();
+      case 'brokers': return renderBrokerIntegration();
       case 'subscription': return renderSubscription();
       case 'billing': return renderBilling();
       case 'email': return renderEmailConfiguration();
@@ -1113,6 +1456,95 @@ const Settings: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+
+      {/* Manage Broker Dialog */}
+      <Dialog open={brokerManageDialog} onClose={() => setBrokerManageDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
+              Manage Broker Account
+            </Typography>
+            <IconButton onClick={() => setBrokerManageDialog(false)} size="small">
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {selectedBrokerForManage && (
+            <Box sx={{ pt: 2 }}>
+              <Box sx={{ 
+                p: 2, 
+                mb: 3, 
+                background: '#f8fafc', 
+                borderRadius: '12px', 
+                border: '1px solid #e2e8f0' 
+              }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#1F2937' }}>
+                  {selectedBrokerForManage.name}
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Account ID</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      {selectedBrokerForManage.accountId}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Status</Typography>
+                    <Chip label={selectedBrokerForManage.status} color="success" size="small" />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body2" sx={{ color: '#6B7280' }}>Balance</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      ₹{selectedBrokerForManage.balance?.toLocaleString()}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Refresh />}
+                  onClick={() => {
+                    alert('Refreshing account data...');
+                  }}
+                  fullWidth
+                >
+                  Refresh Account Data
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    alert('Opening trading settings...');
+                  }}
+                  fullWidth
+                >
+                  Trading Settings
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to disconnect this account?')) {
+                      setBrokerManageDialog(false);
+                      alert('Account disconnected successfully!');
+                    }
+                  }}
+                  fullWidth
+                >
+                  Disconnect Account
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBrokerManageDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
       </Container>
     </Box>
   );

@@ -276,16 +276,22 @@ class RateLimitMiddleware(MiddlewareMixin):
         return ip
     
     def _is_rate_limited(self, key: str, limits: Dict[str, int]) -> bool:
-        """Check if request should be rate limited"""
+        """Check if request should be rate limited using Redis sliding window"""
         
         current_time = int(time.time())
         window_start = current_time - limits['window']
         
-        # Get current request count from cache
+        # Get current request count from Redis cache
         request_times = cache.get(key, [])
         
         # Remove old requests outside the window
         request_times = [req_time for req_time in request_times if req_time > window_start]
+        
+        # Store updated list back to cache
+        if request_times:
+            cache.set(key, request_times, timeout=limits['window'])
+        else:
+            cache.delete(key)
         
         # Check if limit exceeded
         return len(request_times) >= limits['requests']

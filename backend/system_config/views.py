@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
+from django.core.cache import cache
 from .models import EmailConfiguration, SystemConfiguration
 from .serializers import (
     EmailConfigurationSerializer,
@@ -31,18 +32,35 @@ def email_configuration(request):
         }, status=status.HTTP_403_FORBIDDEN)
     
     if request.method == 'GET':
-        # Get current email configuration
+        # Check cache first for email configuration
+        cache_key = "email_configuration_active"
+        cached_config = cache.get(cache_key)
+        
+        if cached_config:
+            return Response(cached_config)
+        
+        # Get current email configuration from database
         config = EmailConfiguration.objects.filter(is_active=True).first()
         if config:
             serializer = EmailConfigurationSerializer(config)
-            return Response(serializer.data)
+            config_data = serializer.data
+            
+            # Cache for 30 minutes (config doesn't change often)
+            cache.set(cache_key, config_data, timeout=1800)
+            
+            return Response(config_data)
         else:
             # Return empty configuration
-            return Response({
+            empty_config = {
                 'is_active': False,
                 'provider': 'GMAIL',
                 'message': 'No email configuration found'
-            })
+            }
+            
+            # Cache empty response for shorter time (5 minutes)
+            cache.set(cache_key, empty_config, timeout=300)
+            
+            return Response(empty_config)
     
     elif request.method == 'POST':
         # Create new email configuration

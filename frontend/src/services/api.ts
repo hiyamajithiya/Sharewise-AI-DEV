@@ -291,7 +291,7 @@ class ApiService {
   }
 
   async updateUserProfile(profileData: any): Promise<any> {
-    const response = await this.api.patch('/users/profile/', profileData);
+    const response = await this.api.patch('/users/profile/update/', profileData);
     return response.data;
   }
 
