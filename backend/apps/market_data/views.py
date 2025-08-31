@@ -147,8 +147,8 @@ def get_live_quote(request, symbol):
         })
     
     async def fetch_quote():
-        market_service = await get_market_data_service()
-        return await market_service.get_live_quote(symbol.upper())
+        from .yfinance_service import yfinance_service
+        return await yfinance_service.get_live_quote(symbol.upper())
     
     try:
         quote_data = asyncio.run(fetch_quote())
@@ -186,31 +186,15 @@ def get_bulk_quotes(request):
     symbols = serializer.validated_data['symbols']
     
     async def fetch_bulk_quotes():
-        market_service = await get_market_data_service()
-        quotes = {}
-        
-        # Fetch quotes concurrently
-        tasks = []
-        for symbol in symbols:
-            tasks.append(market_service.get_live_quote(symbol))
-        
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        for i, result in enumerate(results):
-            symbol = symbols[i]
-            if isinstance(result, dict):
-                quotes[symbol] = result
-            else:
-                quotes[symbol] = {'error': str(result)}
-        
-        return quotes
+        from .yfinance_service import yfinance_service
+        return await yfinance_service.get_bulk_quotes(symbols)
     
     try:
         quotes = asyncio.run(fetch_bulk_quotes())
         
         return Response({
             'status': 'success',
-            'data': quotes
+            'quotes': quotes
         })
         
     except Exception as e:
