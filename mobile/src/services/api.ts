@@ -3,7 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { store } from '../store';
 import { clearAuth, setToken } from '../store/slices/authSlice';
 
-const BASE_URL = 'https://api.sharewise.ai'; // Change to your actual API URL
+// For local development, use your machine's IP address
+// Replace with your actual backend URL in production
+const BASE_URL = __DEV__ 
+  ? 'http://192.168.1.94:8000'  // Local development server
+  : 'https://api.sharewise.ai'; // Production API URL
 
 interface ApiConfig {
   timeout: number;

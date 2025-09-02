@@ -15,6 +15,7 @@ import {
 import { Visibility, VisibilityOff, Email, Lock, Person } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, selectAuthLoading, selectAuthError } from '../store/slices/authSlice';
+import Footer from '../components/common/Footer';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -621,6 +622,7 @@ const Register: React.FC = () => {
           </Box>
         </Box>
       </Container>
+      <Footer />
     </Box>
   );
 };

@@ -15,6 +15,7 @@ import {
 import { ArrowBack, Refresh, Email as EmailIcon } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { verifyEmail, resendVerification, selectAuthLoading, selectAuthError } from '../store/slices/authSlice';
+import Footer from '../components/common/Footer';
 
 const VerifyEmail: React.FC = () => {
   const navigate = useNavigate();
@@ -336,6 +337,7 @@ const VerifyEmail: React.FC = () => {
           </Box>
         </Box>
       </Container>
+      <Footer />
     </Box>
   );
 };

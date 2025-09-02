@@ -15,6 +15,8 @@ import { Visibility, VisibilityOff, Email, Lock, TrendingUp, Analytics, Security
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, selectAuthLoading, selectAuthError } from '../store/slices/authSlice';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import Footer from '../components/common/Footer';
+import GoogleSignIn from '../components/auth/GoogleSignIn';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -472,6 +474,30 @@ const Login: React.FC = () => {
                 {loading ? 'Signing In...' : 'Sign In'}
               </Button>
 
+              {/* Divider */}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                my: 2,
+                '&::before, &::after': {
+                  content: '""',
+                  flex: 1,
+                  height: '1px',
+                  backgroundColor: '#e0e0e0',
+                },
+              }}>
+                <Typography sx={{ 
+                  px: 2, 
+                  color: '#6B7280',
+                  fontSize: '0.875rem',
+                }}>
+                  OR
+                </Typography>
+              </Box>
+
+              {/* Google Sign In Component */}
+              <GoogleSignIn onSuccess={() => navigate(from, { replace: true })} />
+
               <Box sx={{ textAlign: 'center' }}>
                 <Link 
                   component={RouterLink} 
@@ -494,6 +520,7 @@ const Login: React.FC = () => {
           </Box>
         </Grid>
       </Grid>
+      <Footer />
     </Box>
   );
 };

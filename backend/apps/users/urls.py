@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
+from apps.authentication.google_auth import google_signin, google_config
 
 app_name = 'users'
 
@@ -12,6 +13,10 @@ urlpatterns = [
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # Google OAuth endpoints
+    path('google/signin/', google_signin, name='google_signin'),
+    path('google/config/', google_config, name='google_config'),
     
     # Profile endpoints
     path('profile/', views.user_profile, name='user_profile'),

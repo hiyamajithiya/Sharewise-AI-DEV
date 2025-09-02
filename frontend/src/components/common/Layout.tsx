@@ -42,6 +42,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { selectUser, logoutUser } from '../../store/slices/authSlice';
 import { selectTestingState } from '../../store/slices/testingSlice';
+import Footer from './Footer';
 
 const drawerWidth = 240;
 
@@ -542,6 +543,7 @@ const Layout: React.FC = () => {
         sx={{
           flexGrow: 1,
           p: 3,
+          pb: 8, // Add padding bottom for footer
           width: { md: `calc(100% - ${drawerWidth}px)` },
           minHeight: '100vh',
           backgroundColor: 'background.default',
@@ -549,6 +551,7 @@ const Layout: React.FC = () => {
       >
         <Toolbar />
         <Outlet />
+        <Footer />
       </Box>
     </Box>
   );
