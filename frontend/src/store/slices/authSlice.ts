@@ -3,6 +3,8 @@ import { User, UserProfile } from '../../types';
 import { AuthState, AuthTokens, LoginErrorPayload, LoginResponse } from '../../types/auth';
 import { login } from '../../services/auth';
 
+import apiService from '../../services/api';
+
 // Initial state
 const initialState: AuthState = {
   user: null,
