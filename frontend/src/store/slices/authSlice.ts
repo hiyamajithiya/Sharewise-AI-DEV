@@ -1,30 +1,37 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AuthState, User, UserProfile, AuthTokens } from '../../types';
-import apiService from '../../services/api';
+import { User, UserProfile } from '../../types';
+import { AuthState, AuthTokens, LoginErrorPayload, LoginResponse } from '../../types/auth';
+import { login } from '../../services/auth';
 
 // Initial state
 const initialState: AuthState = {
   user: null,
   profile: null,
   tokens: null,
-  isAuthenticated: false,
+  isAuthenticated: false, 
   loading: false,
   error: null,
 };
 
 // Async thunks
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk<
+  LoginResponse,
+  { usernameOrEmail: string; password: string },
+  { rejectValue: LoginErrorPayload }
+>(
   'auth/login',
-  async ({ usernameOrEmail, password }: { usernameOrEmail: string; password: string }, { rejectWithValue }) => {
+  async ({ usernameOrEmail, password }, { rejectWithValue }) => {
     try {
-      const response = await apiService.login(usernameOrEmail, password);
+      console.log('Attempting login...', { usernameOrEmail }); // Debug log
+      const response = await login(usernameOrEmail, password);
+      console.log('Login response:', response); // Debug log
       return response;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Login failed';
+      console.error('Login error:', error); // Debug log
       return rejectWithValue({
-        message: errorMessage,
-        requiresVerification: error.response?.data?.requires_verification || false,
-        email: error.response?.data?.email,
+        message: error.message || 'Login failed',
+        requiresVerification: false,
+        email: usernameOrEmail,
       });
     }
   }
@@ -156,8 +163,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.access) {
-          state.tokens = { access: action.payload.access, refresh: action.payload.refresh };
+        if (action.payload.tokens) {
+          state.tokens = action.payload.tokens;
           state.user = action.payload.user;
           state.isAuthenticated = true;
         }
@@ -165,8 +172,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        const error = action.payload as any;
-        state.error = error?.message || action.payload as string;
+        const errorPayload = action.payload as LoginErrorPayload;
+        state.error = errorPayload?.message || 'Login failed';
         state.isAuthenticated = false;
       });
 

@@ -387,7 +387,7 @@ class MarketplaceUserAdmin(BaseUserAdmin):
     )
     
     def models_created_count(self, obj):
-        return obj.created_models.count()
+        return obj.ml_models.count()
     models_created_count.short_description = 'Models Created'
     
     def models_leased_count(self, obj):
@@ -395,7 +395,7 @@ class MarketplaceUserAdmin(BaseUserAdmin):
     models_leased_count.short_description = 'Models Leased'
     
     def total_earned(self, obj):
-        total = obj.created_models.aggregate(
+        total = obj.ml_models.aggregate(
             total=Sum('leases__creator_earnings')
         )['total'] or Decimal('0')
         return f"₹{total}"
@@ -410,7 +410,7 @@ class MarketplaceUserAdmin(BaseUserAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related(
-            'created_models', 'leased_models'
+            'ml_models', 'leased_models'
         )
 
 # Re-register User with enhanced admin

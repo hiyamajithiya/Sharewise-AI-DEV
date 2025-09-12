@@ -1,5 +1,9 @@
 // Type definitions for ShareWise AI Trading Platform
 
+export * from "./user";
+export * from "./auth";
+
+
 export interface User {
   id: string;
   email: string;

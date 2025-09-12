@@ -14,6 +14,7 @@ import {
 import { Visibility, VisibilityOff, Email, Lock, TrendingUp, Analytics, Security, Speed, ShowChart, Assessment } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, selectAuthLoading, selectAuthError } from '../store/slices/authSlice';
+import { LoginErrorPayload } from '../types/auth';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const Login: React.FC = () => {
@@ -72,12 +73,38 @@ const Login: React.FC = () => {
     }
 
     try {
-      const result = await dispatch(loginUser(formData) as any);
+      console.log('Submitting login form:', formData); // Debug log
+      const result = await dispatch(loginUser({
+        usernameOrEmail: formData.usernameOrEmail,
+        password: formData.password
+      }) as any);
+      
+      console.log('Login dispatch result:', result); // Debug log
+      
+      console.log('Login result:', result);  // Debug log
+      
       if (loginUser.fulfilled.match(result)) {
+        console.log('Login successful, navigating to:', from); // Debug log
         navigate(from, { replace: true });
+      } else if (loginUser.rejected.match(result)) {
+        console.error('Login rejected:', result.payload); // Debug log
+        const errorPayload = result.payload as LoginErrorPayload;
+        setErrors(prev => ({
+          ...prev,
+          submit: errorPayload?.message || 'Login failed'
+        }));
+        
+        if (errorPayload?.requiresVerification) {
+          // Handle email verification if needed
+          console.log('Email verification required for:', errorPayload.email);
+        }
       }
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login error:', error); // Debug log
+      setErrors(prev => ({
+        ...prev,
+        submit: 'An unexpected error occurred'
+      }));
     }
   };
 
