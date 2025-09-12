@@ -92,6 +92,3 @@ coverage/
 *.cache
 
 claude/
-backend/requirements-folder/requirements.txt
-backend/config/settings/development.py
-#backend/config/settings/base.py
