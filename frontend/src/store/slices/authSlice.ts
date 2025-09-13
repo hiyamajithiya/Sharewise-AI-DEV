@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { User, UserProfile } from '../../types';
 import { AuthState, AuthTokens, LoginErrorPayload, LoginResponse } from '../../types/auth';
 import { login } from '../../services/auth';
+import apiService from '../../services/auth';
+
 
 import apiService from '../../services/api';
 

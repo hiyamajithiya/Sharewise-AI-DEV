@@ -84,3 +84,16 @@ export const updateUserProfile = async (profileData: Partial<UserProfile>): Prom
   const response = await api.patch('/users/profile/update/', profileData);
   return response.data;
 };
+
+const apiService = {
+  login,
+  register,
+  verifyEmail,
+  resendVerification,
+  logout,
+  refreshToken,
+  getCurrentUser,
+  updateUserProfile,
+};
+
+export default apiService;
