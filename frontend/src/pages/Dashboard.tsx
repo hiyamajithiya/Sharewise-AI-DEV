@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLiveMarketData, DEFAULT_HOLDINGS } from '../hooks/useLiveMarketData';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -35,6 +36,8 @@ import {
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import DataTable, { TableColumn } from '../components/common/DataTable';
+import { MarketDataAPI } from '../services/marketDataService';
+import LiveMarketWidget from '../components/common/LiveMarketWidget';
 // Removed AddUserModal import - now using User Management page
 
 // Custom styles for clean modern design
@@ -89,10 +92,36 @@ const Dashboard: React.FC = () => {
   const [systemInfo, setSystemInfo] = useState<any>(null);
   // Removed addUserModalOpen state - now navigating to User Management
   const [isLoading, setIsLoading] = useState(true);
-  const [marketPeriod, setMarketPeriod] = useState('1W'); // Add state for market period at component level
-  
+  const { marketData, loading } = useLiveMarketData(['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']);
+  const [marketPeriod, setMarketPeriod] = useState('1W');
   const navigate = useNavigate();
   const user = useSelector((state: any) => state.auth.user);
+
+  const signalColumns: TableColumn[] = [
+    { id: "symbol", label: "Symbol", minWidth: 100 },
+    { id: "signal_type", label: "Signal", minWidth: 80 },
+    { id: "entry_price", label: "Entry Price", minWidth: 120, format: (value) => `$${value?.toFixed(2)}` },
+    { id: "target_price", label: "Target Price", minWidth: 120, format: (value) => `$${value?.toFixed(2)}` },
+    { id: "confidence_score", label: "Confidence", minWidth: 100, format: (value) => `${(value * 100)?.toFixed(1)}%` },
+    { id: "status", label: "Status", minWidth: 100 },
+  ];
+
+  const recentSignals = loading ? [] : Object.keys(marketData).map((symbol, index) => {
+    const quote = marketData[symbol];
+    if (!quote) return null;
+
+    const isPositive = quote.change_percent > 0;
+    return {
+      id: symbol + index,
+      symbol: symbol,
+      signal_type: isPositive ? "BUY" : "SELL",
+      entry_price: quote.last_price,
+      target_price: isPositive ? quote.last_price * 1.05 : quote.last_price * 0.95,
+      confidence_score: Math.min(0.95, 0.7 + Math.abs(quote.change_percent) / 10),
+      timestamp: quote.timestamp,
+      status: index < 2 ? "Active" : "Executed",
+    };
+  }).filter(Boolean).slice(0, 5);
 
   const fetchSystemInfo = async () => {
     try {
@@ -122,65 +151,28 @@ const Dashboard: React.FC = () => {
 
 
   const portfolioStats = {
-    totalValue: 125000,
-    todayPnl: 2500,
-    todayPnlPercent: 2.04,
-    totalPnl: 15000,
-    totalPnlPercent: 13.64,
+    totalValue: 0,
+    todayPnl: 0,
+    todayPnlPercent: 0,
+    totalPnl: 0,
+    totalPnlPercent: 0,
   };
 
 
-  const recentSignals = [
-    {
-      symbol: 'RELIANCE',
-      signal_type: 'BUY',
-      entry_price: 2485.50,
-      target_price: 2650.00,
-      confidence_score: 0.87,
-      timestamp: '2025-01-08T09:30:00Z',
-      status: 'Active',
-    },
-    {
-      symbol: 'TCS',
-      signal_type: 'SELL',
-      entry_price: 3245.75,
-      target_price: 3100.00,
-      confidence_score: 0.92,
-      timestamp: '2025-01-08T10:15:00Z',
-      status: 'Executed',
-    },
-    {
-      symbol: 'INFY',
-      signal_type: 'BUY',
-      entry_price: 1678.90,
-      target_price: 1750.00,
-      confidence_score: 0.78,
-      timestamp: '2025-01-08T11:00:00Z',
-      status: 'Pending',
-    },
-  ];
 
-  const signalColumns: TableColumn[] = [
-    { id: 'symbol', label: 'Symbol', minWidth: 100 },
-    { id: 'signal_type', label: 'Type', minWidth: 80 },
-    { id: 'entry_price', label: 'Entry Price', minWidth: 120, align: 'right' },
-    { id: 'target_price', label: 'Target', minWidth: 120, align: 'right' },
-    { 
-      id: 'confidence_score', 
-      label: 'Confidence', 
-      minWidth: 100, 
-      align: 'center',
-      format: (value: number) => `${Math.round(value * 100)}%`
-    },
-    { id: 'status', label: 'Status', minWidth: 100 },
-  ];
-
-  const topHoldings = [
-    { symbol: 'RELIANCE', quantity: 50, current_price: 2485.50, pnl_percent: 5.2 },
-    { symbol: 'TCS', quantity: 25, current_price: 3245.75, pnl_percent: -2.1 },
-    { symbol: 'INFY', quantity: 100, current_price: 1678.90, pnl_percent: 8.7 },
-    { symbol: 'HDFC', quantity: 75, current_price: 1456.30, pnl_percent: 3.4 },
-  ];
+  const topHoldings = loading ? [] : Object.keys(marketData).slice(0, 5).map(symbol => {
+  const quote = marketData[symbol];
+  const holding = DEFAULT_HOLDINGS.find(h => h.symbol === symbol);
+  
+  if (!quote || !holding) return null;
+  
+  return {
+    symbol: quote.symbol,
+    quantity: holding.shares,
+    current_price: quote.last_price,
+    pnl_percent: ((quote.last_price - holding.avgCost) / holding.avgCost) * 100
+  };
+}).filter(Boolean);
 
   const holdingColumns: TableColumn[] = [
     { id: 'symbol', label: 'Symbol', minWidth: 100 },
@@ -362,6 +354,18 @@ const Dashboard: React.FC = () => {
             </Zoom>
           </Grid>
         ))}
+      </Grid>
+
+{/* Live Market Data Section */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12}>
+          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+            Live Market Data
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <LiveMarketWidget />
+        </Grid>
       </Grid>
 
       {/* Main Content Cards */}
@@ -1048,6 +1052,7 @@ const Dashboard: React.FC = () => {
                       py: 1,
                       px: 3
                     }}
+
                   >
                     View All
                   </Button>

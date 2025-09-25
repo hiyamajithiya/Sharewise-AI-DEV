@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLiveMarketData } from '../hooks/useLiveMarketData';
 import { useLocation } from 'react-router-dom';
 import {
   Container,

@@ -171,18 +171,9 @@ class ApiService {
     } catch (error: any) {
       // If backend is not available or returns network error, use mock auth
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK' || !error.response) {
-        console.log('Backend not available, using mock authentication');
-        const mockResponse = await MockAuthService.login(usernameOrEmail, password);
-        
-        if (mockResponse.access) {
-          const tokens: AuthTokens = {
-            access: mockResponse.access,
-            refresh: mockResponse.refresh,
-          };
-          this.saveTokensToStorage(tokens);
-        }
-        
-        return mockResponse;
+        //console.log('Backend not available, using mock authentication');
+        // Mock auth disabled
+        throw error;
       }
       
       // Re-throw other errors (like authentication failures)
@@ -204,7 +195,7 @@ class ApiService {
     } catch (error: any) {
       // If backend is not available, use mock auth
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK' || !error.response) {
-        console.log('Backend not available, using mock registration');
+        //console.log('Backend not available, using mock registration');
         return await MockAuthService.register(userData);
       }
       
@@ -231,18 +222,9 @@ class ApiService {
     } catch (error: any) {
       // If backend is not available, use mock auth
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK' || !error.response) {
-        console.log('Backend not available, using mock email verification');
-        const mockResponse = await MockAuthService.verifyEmail(userId, otpCode);
-        
-        if (mockResponse.access) {
-          const tokens: AuthTokens = {
-            access: mockResponse.access,
-            refresh: mockResponse.refresh,
-          };
-          this.saveTokensToStorage(tokens);
-        }
-        
-        return mockResponse;
+        //console.log('Backend not available, using mock email verification');
+        // Mock auth disabled
+        throw error;
       }
       
       throw error;

@@ -218,6 +218,13 @@ class MarketDataService:
                     self.providers[config.id] = NSEDataProvider(config)
                 # Add other providers here (Zerodha, Upstox, etc.)
                 
+            # Load Finnhub provider for US markets
+            from django.conf import settings
+            finnhub_api_key = getattr(settings, 'FINNHUB_API_KEY', None) or 'd3a4vopr01qli8jcmumgd3a4vopr01qli8jcmun0'
+            if finnhub_api_key:
+                self.providers['finnhub'] = FinnhubDataProvider(finnhub_api_key)
+                logger.info("Added Finnhub provider for US markets")
+
             logger.info(f"Loaded {len(self.providers)} market data providers")
             
         except Exception as e:
@@ -445,3 +452,115 @@ async def get_market_data_service():
     if not market_data_service:
         market_data_service = await MarketDataService.initialize()
     return market_data_service
+
+class FinnhubDataProvider:
+    """Finnhub API Data Provider for US Markets"""
+
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.base_url = 'https://finnhub.io/api/v1'
+        self.session = None
+
+    def _setup_session(self):
+        """Setup HTTP session"""
+        if not self.session:
+            self.session = requests.Session()
+            self.session.headers.update({
+                'X-Finnhub-Token': self.api_key
+            })
+
+    async def get_quote(self, symbol: str) -> Optional[Dict]:
+        """Get real-time quote for US symbols"""
+        try:
+            self._setup_session()
+            response = self.session.get(f"{self.base_url}/quote", 
+                                      params={'symbol': symbol}, 
+                                      timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return self._normalize_finnhub_quote(data, symbol)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Finnhub quote error: {e}")
+            return None
+
+    def _normalize_finnhub_quote(self, data: Dict, symbol: str) -> Dict:
+        """Normalize Finnhub response to NSE format"""
+        try:
+            current_price = Decimal(str(data.get('c', 0)))
+            previous_close = Decimal(str(data.get('pc', 0)))
+            change = current_price - previous_close
+            change_percent = (change / previous_close * 100) if previous_close > 0 else Decimal('0')
+
+            return {
+                'symbol': symbol,
+                'last_price': current_price,
+                'change': change,
+                'change_percent': change_percent,
+                'open_price': Decimal(str(data.get('o', 0))),
+                'high_price': Decimal(str(data.get('h', 0))),
+                'low_price': Decimal(str(data.get('l', 0))),
+                'previous_close': previous_close,
+                'volume': 0,  # Not provided by Finnhub in quote endpoint
+                'value': Decimal('0'),
+                'timestamp': timezone.now(),
+                'data_source': 'FINNHUB'
+            }
+        except Exception as e:
+            logger.error(f"Error normalizing Finnhub data: {e}")
+            return {}
+
+
+class FinnhubDataProvider:
+    """Finnhub API Data Provider for US Markets"""
+
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.base_url = 'https://finnhub.io/api/v1'
+        self.session = None
+
+    def _setup_session(self):
+        if not self.session:
+            self.session = requests.Session()
+
+    async def get_quote(self, symbol: str) -> Optional[Dict]:
+        try:
+            self._setup_session()
+            params = {'symbol': symbol, 'token': self.api_key}
+            response = self.session.get(f"{self.base_url}/quote", params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return self._normalize_finnhub_quote(data, symbol)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Finnhub quote error: {e}")
+            return None
+
+    def _normalize_finnhub_quote(self, data: Dict, symbol: str) -> Dict:
+        try:
+            current_price = Decimal(str(data.get('c', 0)))
+            previous_close = Decimal(str(data.get('pc', 0)))
+            change = current_price - previous_close if previous_close > 0 else Decimal('0')
+            change_percent = (change / previous_close * 100) if previous_close > 0 else Decimal('0')
+
+            return {
+                'symbol': symbol,
+                'last_price': current_price,
+                'change': change,
+                'change_percent': change_percent,
+                'open_price': Decimal(str(data.get('o', 0))),
+                'high_price': Decimal(str(data.get('h', 0))),
+                'low_price': Decimal(str(data.get('l', 0))),
+                'previous_close': previous_close,
+                'volume': 0,
+                'value': Decimal('0'),
+                'timestamp': timezone.now(),
+                'data_source': 'FINNHUB'
+            }
+        except Exception as e:
+            logger.error(f"Error normalizing Finnhub data: {e}")
+            return {}

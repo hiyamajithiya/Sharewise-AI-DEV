@@ -446,3 +446,34 @@ MARKET_DATA_SETTINGS = {
         'WEBSOCKET_CONNECTIONS': 7,
     }
 }
+# Finnhub Market Data Configuration
+FINNHUB_API_KEY = os.getenv('FINNHUB_API_KEY')
+FINNHUB_BASE_URL = os.getenv('FINNHUB_BASE_URL', 'https://finnhub.io/api/v1')
+FINNHUB_WS_URL = os.getenv('FINNHUB_WS_URL', 'wss://ws.finnhub.io')
+
+MARKET_DATA_CONFIG = {
+    'FINNHUB': {
+        'API_KEY': FINNHUB_API_KEY,
+        'BASE_URL': FINNHUB_BASE_URL,
+        'WS_URL': FINNHUB_WS_URL,
+        'RATE_LIMIT': 60,  # 60 requests per minute for free tier
+        'TIMEOUT': 30,
+        'SUPPORTED_EXCHANGES': ['NSE', 'BSE', 'US']
+    }
+}
+
+# Finnhub Market Data Configuration
+FINNHUB_API_KEY = os.getenv('FINNHUB_API_KEY')
+FINNHUB_BASE_URL = os.getenv('FINNHUB_BASE_URL', 'https://finnhub.io/api/v1')
+FINNHUB_WS_URL = os.getenv('FINNHUB_WS_URL', 'wss://ws.finnhub.io')
+
+MARKET_DATA_CONFIG = {
+    'FINNHUB': {
+        'API_KEY': FINNHUB_API_KEY,
+        'BASE_URL': FINNHUB_BASE_URL,
+        'WS_URL': FINNHUB_WS_URL,
+        'RATE_LIMIT': 60,  # 60 requests per minute for free tier
+        'TIMEOUT': 30,
+        'SUPPORTED_EXCHANGES': ['NSE', 'BSE', 'US']
+    }
+}

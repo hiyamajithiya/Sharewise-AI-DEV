@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLiveMarketData } from '../hooks/useLiveMarketData';
 import {
   Container,
   Typography,
@@ -101,15 +102,35 @@ const Portfolio: React.FC = () => {
   const tierFeatures = getTierFeatures(subscriptionTier);
 
   // Mock portfolio data based on tier
-  const portfolioData = {
-    totalValue: Math.min(125000, tierFeatures.portfolioValue),
-    dayChange: 2500,
-    dayChangePercent: 2.04,
-    totalPnL: 15000,
-    totalPnLPercent: 13.64,
-    investedAmount: 110000,
+  // Live portfolio data using real market prices
+const { marketData, loading } = useLiveMarketData(['AAPL']);
+const portfolioData = (() => {
+  if (loading || !marketData.AAPL) {
+    return {
+      totalValue: Math.min(125000, tierFeatures.portfolioValue),
+      dayChange: 0,
+      dayChangePercent: 0,
+      totalPnL: 15000,
+      totalPnLPercent: 13.64,
+      investedAmount: 110000,
+      cashBalance: 15000,
+    };
+  }
+  
+  const aaplPrice = marketData.AAPL.last_price;
+  const aaplChange = marketData.AAPL.change_percent;
+  const shares = 500; // Simulate portfolio holding
+  
+  return {
+    totalValue: Math.min(Math.round(aaplPrice * shares), tierFeatures.portfolioValue),
+    dayChange: Math.round((aaplPrice * shares * aaplChange) / 100),
+    dayChangePercent: parseFloat(aaplChange.toFixed(2)),
+    totalPnL: Math.round((aaplPrice * shares) - (240 * shares)), // Assuming $240 buy price
+    totalPnLPercent: parseFloat(((aaplPrice - 240) / 240 * 100).toFixed(2)),
+    investedAmount: 240 * shares,
     cashBalance: 15000,
   };
+})();
 
   // Mock holdings data - filtered by tier
   const allHoldings = [

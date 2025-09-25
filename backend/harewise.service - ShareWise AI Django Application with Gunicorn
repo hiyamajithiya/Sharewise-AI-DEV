@@ -1,0 +1,14 @@
+[0;1;32m●[0m sharewise.service - ShareWise AI Django Application with Gunicorn
+     Loaded: loaded (]8;;file://vmi2703348/etc/systemd/system/sharewise.service/etc/systemd/system/sharewise.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Wed 2025-09-24 15:01:56 CEST; 5s ago
+   Main PID: 59252 (gunicorn)
+      Tasks: 4 (limit: 14309)
+     Memory: 73.9M (peak: 74.5M)
+        CPU: 821ms
+     CGroup: /system.slice/sharewise.service
+             ├─[0;38;5;245m59252 /var/www/sharewise-ai/backend/venv/bin/python3 /var/www/sharewise-ai/backend/venv/bin/gunicorn --config gunicorn.conf.py config.wsgi:application[0m
+             ├─[0;38;5;245m59254 /var/www/sharewise-ai/backend/venv/bin/python3 /var/www/sharewise-ai/backend/venv/bin/gunicorn --config gunicorn.conf.py config.wsgi:application[0m
+             ├─[0;38;5;245m59255 /var/www/sharewise-ai/backend/venv/bin/python3 /var/www/sharewise-ai/backend/venv/bin/gunicorn --config gunicorn.conf.py config.wsgi:application[0m
+             └─[0;38;5;245m59256 /var/www/sharewise-ai/backend/venv/bin/python3 /var/www/sharewise-ai/backend/venv/bin/gunicorn --config gunicorn.conf.py config.wsgi:application[0m
+
+Sep 24 15:01:56 vmi2703348 systemd[1]: Started sharewise.service - ShareWise AI Django Application with Gunicorn.
