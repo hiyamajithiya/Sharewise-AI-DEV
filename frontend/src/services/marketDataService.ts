@@ -57,12 +57,12 @@ class MarketDataService {
       return;
     }
 
-    // Construct WebSocket URL using environment variable
-    const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws';
-    const fullWsUrl = `${wsUrl}/market-data/`;
+    // Construct WebSocket URL
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws/market-data/`;
     
     try {
-      this.ws = new WebSocket(fullWsUrl);
+      this.ws = new WebSocket(wsUrl);
       
       this.ws.onopen = () => {
         console.log('Market data WebSocket connected');
@@ -312,21 +312,13 @@ export class MarketDataAPI {
 
   static async getQuote(symbol: string): Promise<MarketQuote | null> {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-      const response = await fetch(`${apiUrl}/market-data/quote/${symbol}/`, {
+      const response = await fetch(`/api/market-data/quote/${symbol}/`, {
         headers: this.getHeaders()
       });
 
       if (response.ok) {
         const data = await response.json();
-        return {
-          symbol: data.symbol,
-          last_price: data.last_price,
-          change: data.change,
-          change_percent: data.change_percent,
-          volume: data.volume,
-          timestamp: data.timestamp
-        };
+        return data.status === 'success' ? data.data : null;
       }
       
       return null;
@@ -416,8 +408,7 @@ export class MarketDataAPI {
 
   static async subscribeToSymbols(symbols: string[]): Promise<any> {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-      const response = await fetch(`${apiUrl}/market-data/subscribe/`, {
+      const response = await fetch('/api/market-data/subscribe/', {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({ symbols })
@@ -433,6 +424,4 @@ export class MarketDataAPI {
       return null;
     }
   }
-
-
 }

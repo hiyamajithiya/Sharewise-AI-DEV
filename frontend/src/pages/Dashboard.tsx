@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLiveMarketData } from '../hooks/useLiveMarketData';
+import { useLiveMarketData, DEFAULT_HOLDINGS } from '../hooks/useLiveMarketData';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -92,7 +92,6 @@ const Dashboard: React.FC = () => {
   const [systemInfo, setSystemInfo] = useState<any>(null);
   // Removed addUserModalOpen state - now navigating to User Management
   const [isLoading, setIsLoading] = useState(true);
-  const [holdings, setHoldings] = useState<any[]>([]);
   const { marketData, loading } = useLiveMarketData(['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']);
   const [marketPeriod, setMarketPeriod] = useState('1W');
   const navigate = useNavigate();
@@ -148,28 +147,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchSystemInfo();
-    fetchHoldings();
   }, []);
-
-  const fetchHoldings = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/portfolios/holdings/`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const holdingsData = await response.json();
-        setHoldings(holdingsData);
-      }
-    } catch (error) {
-      console.error('Failed to fetch holdings:', error);
-      setHoldings([]);
-    }
-  };
 
 
   const portfolioStats = {
@@ -183,18 +161,18 @@ const Dashboard: React.FC = () => {
 
 
   const topHoldings = loading ? [] : Object.keys(marketData).slice(0, 5).map(symbol => {
-    const quote = marketData[symbol];
-    const holding = holdings.find((h: any) => h.symbol === symbol);
-    
-    if (!quote || !holding) return null;
-    
-    return {
-      symbol: quote.symbol,
-      quantity: holding.quantity || holding.shares || 0,
-      current_price: quote.last_price,
-      pnl_percent: holding.avg_cost ? ((quote.last_price - holding.avg_cost) / holding.avg_cost) * 100 : 0
-    };
-  }).filter(Boolean);
+  const quote = marketData[symbol];
+  const holding = DEFAULT_HOLDINGS.find(h => h.symbol === symbol);
+  
+  if (!quote || !holding) return null;
+  
+  return {
+    symbol: quote.symbol,
+    quantity: holding.shares,
+    current_price: quote.last_price,
+    pnl_percent: ((quote.last_price - holding.avgCost) / holding.avgCost) * 100
+  };
+}).filter(Boolean);
 
   const holdingColumns: TableColumn[] = [
     { id: 'symbol', label: 'Symbol', minWidth: 100 },

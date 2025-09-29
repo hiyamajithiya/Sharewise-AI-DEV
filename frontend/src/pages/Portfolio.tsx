@@ -122,33 +122,14 @@ const Portfolio: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Real API calls to your Django backend
-        const [portfolioResponse, holdingsResponse] = await Promise.all([
-          fetch(`${process.env.REACT_APP_API_URL}/portfolios/summary/`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-          fetch(`${process.env.REACT_APP_API_URL}/portfolios/holdings/`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-              'Content-Type': 'application/json',
-            },
-          })
-        ]);
-
-        if (!portfolioResponse.ok || !holdingsResponse.ok) {
-          throw new Error('Failed to fetch portfolio data');
-        }
-
-        const portfolioData = await portfolioResponse.json();
-        const holdingsData = await holdingsResponse.json();
+        // TODO: Replace with actual API calls
+        // const portfolioResponse = await apiService.getPortfolio();
+        // const holdingsResponse = await apiService.getHoldings();
         
-        setPortfolioData(portfolioData);
-        setHoldings(holdingsData);
+        // setPortfolioData(portfolioResponse);
+        // setHoldings(holdingsResponse);
+        
+        // For now, just set loading to false - no mock data
         setLoading(false);
         
       } catch (err: any) {
