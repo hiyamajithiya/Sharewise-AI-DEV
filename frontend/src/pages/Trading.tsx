@@ -259,7 +259,7 @@ const Trading: React.FC = () => {
     }
   };
 
-  // Mock trading signals based on tier with F&O instruments (enhanced with real-time data)
+  // TODO: Load trading signals from API based on tier
   const mockSignals = [
     {
       id: 1,
@@ -370,7 +370,7 @@ const Trading: React.FC = () => {
     }
   };
 
-  // Mock F&O chain data
+  // TODO: Load F&O chain data from API
   // Get option chain data (real-time if available, fallback to mock)
   const getOptionChainForUnderlying = (underlying: string) => {
     const realTimeData = optionChainData[underlying];

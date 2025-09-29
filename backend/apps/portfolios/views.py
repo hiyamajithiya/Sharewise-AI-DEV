@@ -8,43 +8,65 @@ from rest_framework import status
 @permission_classes([IsAuthenticated])
 def get_portfolio(request):
     """Get user's portfolio summary"""
-    # TODO: Implement actual portfolio logic
-    return Response({
-        'total_value': 100000.0,
-        'total_pnl': 5000.0,
-        'day_pnl': 500.0,
-        'holdings_count': 5
-    })
+    try:
+        from apps.trading.portfolio_aggregation import get_user_portfolio_summary
+        portfolio_data = get_user_portfolio_summary(request.user)
+        return Response(portfolio_data)
+    except Exception as e:
+        return Response(
+            {'error': 'Unable to fetch portfolio data', 'detail': str(e)}, 
+            status=500
+        )
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_holdings(request):
     """Get user's current holdings"""
-    # TODO: Implement actual holdings logic
-    return Response([
-        {
-            'symbol': 'AAPL',
-            'quantity': 100,
-            'avg_price': 150.0,
-            'current_price': 155.0,
-            'pnl': 500.0
-        }
-    ])
+    try:
+        from apps.trading.models import PortfolioPosition
+        holdings = PortfolioPosition.objects.filter(
+            user=request.user, 
+            total_quantity__gt=0
+        ).values('symbol', 'total_quantity', 'average_price', 'current_price', 'unrealized_pnl')
+        return Response(list(holdings))
+    except Exception as e:
+        return Response(
+            {'error': 'Unable to fetch holdings data', 'detail': str(e)}, 
+            status=500
+        )
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_portfolio_history(request):
     """Get portfolio performance history"""
-    # TODO: Implement actual history logic
-    return Response([
-        {
-            'date': '2024-01-01',
-            'portfolio_value': 95000.0
-        },
-        {
-            'date': '2024-01-02',
-            'portfolio_value': 100000.0
-        }
-    ])
+    try:
+        from apps.trading.models import PortfolioPosition
+        from django.db.models import Sum
+        from datetime import datetime, timedelta
+        
+        days = int(request.GET.get('days', 30))
+        start_date = datetime.now() - timedelta(days=days)
+        
+        # This would ideally use a PortfolioSnapshot model to track daily values
+        # For now, return current value as placeholder
+        positions = PortfolioPosition.objects.filter(
+            user=request.user,
+            last_updated__gte=start_date
+        )
+        
+        if not positions.exists():
+            return Response([])
+            
+        current_value = sum(pos.current_value for pos in positions)
+        
+        return Response([{
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'portfolio_value': float(current_value)
+        }])
+    except Exception as e:
+        return Response(
+            {'error': 'Unable to fetch portfolio history', 'detail': str(e)}, 
+            status=500
+        )

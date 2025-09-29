@@ -196,7 +196,7 @@ const Strategies: React.FC = () => {
 
   const tierFeatures = getTierFeatures(subscriptionTier);
 
-  // Mock strategy data based on tier
+  // TODO: Load strategy data from API based on tier
   const allStrategies = [
     {
       id: 1,

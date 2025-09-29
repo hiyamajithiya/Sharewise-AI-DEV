@@ -87,7 +87,7 @@ const DashboardScreen: React.FC = () => {
     return value >= 0 ? theme.colors.bull : theme.colors.bear;
   };
 
-  // Mock chart data - replace with real data
+  // TODO: Replace with real chart data from API
   const chartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [

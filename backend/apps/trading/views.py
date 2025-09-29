@@ -721,42 +721,45 @@ def calculate_margin(request):
 @permission_classes([IsAuthenticated])
 def fo_positions(request):
     """Get F&O positions for the user"""
-    user = request.user
-    
-    # Mock F&O positions data
-    # In real implementation, this would fetch from broker API
-    mock_positions = [
-        {
-            'symbol': 'NIFTY24DEC19000CE',
-            'instrument_type': 'OPTIONS',
-            'underlying_symbol': 'NIFTY',
-            'quantity': 50,
-            'average_price': 125.50,
-            'market_price': 140.75,
-            'pnl': 762.5,
-            'pnl_percentage': 12.15,
-            'margin_used': 15000,
-            'days_to_expiry': 15
-        },
-        {
-            'symbol': 'BANKNIFTY24DEC48000PE',
-            'instrument_type': 'OPTIONS',
-            'underlying_symbol': 'BANKNIFTY',
-            'quantity': -25,
-            'average_price': 180.25,
-            'market_price': 165.50,
-            'pnl': 368.75,
-            'pnl_percentage': 8.17,
-            'margin_used': 25000,
-            'days_to_expiry': 15
-        }
-    ]
-    
-    return Response({
-        'positions': mock_positions,
-        'total_pnl': sum(pos['pnl'] for pos in mock_positions),
-        'total_margin_used': sum(pos['margin_used'] for pos in mock_positions)
-    })
+    try:
+        from apps.trading.models import PortfolioPosition
+        positions = PortfolioPosition.objects.filter(
+            user=request.user,
+            instrument_type__in=['FUTURES', 'OPTIONS'],
+            total_quantity__gt=0
+        )
+        
+        positions_data = []
+        total_pnl = 0
+        total_margin_used = 0
+        
+        for pos in positions:
+            position_data = {
+                'symbol': pos.symbol,
+                'instrument_type': pos.instrument_type,
+                'underlying_symbol': pos.symbol.split('24')[0] if '24' in pos.symbol else pos.symbol,
+                'quantity': float(pos.total_quantity),
+                'average_price': float(pos.average_price),
+                'market_price': float(pos.current_price) if pos.current_price else float(pos.average_price),
+                'pnl': float(pos.unrealized_pnl),
+                'pnl_percentage': float(pos.pnl_percentage),
+                'margin_used': float(pos.margin_used) if hasattr(pos, 'margin_used') else 0,
+                'days_to_expiry': 0  # Would need expiry date calculation
+            }
+            positions_data.append(position_data)
+            total_pnl += position_data['pnl']
+            total_margin_used += position_data['margin_used']
+        
+        return Response({
+            'positions': positions_data,
+            'total_pnl': total_pnl,
+            'total_margin_used': total_margin_used
+        })
+    except Exception as e:
+        return Response(
+            {'error': 'Unable to fetch F&O positions', 'detail': str(e)}, 
+            status=500
+        )
 
 
 @api_view(['GET'])

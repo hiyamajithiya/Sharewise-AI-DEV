@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { AuthTokens } from '../types';
-import { MockAuthService } from './mockAuth';
 
 // API Configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
@@ -193,12 +192,7 @@ class ApiService {
       const response = await this.api.post('/users/register/', userData);
       return response.data;
     } catch (error: any) {
-      // If backend is not available, use mock auth
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK' || !error.response) {
-        //console.log('Backend not available, using mock registration');
-        return await MockAuthService.register(userData);
-      }
-      
+      // No mock authentication fallback - backend is required
       throw error;
     }
   }

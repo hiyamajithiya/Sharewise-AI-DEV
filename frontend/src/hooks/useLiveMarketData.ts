@@ -104,10 +104,4 @@ export const useLiveMarketData = (symbols: string[] = ['AAPL', 'GOOGL', 'MSFT', 
   };
 };
 
-// Default portfolio holdings for demo
-export const DEFAULT_HOLDINGS: PortfolioHolding[] = [
-  { symbol: 'AAPL', shares: 50, avgCost: 180 },
-  { symbol: 'GOOGL', shares: 25, avgCost: 120 },
-  { symbol: 'MSFT', shares: 40, avgCost: 280 },
-  { symbol: 'TSLA', shares: 10, avgCost: 200 },
-];
+// Default holdings removed - portfolio data should come from backend API

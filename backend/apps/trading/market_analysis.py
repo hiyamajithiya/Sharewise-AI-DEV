@@ -378,8 +378,8 @@ class MarketAnalysisEngine:
             
         except Exception as e:
             logger.error(f"Error fetching market data for {symbol}: {e}")
-            # Return mock data for testing
-            return self._generate_mock_data(symbol)
+            # Return empty dataframe or raise exception - no mock data
+            raise ValueError(f"Unable to fetch market data for {symbol}: {e}")
     
     def _convert_to_yf_symbol(self, symbol: str) -> str:
         """Convert NSE symbols to Yahoo Finance format"""
@@ -435,29 +435,7 @@ class MarketAnalysisEngine:
             return f"{symbol.upper()}.NS"
         return symbol.upper()
     
-    def _generate_mock_data(self, symbol: str) -> pd.DataFrame:
-        """Generate mock market data for testing"""
-        dates = pd.date_range(start=datetime.now() - timedelta(days=60), end=datetime.now(), freq='D')
-        
-        # Generate realistic mock data
-        np.random.seed(hash(symbol) % 1000)  # Consistent data per symbol
-        base_price = 100 + (hash(symbol) % 500)  # Base price between 100-600
-        
-        prices = [base_price]
-        for _ in range(len(dates) - 1):
-            change = np.random.normal(0, 0.02)  # 2% daily volatility
-            new_price = prices[-1] * (1 + change)
-            prices.append(max(new_price, 1))  # Ensure positive prices
-        
-        data = {
-            'Open': [p * (1 + np.random.normal(0, 0.005)) for p in prices],
-            'High': [p * (1 + abs(np.random.normal(0, 0.01))) for p in prices],
-            'Low': [p * (1 - abs(np.random.normal(0, 0.01))) for p in prices],
-            'Close': prices,
-            'Volume': [np.random.randint(10000, 1000000) for _ in prices]
-        }
-        
-        return pd.DataFrame(data, index=dates)
+# Mock data generation method removed - use real market data only
     
     def generate_signal(self, symbol: str, user: CustomUser, strategy_name: str = "Market Analysis Engine") -> Optional[TradingSignal]:
         """Generate a trading signal for the given symbol"""

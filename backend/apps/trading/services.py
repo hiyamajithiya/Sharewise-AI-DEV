@@ -675,26 +675,34 @@ class PerformanceAnalyzer:
     def get_daily_pnl_series(self, days: int = 30) -> List[Dict]:
         """Get daily P&L series for charting"""
         try:
+            # TODO: Implement real daily P&L calculation from PortfolioPosition or TradeExecution models
+            # This should aggregate realized and unrealized P&L by date
+            from django.db.models import Sum
+            from apps.trading.models import TradeExecution
+            
             end_date = timezone.now()
             start_date = end_date - timedelta(days=days)
             
-            # This would aggregate daily P&L properly
-            # For now, return mock data
-            daily_data = []
-            current_date = start_date.date()
+            # Get realized P&L from executed trades
+            trades = TradeExecution.objects.filter(
+                user=self.user,
+                executed_at__date__range=[start_date.date(), end_date.date()]
+            ).values('executed_at__date').annotate(
+                daily_pnl=Sum('profit_loss')
+            ).order_by('executed_at__date')
             
-            while current_date <= end_date.date():
-                # Mock daily P&L
-                import random
-                daily_pnl = random.uniform(-1000, 1000)
+            daily_data = []
+            cumulative_pnl = 0
+            
+            for trade in trades:
+                daily_pnl = float(trade['daily_pnl'] or 0)
+                cumulative_pnl += daily_pnl
                 
                 daily_data.append({
-                    'date': current_date.isoformat(),
+                    'date': trade['executed_at__date'].isoformat(),
                     'pnl': round(daily_pnl, 2),
-                    'cumulative_pnl': sum(d['pnl'] for d in daily_data) + daily_pnl
+                    'cumulative_pnl': round(cumulative_pnl, 2)
                 })
-                
-                current_date += timedelta(days=1)
             
             return daily_data
             

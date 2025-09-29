@@ -682,7 +682,7 @@ const CustomTools: React.FC = () => {
                     <TextField
                       fullWidth
                       label="Webhook URL"
-                      value="https://api.example.com/trading-signals"
+                      placeholder="Enter your API endpoint URL"
                       sx={{ mb: 2 }}
                     />
                     <FormControlLabel
@@ -711,7 +711,7 @@ const CustomTools: React.FC = () => {
                     <TextField
                       fullWidth
                       label="Webhook URL"
-                      value="https://api.example.com/portfolio-updates"
+                      placeholder="Enter your webhook URL"
                       sx={{ mb: 2 }}
                     />
                     <FormControl fullWidth sx={{ mb: 2 }}>

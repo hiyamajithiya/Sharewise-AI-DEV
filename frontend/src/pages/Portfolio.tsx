@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLiveMarketData } from '../hooks/useLiveMarketData';
+import React, { useState, useEffect } from 'react';
+// import { useLiveMarketData } from '../hooks/useLiveMarketData'; // Removed - will use API calls
 import {
   Container,
   Typography,
@@ -101,55 +101,53 @@ const Portfolio: React.FC = () => {
 
   const tierFeatures = getTierFeatures(subscriptionTier);
 
-  // Mock portfolio data based on tier
-  // Live portfolio data using real market prices
-const { marketData, loading } = useLiveMarketData(['AAPL']);
-const portfolioData = (() => {
-  if (loading || !marketData.AAPL) {
-    return {
-      totalValue: Math.min(125000, tierFeatures.portfolioValue),
-      dayChange: 0,
-      dayChangePercent: 0,
-      totalPnL: 15000,
-      totalPnLPercent: 13.64,
-      investedAmount: 110000,
-      cashBalance: 15000,
+  // Portfolio state and API integration
+  const [portfolioData, setPortfolioData] = useState({
+    totalValue: 0,
+    dayChange: 0,
+    dayChangePercent: 0,
+    totalPnL: 0,
+    totalPnLPercent: 0,
+    investedAmount: 0,
+    cashBalance: 0,
+  });
+  const [holdings, setHoldings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch portfolio data on component mount
+  useEffect(() => {
+    const fetchPortfolioData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // TODO: Replace with actual API calls
+        // const portfolioResponse = await apiService.getPortfolio();
+        // const holdingsResponse = await apiService.getHoldings();
+        
+        // setPortfolioData(portfolioResponse);
+        // setHoldings(holdingsResponse);
+        
+        // For now, just set loading to false - no mock data
+        setLoading(false);
+        
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch portfolio data');
+        setLoading(false);
+      }
     };
-  }
-  
-  const aaplPrice = marketData.AAPL.last_price;
-  const aaplChange = marketData.AAPL.change_percent;
-  const shares = 500; // Simulate portfolio holding
-  
-  return {
-    totalValue: Math.min(Math.round(aaplPrice * shares), tierFeatures.portfolioValue),
-    dayChange: Math.round((aaplPrice * shares * aaplChange) / 100),
-    dayChangePercent: parseFloat(aaplChange.toFixed(2)),
-    totalPnL: Math.round((aaplPrice * shares) - (240 * shares)), // Assuming $240 buy price
-    totalPnLPercent: parseFloat(((aaplPrice - 240) / 240 * 100).toFixed(2)),
-    investedAmount: 240 * shares,
-    cashBalance: 15000,
-  };
-})();
 
-  // Mock holdings data - filtered by tier
-  const allHoldings = [
-    { id: 1, symbol: 'RELIANCE', name: 'Reliance Industries', quantity: 50, avgPrice: 2200, currentPrice: 2485.50, sector: 'Energy', tier: 'BASIC' },
-    { id: 2, symbol: 'TCS', name: 'Tata Consultancy Services', quantity: 25, avgPrice: 3100, currentPrice: 3245.75, sector: 'IT', tier: 'BASIC' },
-    { id: 3, symbol: 'INFY', name: 'Infosys Limited', quantity: 100, avgPrice: 1550, currentPrice: 1678.90, sector: 'IT', tier: 'BASIC' },
-    { id: 4, symbol: 'HDFC', name: 'HDFC Bank', quantity: 75, avgPrice: 1350, currentPrice: 1456.30, sector: 'Banking', tier: 'PRO' },
-    { id: 5, symbol: 'ICICI', name: 'ICICI Bank', quantity: 60, avgPrice: 820, currentPrice: 892.15, sector: 'Banking', tier: 'PRO' },
-    { id: 6, symbol: 'ADANIENT', name: 'Adani Enterprises', quantity: 30, avgPrice: 2800, currentPrice: 3150.00, sector: 'Infrastructure', tier: 'ELITE' },
-    { id: 7, symbol: 'ASIANPAINT', name: 'Asian Paints', quantity: 40, avgPrice: 3200, currentPrice: 3485.25, sector: 'Consumer Goods', tier: 'ELITE' },
-  ];
+    fetchPortfolioData();
+  }, []);
 
+  // Filter holdings based on tier limits
   const getFilteredHoldings = () => {
-    if (subscriptionTier === 'BASIC') return allHoldings.filter(h => h.tier === 'BASIC').slice(0, tierFeatures.maxHoldings);
-    if (subscriptionTier === 'PRO') return allHoldings.filter(h => ['BASIC', 'PRO'].includes(h.tier)).slice(0, tierFeatures.maxHoldings);
-    return allHoldings; // ELITE gets all
+    if (tierFeatures.maxHoldings === -1) return holdings; // Unlimited for ELITE
+    return holdings.slice(0, tierFeatures.maxHoldings);
   };
 
-  const holdings = getFilteredHoldings();
+  const filteredHoldings = getFilteredHoldings();
 
   // Calculate portfolio metrics
   const calculateHoldingMetrics = (holding: any) => {
@@ -163,13 +161,17 @@ const portfolioData = (() => {
 
   // Sector allocation
   const getSectorAllocation = () => {
+    if (filteredHoldings.length === 0) return [];
+    
     const sectors: { [key: string]: number } = {};
-    holdings.forEach(holding => {
+    filteredHoldings.forEach(holding => {
       const { marketValue } = calculateHoldingMetrics(holding);
       sectors[holding.sector] = (sectors[holding.sector] || 0) + marketValue;
     });
     
     const total = Object.values(sectors).reduce((sum, value) => sum + value, 0);
+    if (total === 0) return [];
+    
     return Object.entries(sectors).map(([sector, value]) => ({
       sector,
       value,
@@ -193,7 +195,7 @@ const portfolioData = (() => {
   };
 
   const handlePlaceOrder = () => {
-    window.alert(`📈 Place Order Feature\n\nOpening order placement interface...\n\nAvailable Cash: ₹${portfolioData.cashBalance.toLocaleString()}\nCurrent Holdings: ${holdings.length} stocks`);
+    window.alert(`📈 Place Order Feature\n\nOpening order placement interface...\n\nAvailable Cash: ₹${portfolioData.cashBalance.toLocaleString()}\nCurrent Holdings: ${filteredHoldings.length} stocks`);
   };
 
   const handleDownloadReport = () => {
@@ -211,10 +213,10 @@ Portfolio Summary:
 • Total P&L: ₹${portfolioData.totalPnL.toLocaleString()} (${portfolioData.totalPnLPercent}%)
 • Today's P&L: ₹${portfolioData.dayChange.toLocaleString()} (${portfolioData.dayChangePercent}%)
 • Cash Balance: ₹${portfolioData.cashBalance.toLocaleString()}
-• Number of Holdings: ${holdings.length}
+• Number of Holdings: ${filteredHoldings.length}
 
 Holdings Breakdown:
-${holdings.map(holding => {
+${filteredHoldings.map(holding => {
   const metrics = calculateHoldingMetrics(holding);
   return `• ${holding.symbol}: ${holding.quantity} shares @ ₹${holding.currentPrice} (P&L: ${metrics.pnlPercent >= 0 ? '+' : ''}${metrics.pnlPercent.toFixed(2)}%)`;
 }).join('\n')}
@@ -252,8 +254,8 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
     {
       title: 'Portfolio Value',
       value: `₹${portfolioData.totalValue.toLocaleString()}`,
-      change: `+${portfolioData.totalPnLPercent}%`,
-      changeType: 'positive' as const,
+      change: `${portfolioData.totalPnLPercent >= 0 ? '+' : ''}${portfolioData.totalPnLPercent}%`,
+      changeType: (portfolioData.totalPnLPercent >= 0 ? 'positive' : 'negative') as 'positive' | 'negative',
       icon: <AccountBalance />,
       color: 'primary' as const,
       subtitle: `Max: ₹${tierFeatures.portfolioValue.toLocaleString()}`,
@@ -286,6 +288,55 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
       subtitle: 'Buying power',
     },
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh',
+        background: '#f5f7fa',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <LinearProgress sx={{ width: 200, mb: 2 }} />
+          <Typography variant="body1" sx={{ color: '#6B7280' }}>
+            Loading your portfolio...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh',
+        background: '#f5f7fa',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <Box sx={{ textAlign: 'center', maxWidth: 400 }}>
+          <Typography variant="h6" sx={{ color: '#EF4444', mb: 2 }}>
+            Error Loading Portfolio
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
+            {error}
+          </Typography>
+          <Button 
+            variant="contained" 
+            onClick={() => window.location.reload()}
+            sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+          >
+            Retry
+          </Button>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ 
@@ -326,7 +377,7 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
               <Typography variant="body1" sx={{ color: '#6B7280' }}>
                 {isTestingMode && selectedUser
                   ? `Testing portfolio for ${selectedUser.role} role - ${subscriptionTier} tier`
-                  : `Your ${subscriptionTier} portfolio with ${holdings.length} holdings`
+                  : `Your ${subscriptionTier} portfolio with ${filteredHoldings.length} holdings`
                 }
               </Typography>
             </Box>
@@ -509,14 +560,14 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
                   Your Holdings
-                  <Badge badgeContent={holdings.length} color="primary" sx={{ ml: 2 }}>
+                  <Badge badgeContent={filteredHoldings.length} color="primary" sx={{ ml: 2 }}>
                     <PieChart sx={{ color: '#1F2937' }} />
                   </Badge>
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#6B7280' }}>
                   {tierFeatures.maxHoldings === -1 
                     ? 'Unlimited holdings' 
-                    : `${holdings.length}/${tierFeatures.maxHoldings} holdings`}
+                    : `${filteredHoldings.length}/${tierFeatures.maxHoldings} holdings`}
                 </Typography>
               </Box>
 
@@ -534,7 +585,16 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {holdings.map((holding) => {
+                    {filteredHoldings.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                            No holdings found. Add stocks to your portfolio to get started.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredHoldings.map((holding) => {
                       const metrics = calculateHoldingMetrics(holding);
                       return (
                         <TableRow key={holding.id} hover>
@@ -582,7 +642,8 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
                           </TableCell>
                         </TableRow>
                       );
-                    })}
+                    })
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -703,21 +764,27 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#1F2937' }}>
               Sector Allocation
             </Typography>
-            {sectorAllocation.map((sector, index) => (
-              <Box key={sector.sector} sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="body2" sx={{ color: '#1F2937' }}>{sector.sector}</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
-                    {sector.percentage}%
-                  </Typography>
+            {sectorAllocation.length === 0 ? (
+              <Typography variant="body2" sx={{ color: '#6B7280', textAlign: 'center', py: 4 }}>
+                Add holdings to see sector allocation
+              </Typography>
+            ) : (
+              sectorAllocation.map((sector, index) => (
+                <Box key={sector.sector} sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2" sx={{ color: '#1F2937' }}>{sector.sector}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
+                      {sector.percentage}%
+                    </Typography>
+                  </Box>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={parseFloat(sector.percentage)} 
+                    sx={{ height: 8, borderRadius: 4 }}
+                  />
                 </Box>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={parseFloat(sector.percentage)} 
-                  sx={{ height: 8, borderRadius: 4 }}
-                />
-              </Box>
-            ))}
+              ))
+            )}
           </Paper>
 
           {/* Portfolio Insights */}
@@ -735,18 +802,30 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
             </Typography>
             
             <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
-                <Typography variant="body2" sx={{ color: '#1F2937' }}>
-                  Well diversified across {sectorAllocation.length} sectors
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
-                <Typography variant="body2" sx={{ color: '#1F2937' }}>
-                  Strong performance with +{portfolioData.totalPnLPercent}% returns
-                </Typography>
-              </Box>
+              {sectorAllocation.length > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: '#1F2937' }}>
+                    Well diversified across {sectorAllocation.length} sectors
+                  </Typography>
+                </Box>
+              )}
+              {portfolioData.totalPnLPercent > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: '#1F2937' }}>
+                    Strong performance with +{portfolioData.totalPnLPercent}% returns
+                  </Typography>
+                </Box>
+              )}
+              {filteredHoldings.length === 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Warning color="warning" sx={{ mr: 1, fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: '#1F2937' }}>
+                    No holdings found. Start investing to build your portfolio.
+                  </Typography>
+                </Box>
+              )}
               {tierFeatures.rebalanceAlerts && (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <Warning color="warning" sx={{ mr: 1, fontSize: 20 }} />

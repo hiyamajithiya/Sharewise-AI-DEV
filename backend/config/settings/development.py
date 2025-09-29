@@ -107,7 +107,7 @@ except (ImportError, redis.ConnectionError):
 # Development specific ShareWise settings
 SHAREWISE_SETTINGS.update({
     'ENABLE_PAPER_TRADING': True,
-    'MOCK_BROKER_APIS': True,
+    'MOCK_BROKER_APIS': False,  # Disabled - use real broker APIs only
     'ENABLE_DEBUG_SIGNALS': True,
 })
 

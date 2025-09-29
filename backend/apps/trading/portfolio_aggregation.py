@@ -80,80 +80,21 @@ class BrokerDataProvider:
         raise NotImplementedError("Each broker must implement fetch_current_prices")
 
 
-class MockBrokerProvider(BrokerDataProvider):
-    """Mock broker provider for testing and demonstration"""
-    
-    def fetch_positions(self, user: User, account_id: str = None) -> List[BrokerPosition]:
-        """Mock positions data"""
-        mock_positions = [
-            BrokerPosition(
-                broker_name=self.broker_name,
-                broker_account_id=account_id or f"{self.broker_name}_account_1",
-                symbol="RELIANCE",
-                instrument_type="EQUITY",
-                quantity=100,
-                average_price=Decimal("2450.50"),
-                current_price=Decimal("2480.00"),
-                market_value=Decimal("248000.00"),
-                pnl=Decimal("2950.00"),
-                pnl_percentage=1.20,
-                last_updated=timezone.now()
-            ),
-            BrokerPosition(
-                broker_name=self.broker_name,
-                broker_account_id=account_id or f"{self.broker_name}_account_1",
-                symbol="TCS",
-                instrument_type="EQUITY",
-                quantity=50,
-                average_price=Decimal("3520.00"),
-                current_price=Decimal("3545.75"),
-                market_value=Decimal("177287.50"),
-                pnl=Decimal("1287.50"),
-                pnl_percentage=0.73,
-                last_updated=timezone.now()
-            )
-        ]
-        
-        # Add some variation based on broker name
-        if self.broker_name == "upstox":
-            mock_positions.append(BrokerPosition(
-                broker_name=self.broker_name,
-                broker_account_id=account_id or f"{self.broker_name}_account_1",
-                symbol="INFY",
-                instrument_type="EQUITY",
-                quantity=75,
-                average_price=Decimal("1650.25"),
-                current_price=Decimal("1675.50"),
-                market_value=Decimal("125662.50"),
-                pnl=Decimal("1893.75"),
-                pnl_percentage=1.53,
-                last_updated=timezone.now()
-            ))
-        
-        return mock_positions
-    
-    def fetch_current_prices(self, symbols: List[str]) -> Dict[str, Decimal]:
-        """Mock current prices"""
-        mock_prices = {
-            "RELIANCE": Decimal("2480.00"),
-            "TCS": Decimal("3545.75"),
-            "INFY": Decimal("1675.50"),
-            "HDFCBANK": Decimal("1598.20"),
-            "ICICIBANK": Decimal("985.40")
-        }
-        return {symbol: mock_prices.get(symbol, Decimal("100.00")) for symbol in symbols}
+# MockBrokerProvider removed - use real broker implementations only
 
 
 class PortfolioAggregator:
     """Main portfolio aggregation service"""
     
     def __init__(self):
+        # TODO: Initialize real broker provider implementations
+        # Example: ZerodhaProvider, UpstoxProvider, etc.
         self.broker_providers = {
-            "zerodha": MockBrokerProvider("zerodha"),
-            "upstox": MockBrokerProvider("upstox"),
-            "alice_blue": MockBrokerProvider("alice_blue"),
-            "kotak": MockBrokerProvider("kotak"),
-            "icici_direct": MockBrokerProvider("icici_direct")
+            # "zerodha": ZerodhaProvider("zerodha"),
+            # "upstox": UpstoxProvider("upstox"),
+            # "alice_blue": AliceBlueProvider("alice_blue"),
+            # "kotak": KotakProvider("kotak"),
+            # "icici_direct": ICICIDirectProvider("icici_direct")
         }
         
         # Industry sector mappings
@@ -198,20 +139,23 @@ class PortfolioAggregator:
         }
     
     def get_user_broker_accounts(self, user: User) -> Dict[str, List[str]]:
-        """Get user's broker accounts - would be fetched from user profile/settings"""
-        # Mock data - in real implementation, this would come from user's connected accounts
-        if hasattr(user, 'profile') and user.profile.preferred_brokers:
-            brokers = user.profile.preferred_brokers
-        else:
-            brokers = ["zerodha", "upstox"]  # Default mock brokers
-        
-        # Mock account IDs for each broker
-        broker_accounts = {}
-        for broker in brokers:
-            if broker in self.broker_providers:
-                broker_accounts[broker] = [f"{broker}_account_1"]  # Mock single account per broker
-        
-        return broker_accounts
+        """Get user's broker accounts from their profile/connected accounts"""
+        try:
+            # TODO: Implement real broker account retrieval from user profile
+            # This should fetch from BrokerAccount model or user profile
+            broker_accounts = {}
+            
+            # Get user's connected broker accounts from database
+            if hasattr(user, 'profile') and hasattr(user.profile, 'broker_accounts'):
+                for account in user.profile.broker_accounts.all():
+                    if account.broker_name not in broker_accounts:
+                        broker_accounts[account.broker_name] = []
+                    broker_accounts[account.broker_name].append(account.account_id)
+            
+            return broker_accounts
+        except Exception as e:
+            logger.error(f"Error fetching user broker accounts: {e}")
+            return {}
     
     def fetch_all_positions(self, user: User) -> List[BrokerPosition]:
         """Fetch positions from all connected brokers"""
