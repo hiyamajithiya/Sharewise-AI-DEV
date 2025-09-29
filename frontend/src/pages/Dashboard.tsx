@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLiveMarketData, DEFAULT_HOLDINGS } from '../hooks/useLiveMarketData';
+import { useLiveMarketData } from '../hooks/useLiveMarketData';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -157,22 +157,7 @@ const Dashboard: React.FC = () => {
     totalPnl: 0,
     totalPnlPercent: 0,
   };
-
-
-
-  const topHoldings = loading ? [] : Object.keys(marketData).slice(0, 5).map(symbol => {
-  const quote = marketData[symbol];
-  const holding = DEFAULT_HOLDINGS.find(h => h.symbol === symbol);
-  
-  if (!quote || !holding) return null;
-  
-  return {
-    symbol: quote.symbol,
-    quantity: holding.shares,
-    current_price: quote.last_price,
-    pnl_percent: ((quote.last_price - holding.avgCost) / holding.avgCost) * 100
-  };
-}).filter(Boolean);
+  const topHoldings: any[] = [];
 
   const holdingColumns: TableColumn[] = [
     { id: 'symbol', label: 'Symbol', minWidth: 100 },
