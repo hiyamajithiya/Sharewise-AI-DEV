@@ -299,6 +299,12 @@ class ApiService {
     return response.data;
   }
 
+
+  // Delete user - Admin only
+  async deleteUser(userId: string): Promise<any> {
+    const response = await this.api.delete(`/users/admin/delete-user/${userId}/`);
+    return response.data;
+  }
   // Trading signals methods
   async getSignals(params?: any): Promise<any> {
     const response = await this.api.get('/trading/signals/', { params });

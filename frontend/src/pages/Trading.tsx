@@ -49,6 +49,7 @@ import {
 import { useSelector } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
 import { marketDataService, MarketQuote, OptionChainData, MarketDataAPI } from '../services/marketDataService';
+import apiService from '../services/api';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -95,6 +96,25 @@ const Trading: React.FC = () => {
   const [marketQuotes, setMarketQuotes] = useState<{ [symbol: string]: MarketQuote }>({});
   const [optionChainData, setOptionChainData] = useState<{ [underlying: string]: OptionChainData }>({});
   const [isLoadingQuotes, setIsLoadingQuotes] = useState(false);
+  const [signals, setSignals] = useState<any[]>([]);
+  const [loadingSignals, setLoadingSignals] = useState(true);
+
+  // Load trading signals from API
+  useEffect(() => {
+    const loadSignals = async () => {
+      try {
+        setLoadingSignals(true);
+        const response = await apiService.getSignals();
+        setSignals(response.results || []);
+      } catch (error) {
+        console.error("Failed to load signals:", error);
+        setSignals([]);
+      } finally {
+        setLoadingSignals(false);
+      }
+    };
+    loadSignals();
+  }, []);
 
   const user = useSelector((state: any) => state.auth.user);
   const testingState = useSelector(selectTestingState);
@@ -260,77 +280,9 @@ const Trading: React.FC = () => {
   };
 
   // TODO: Load trading signals from API based on tier
-  const mockSignals = [
-    {
-      id: 1,
-      symbol: 'RELIANCE',
-      instrument_type: 'EQUITY',
-      type: 'BUY',
-      price: getRealTimePrice('RELIANCE') || 2485.50,
-      target: 2650.00,
-      stopLoss: 2350.00,
-      confidence: 87,
-      status: 'ACTIVE',
-      time: '09:30 AM',
-      change: getRealTimeChange('RELIANCE') ? formatChangeDisplay(getRealTimeChange('RELIANCE')!.change, getRealTimeChange('RELIANCE')!.changePercent) : '+2.4%',
-      tier: 'BASIC'
-    },
-    {
-      id: 2,
-      symbol: 'NIFTY24DEC19000CE',
-      instrument_type: 'OPTIONS',
-      underlying_symbol: 'NIFTY',
-      strike_price: 19000,
-      option_type: 'CALL',
-      expiry_date: '2024-12-26',
-      type: 'BUY',
-      price: 125.50,
-      target: 180.00,
-      stopLoss: 90.00,
-      confidence: 89,
-      status: 'ACTIVE',
-      time: '09:45 AM',
-      change: '+5.2%',
-      tier: 'PRO'
-    },
-    {
-      id: 3,
-      symbol: 'BANKNIFTY24DEC48000FUT',
-      instrument_type: 'FUTURES',
-      underlying_symbol: 'BANKNIFTY',
-      expiry_date: '2024-12-26',
-      type: 'SELL',
-      price: 48250.75,
-      target: 47800.00,
-      stopLoss: 48600.00,
-      confidence: 85,
-      status: 'ACTIVE',
-      time: '10:30 AM',
-      change: '-1.2%',
-      tier: 'PRO'
-    },
-    {
-      id: 4,
-      symbol: 'NIFTY24DEC18500PE',
-      instrument_type: 'OPTIONS',
-      underlying_symbol: 'NIFTY',
-      strike_price: 18500,
-      option_type: 'PUT',
-      expiry_date: '2024-12-26',
-      type: 'SELL',
-      price: 95.25,
-      target: 60.00,
-      stopLoss: 140.00,
-      confidence: 92,
-      status: 'ACTIVE',
-      time: '11:00 AM',
-      change: '+8.5%',
-      tier: 'ELITE'
-    },
-  ];
 
   // Filter signals based on user tier
-  const availableSignals = mockSignals.filter(signal => {
+  const availableSignals = signals.filter(signal => {
     if (subscriptionTier === 'BASIC') return signal.tier === 'BASIC';
     if (subscriptionTier === 'PRO') return ['BASIC', 'PRO'].includes(signal.tier);
     return true; // ELITE gets all signals
@@ -581,7 +533,7 @@ const Trading: React.FC = () => {
               Active Signals for Quick Trading
             </Typography>
             <Grid container spacing={2}>
-              {mockSignals.slice(0, 3).map((signal: any, index: number) => (
+              {signals.slice(0, 3).map((signal: any, index: number) => (
                 <Grid item xs={12} sm={4} key={index}>
                   <Card sx={{
                     p: 2,
@@ -644,7 +596,7 @@ const Trading: React.FC = () => {
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#374151' }}>
                   All Trading Signals
                 </Typography>
-                <Badge badgeContent={mockSignals.filter(s => s.status === 'ACTIVE').length} color="primary">
+                <Badge badgeContent={signals.filter(s => s.status === 'ACTIVE').length} color="primary">
                   <ShowChart sx={{ color: '#667eea' }} />
                 </Badge>
               </Box>
@@ -664,7 +616,7 @@ const Trading: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {mockSignals.map((signal: any) => (
+                    {signals.map((signal: any) => (
                       <TableRow 
                         key={signal.id} 
                         hover
@@ -792,10 +744,10 @@ const Trading: React.FC = () => {
                 borderTop: '1px solid #e2e8f0' 
               }}>
                 <Typography variant="caption" sx={{ color: '#6B7280' }}>
-                  Total: {mockSignals.length} signals | Active: {mockSignals.filter(s => s.status === 'ACTIVE').length}
+                  Total: {signals.length} signals | Active: {signals.filter(s => s.status === 'ACTIVE').length}
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#667eea', fontWeight: 600 }}>
-                  Avg. Confidence: {Math.round(mockSignals.reduce((acc, s) => acc + s.confidence, 0) / mockSignals.length)}%
+                  Avg. Confidence: {Math.round(signals.reduce((acc, s) => acc + s.confidence, 0) / signals.length)}%
                 </Typography>
               </Box>
             </Card>
@@ -1137,7 +1089,7 @@ const Trading: React.FC = () => {
                   <Grid item xs={6}>
                     <Box sx={{ textAlign: 'center', p: 2, background: '#f8fafc', borderRadius: '8px' }}>
                       <Typography variant="h4" sx={{ fontWeight: 700, color: '#10B981' }}>
-                        {mockSignals.filter(s => s.status === 'ACTIVE').length}
+                        {signals.filter(s => s.status === 'ACTIVE').length}
                       </Typography>
                       <Typography variant="body2" sx={{ color: '#6B7280' }}>
                         Active Signals
@@ -1147,7 +1099,7 @@ const Trading: React.FC = () => {
                   <Grid item xs={6}>
                     <Box sx={{ textAlign: 'center', p: 2, background: '#f8fafc', borderRadius: '8px' }}>
                       <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea' }}>
-                        {Math.round(mockSignals.reduce((acc, s) => acc + s.confidence, 0) / mockSignals.length)}%
+                        {Math.round(signals.reduce((acc, s) => acc + s.confidence, 0) / signals.length)}%
                       </Typography>
                       <Typography variant="body2" sx={{ color: '#6B7280' }}>
                         Avg. Confidence

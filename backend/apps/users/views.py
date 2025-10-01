@@ -537,3 +537,45 @@ def create_user_admin(request):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user_admin(request, user_id):
+    """
+    Delete a user - only for super admin
+    """
+    user = request.user
+
+    # Only super admin can delete users
+    if not user.is_super_admin():
+        return Response({
+            'error': 'Access denied. Only super admin can delete users.'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        target_user = User.objects.get(id=user_id)
+        
+        # Prevent deleting yourself
+        if target_user.id == user.id:
+            return Response({
+                'error': 'You cannot delete your own account.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Store email for response
+        deleted_email = target_user.email
+        
+        # Delete the user
+        target_user.delete()
+        
+        return Response({
+            'message': f'User {deleted_email} has been deleted successfully.'
+        }, status=status.HTTP_200_OK)
+        
+    except User.DoesNotExist:
+        return Response({
+            'error': 'User not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': f'Failed to delete user: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

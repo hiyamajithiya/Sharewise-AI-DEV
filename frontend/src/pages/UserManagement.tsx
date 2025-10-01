@@ -58,7 +58,7 @@ import StatCard from '../components/common/StatCard';
 import apiService from '../services/api';
 
 interface User {
-  id: number;
+  id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -128,79 +128,6 @@ const UserManagement: React.FC = () => {
   const testingState = useSelector(selectTestingState);
   const { isTestingMode, selectedUser: testingUser } = testingState;
 
-  // Mock user data
-  const mockUsers: User[] = [
-    {
-      id: 1,
-      first_name: 'John',
-      last_name: 'Doe',
-      email: 'john.doe@example.com',
-      role: 'USER',
-      subscription_tier: 'PRO',
-      status: 'ACTIVE',
-      last_login: '2024-01-15T10:30:00Z',
-      created_at: '2024-01-01T08:00:00Z',
-      is_verified: true,
-      total_trades: 145,
-      portfolio_value: 250000
-    },
-    {
-      id: 2,
-      first_name: 'Sarah',
-      last_name: 'Johnson',
-      email: 'sarah.j@example.com',
-      role: 'USER',
-      subscription_tier: 'ELITE',
-      status: 'ACTIVE',
-      last_login: '2024-01-14T16:45:00Z',
-      created_at: '2023-11-15T12:30:00Z',
-      is_verified: true,
-      total_trades: 320,
-      portfolio_value: 750000
-    },
-    {
-      id: 3,
-      first_name: 'Mike',
-      last_name: 'Wilson',
-      email: 'mike.wilson@example.com',
-      role: 'SUPPORT',
-      subscription_tier: 'PRO',
-      status: 'ACTIVE',
-      last_login: '2024-01-15T09:15:00Z',
-      created_at: '2024-01-10T14:20:00Z',
-      is_verified: true,
-      total_trades: 0,
-      portfolio_value: 0
-    },
-    {
-      id: 4,
-      first_name: 'Emily',
-      last_name: 'Davis',
-      email: 'emily.davis@example.com',
-      role: 'USER',
-      subscription_tier: 'PRO',
-      status: 'PENDING',
-      last_login: '2024-01-12T14:20:00Z',
-      created_at: '2024-01-12T14:00:00Z',
-      is_verified: false,
-      total_trades: 5,
-      portfolio_value: 10000
-    },
-    {
-      id: 5,
-      first_name: 'Alex',
-      last_name: 'Thompson',
-      email: 'alex.t@example.com',
-      role: 'SALES',
-      subscription_tier: 'PRO',
-      status: 'SUSPENDED',
-      last_login: '2024-01-10T11:30:00Z',
-      created_at: '2023-12-01T09:45:00Z',
-      is_verified: true,
-      total_trades: 0,
-      portfolio_value: 0
-    }
-  ];
 
   useEffect(() => {
     loadUsers();
@@ -212,7 +139,7 @@ const UserManagement: React.FC = () => {
       const response = await apiService.getAllUsers();
       // Transform backend response to match frontend interface
       const transformedUsers = response.results?.map((user: any) => ({
-        id: parseInt(user.id),
+        id: user.id,
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         email: user.email,
@@ -230,7 +157,7 @@ const UserManagement: React.FC = () => {
     } catch (error) {
       console.error('Failed to load users:', error);
       // Fallback to mock data if API fails
-      setUsers(mockUsers);
+      setUsers([]); // Empty array on error
     } finally {
       setLoading(false);
     }
@@ -280,11 +207,20 @@ const UserManagement: React.FC = () => {
     setActionMenuAnchor(null);
   };
 
-  const handleDeleteUser = () => {
+  const handleDeleteUser = async () => {
     if (selectedUser) {
-      setUsers(users.filter(u => u.id !== selectedUser.id));
-      setDeleteDialogOpen(false);
-      setSelectedUser(null);
+      try {
+        // Call the backend API to delete the user
+        await apiService.deleteUser(selectedUser.id);
+        
+        // Update local state after successful deletion
+        setUsers(users.filter(u => u.id !== selectedUser.id));
+        setDeleteDialogOpen(false);
+        setSelectedUser(null);
+      } catch (error: any) {
+        console.error('Error deleting user:', error);
+        alert(error.response?.data?.error || 'Failed to delete user');
+      }
     }
   };
 
