@@ -1,5 +1,65 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { AuthTokens } from '../types';
+import { 
+  AuthTokens, 
+  SalesAnalyticsData, 
+  TradingMonitorData, 
+  SupportCenterData,
+  DashboardData,
+  PortfolioStats,
+  Holding,
+  TradingSignal,
+  MarketOverview,
+  AdminDashboardData,
+  SystemHealth,
+  UserActivity,
+  SupportDashboardData,
+  SalesDashboardData,
+  UserSettings,
+  SystemSettings,
+  UserProfile,
+  NotificationSettings,
+  SecuritySettings,
+  SubscriptionSettings,
+  BillingSettings,
+  ThemeSettings,
+  BillingRecord,
+  PaymentMethod,
+  AdvancedTradingData,
+  AdvancedTradingStrategy,
+  StrategyType,
+  RiskMetric,
+  PortfolioRisk,
+  StrategyConfiguration,
+  StrategyDeployment,
+  QuickDeployConfig,
+  MarketData,
+  OrderBook,
+  PortfolioOptimization,
+  AllocationItem,
+  PerformancePoint,
+  CorrelationMatrix,
+  // Additional types for new API methods
+  PortfolioData,
+  PortfolioHolding,
+  PortfolioPerformance,
+  TradingStrategyInfo,
+  TradingStrategyPerformance,
+  AIModel,
+  ModelPrediction,
+  ModelPerformance,
+  AnalyticsData,
+  AnalyticsOverview,
+  AnalyticsPerformance,
+  AnalyticsRiskMetrics,
+  TradingActivity,
+  SectorAnalysis,
+  UserInsights,
+  CorrelationData,
+  CustomTool,
+  ToolResult,
+  QuickTip,
+  BacktestResult
+} from '../types';
 
 // API Configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
@@ -148,6 +208,34 @@ class ApiService {
   private clearTokensFromStorage(): void {
     this.tokens = null;
     localStorage.removeItem('auth_tokens');
+  }
+
+  // Safety wrapper to handle API responses and prevent runtime errors
+  private safeApiResponse<T = any>(response: any, fallback: T): T {
+    try {
+      if (!response) return fallback;
+      if (response.data !== undefined) return response.data;
+      return response;
+    } catch (error) {
+      console.warn('API response parsing error:', error);
+      return fallback;
+    }
+  }
+
+  // Helper method for safe array responses
+  private safeArrayResponse<T = any>(response: any): T[] {
+    const data = this.safeApiResponse(response, { results: [] });
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object') {
+      return (data as any).results || (data as any).data || [];
+    }
+    return [];
+  }
+
+  // Helper method for safe object responses
+  private safeObjectResponse<T = any>(response: any, defaultObject: T): T {
+    const data = this.safeApiResponse(response, defaultObject);
+    return typeof data === 'object' && data !== null ? data : defaultObject;
   }
 
   // Authentication methods
@@ -308,80 +396,57 @@ class ApiService {
   // Trading signals methods
   async getSignals(params?: any): Promise<any> {
     const response = await this.api.get('/trading/signals/', { params });
-    return response.data;
+    return this.safeObjectResponse(response.data, { results: [], count: 0 });
   }
 
   async createSignal(signalData: any): Promise<any> {
     const response = await this.api.post('/trading/signals/', signalData);
-    return response.data;
+    return this.safeObjectResponse(response.data, { id: null, status: 'error' });
   }
 
   async executeSignal(signalId: string): Promise<any> {
     const response = await this.api.post(`/trading/signals/${signalId}/execute/`);
-    return response.data;
+    return this.safeObjectResponse(response.data, { success: false, message: 'Execution failed' });
   }
 
   // Trading orders methods
   async getOrders(params?: any): Promise<any> {
     const response = await this.api.get('/trading/orders/', { params });
-    return response.data;
+    return this.safeObjectResponse(response.data, { results: [], count: 0 });
   }
 
   async placeOrder(orderData: any): Promise<any> {
     const response = await this.api.post('/trading/orders/', orderData);
-    return response.data;
+    return this.safeObjectResponse(response.data, { id: null, status: 'failed', message: 'Order placement failed' });
   }
 
   async cancelOrder(orderId: string): Promise<any> {
     const response = await this.api.post(`/trading/orders/${orderId}/cancel/`);
-    return response.data;
+    return this.safeObjectResponse(response.data, { success: false, message: 'Order cancellation failed' });
   }
 
   async modifyOrder(orderId: string, orderData: any): Promise<any> {
     const response = await this.api.patch(`/trading/orders/${orderId}/`, orderData);
-    return response.data;
+    return this.safeObjectResponse(response.data, { success: false, message: 'Order modification failed' });
   }
 
-  // Portfolio methods
+  // Portfolio methods - using trading app endpoints
   async getPortfolio(): Promise<any> {
-    const response = await this.api.get('/portfolio/');
+    const response = await this.api.get('/trading/portfolio/overview/');
     return response.data;
   }
 
   async getHoldings(): Promise<any> {
-    const response = await this.api.get('/portfolio/holdings/');
+    const response = await this.api.get('/trading/portfolio/positions/');
     return response.data;
   }
 
   async getPortfolioHistory(params?: any): Promise<any> {
-    const response = await this.api.get('/portfolio/history/', { params });
+    const response = await this.api.get('/trading/reports/trade-history/', { params });
     return response.data;
   }
 
-  // Strategies methods
-  async getStrategies(params?: any): Promise<any> {
-    const response = await this.api.get('/strategies/', { params });
-    return response.data;
-  }
-
-  async createStrategy(strategyData: any): Promise<any> {
-    const response = await this.api.post('/strategies/', strategyData);
-    return response.data;
-  }
-
-  async updateStrategy(strategyId: string, strategyData: any): Promise<any> {
-    const response = await this.api.patch(`/strategies/${strategyId}/`, strategyData);
-    return response.data;
-  }
-
-  async deleteStrategy(strategyId: string): Promise<void> {
-    await this.api.delete(`/strategies/${strategyId}/`);
-  }
-
-  async backtestStrategy(strategyId: string, params: any): Promise<any> {
-    const response = await this.api.post(`/strategies/${strategyId}/backtest/`, params);
-    return response.data;
-  }
+  // Legacy strategies methods - removed to avoid duplicates with new comprehensive methods
 
   // Market data methods
   async getMarketData(symbol: string, timeframe: string = '1d'): Promise<any> {
@@ -478,10 +543,7 @@ class ApiService {
     return response.data;
   }
 
-  async getModelPerformance(modelId: string): Promise<any> {
-    const response = await this.api.get(`/ai-studio/models/${modelId}/performance/`);
-    return response.data;
-  }
+  // Legacy getModelPerformance removed to avoid duplicate with new comprehensive method
 
   async getTrainingJobs(): Promise<any> {
     const response = await this.api.get('/ai-studio/training-jobs/');
@@ -705,6 +767,121 @@ class ApiService {
     return response.data;
   }
 
+  // Trading Monitor methods
+  async getTradingMonitorData(): Promise<TradingMonitorData> {
+    const response = await this.api.get('/trading/monitor/dashboard/');
+    return response.data;
+  }
+
+  async getSystemMetricsData(): Promise<any> {
+    const response = await this.api.get('/trading/monitor/system-metrics/');
+    return response.data;
+  }
+
+  async getMonitorActiveStrategies(): Promise<any> {
+    const response = await this.api.get('/trading/monitor/active-strategies/');
+    return response.data;
+  }
+
+  async getSystemAlerts(): Promise<any> {
+    const response = await this.api.get('/trading/monitor/alerts/');
+    return response.data;
+  }
+
+  async resolveAlert(alertId: string): Promise<any> {
+    const response = await this.api.patch(`/trading/monitor/alerts/${alertId}/resolve/`);
+    return response.data;
+  }
+
+  // Support Center methods
+  async getSupportCenterData(): Promise<SupportCenterData> {
+    const response = await this.api.get('/support/dashboard/');
+    return response.data;
+  }
+
+  async getSupportMetrics(): Promise<any> {
+    const response = await this.api.get('/support/metrics/');
+    return response.data;
+  }
+
+  async getSupportTickets(params?: any): Promise<any> {
+    const response = await this.api.get('/support/tickets/', { params });
+    return response.data;
+  }
+
+  async createSupportTicket(ticketData: any): Promise<any> {
+    const response = await this.api.post('/support/tickets/', ticketData);
+    return response.data;
+  }
+
+  async updateSupportTicket(ticketId: string, updateData: any): Promise<any> {
+    const response = await this.api.patch(`/support/tickets/${ticketId}/`, updateData);
+    return response.data;
+  }
+
+  async assignSupportTicket(ticketId: string, assigneeId: string): Promise<any> {
+    const response = await this.api.patch(`/support/tickets/${ticketId}/assign/`, {
+      assignee: assigneeId
+    });
+    return response.data;
+  }
+
+  async getSupportChannels(): Promise<any> {
+    const response = await this.api.get('/support/channels/');
+    return response.data;
+  }
+
+  async getSupportAgents(): Promise<any> {
+    const response = await this.api.get('/support/agents/');
+    return response.data;
+  }
+
+  // Sales Analytics methods
+  async getSalesAnalyticsData(): Promise<SalesAnalyticsData> {
+    const response = await this.api.get('/sales/analytics/dashboard/');
+    return response.data;
+  }
+
+  async getSalesMetrics(timeframe?: string): Promise<any> {
+    const response = await this.api.get('/sales/analytics/metrics/', {
+      params: { timeframe }
+    });
+    return response.data;
+  }
+
+  async getSalesTeamPerformance(period?: string): Promise<any> {
+    const response = await this.api.get('/sales/analytics/team-performance/', {
+      params: { period }
+    });
+    return response.data;
+  }
+
+  async getMonthlyTrends(months?: number): Promise<any> {
+    const response = await this.api.get('/sales/analytics/monthly-trends/', {
+      params: { months }
+    });
+    return response.data;
+  }
+
+  async getTopCustomers(limit?: number): Promise<any> {
+    const response = await this.api.get('/sales/analytics/top-customers/', {
+      params: { limit }
+    });
+    return response.data;
+  }
+
+  async getLeadSources(): Promise<any> {
+    const response = await this.api.get('/sales/analytics/lead-sources/');
+    return response.data;
+  }
+
+  async updateSalesTarget(repId: string, target: number): Promise<any> {
+    const response = await this.api.patch(`/sales/analytics/sales-rep/${repId}/target/`, {
+      target
+    });
+    return response.data;
+  }
+
   async getSecurityStatus(): Promise<any> {
     const response = await this.api.get('/security/monitoring/');
     return response.data;
@@ -755,6 +932,568 @@ class ApiService {
   // Get current tokens
   getTokens(): AuthTokens | null {
     return this.tokens;
+  }
+
+  // Dashboard API methods - using existing trading endpoints
+  async getDashboardData(): Promise<DashboardData> {
+    return this.get('/trading/dashboard/');
+  }
+
+  async getPortfolioStats(): Promise<PortfolioStats> {
+    return this.get('/trading/portfolio/overview/');
+  }
+
+  async getTopHoldings(limit: number = 5): Promise<Holding[]> {
+    return this.get(`/trading/portfolio/positions/?limit=${limit}`);
+  }
+
+  async getRecentSignals(limit: number = 5): Promise<TradingSignal[]> {
+    return this.get(`/trading/signals/?limit=${limit}&ordering=-created_at`);
+  }
+
+  async getMarketOverview(): Promise<MarketOverview> {
+    return this.get('/market-data/overview/');
+  }
+
+  // Role-specific dashboard methods - using trading automation endpoints
+  async getAdminDashboardData(): Promise<AdminDashboardData> {
+    return this.get('/trading/automation/dashboard/');
+  }
+
+  async getSystemHealth(): Promise<SystemHealth> {
+    return this.get('/trading/automation/health/');
+  }
+
+  async getUserActivity(limit: number = 10): Promise<UserActivity[]> {
+    return this.get(`/trading/automation/stats/?limit=${limit}`);
+  }
+
+  async getSupportDashboardData(): Promise<SupportDashboardData> {
+    return this.get('/trading/performance/');
+  }
+
+  async getSalesDashboardData(): Promise<SalesDashboardData> {
+    return this.get('/trading/reports/performance/');
+  }
+
+  // Dashboard refresh methods - using existing endpoints
+  async refreshDashboardData(): Promise<DashboardData> {
+    // Use existing portfolio sync endpoint instead
+    return this.post('/trading/portfolio/sync/', {});
+  }
+
+  async refreshPortfolioData(): Promise<PortfolioStats> {
+    return this.post('/trading/portfolio/sync/', {});
+  }
+
+  // Settings API methods
+  async getUserSettings(): Promise<UserSettings> {
+    return this.get('/settings/user/');
+  }
+
+  async updateUserSettings(profileData: Partial<UserProfile>): Promise<UserProfile> {
+    return this.patch('/settings/user/profile/', profileData);
+  }
+
+  async updateNotificationSettings(notifications: Partial<NotificationSettings>): Promise<NotificationSettings> {
+    return this.patch('/settings/user/notifications/', notifications);
+  }
+
+  async updateSecuritySettings(security: Partial<SecuritySettings>): Promise<SecuritySettings> {
+    return this.patch('/settings/user/security/', security);
+  }
+
+  async updateThemeSettings(theme: Partial<ThemeSettings>): Promise<ThemeSettings> {
+    return this.patch('/settings/user/theme/', theme);
+  }
+
+  async getSubscriptionSettings(): Promise<SubscriptionSettings> {
+    return this.get('/settings/user/subscription/');
+  }
+
+  async getBillingSettings(): Promise<BillingSettings> {
+    return this.get('/settings/user/billing/');
+  }
+
+  async getBillingHistory(): Promise<BillingRecord[]> {
+    return this.get('/settings/user/billing/history/');
+  }
+
+  async updatePaymentMethod(paymentData: Partial<PaymentMethod>): Promise<PaymentMethod> {
+    return this.post('/settings/user/billing/payment-method/', paymentData);
+  }
+
+  async downloadInvoice(invoiceId: string): Promise<Blob> {
+    const response = await this.api.get(`/settings/user/billing/invoice/${invoiceId}/download/`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  }
+
+  // System settings (Admin only)
+  async getSystemSettings(): Promise<SystemSettings> {
+    return this.get('/settings/system/');
+  }
+
+  async updateSystemSettings(settings: Partial<SystemSettings>): Promise<SystemSettings> {
+    return this.patch('/settings/system/', settings);
+  }
+
+  // Subscription management
+  async upgradeSubscription(tier: 'PRO' | 'ELITE'): Promise<{ checkout_url: string }> {
+    return this.post('/settings/user/subscription/upgrade/', { tier });
+  }
+
+  async cancelSubscription(): Promise<{ status: string }> {
+    return this.post('/settings/user/subscription/cancel/', {});
+  }
+
+  // Security operations
+  async enableTwoFactor(): Promise<{ qr_code: string; backup_codes: string[] }> {
+    return this.post('/settings/user/security/2fa/enable/', {});
+  }
+
+  async disableTwoFactor(code: string): Promise<{ status: string }> {
+    return this.post('/settings/user/security/2fa/disable/', { code });
+  }
+
+  async generateApiKey(name: string, permissions: string[]): Promise<{ key: string; key_id: string }> {
+    return this.post('/settings/user/security/api-keys/', { name, permissions });
+  }
+
+  async revokeApiKey(keyId: string): Promise<{ status: string }> {
+    await this.delete(`/settings/user/security/api-keys/${keyId}/`);
+    return { status: 'revoked' };
+  }
+
+  // Settings backup and restore
+  async exportSettings(): Promise<Blob> {
+    const response = await this.api.get('/settings/user/export/', {
+      responseType: 'blob'
+    });
+    return response.data;
+  }
+
+  async importSettings(settingsFile: File): Promise<{ status: string; imported_count: number }> {
+    const formData = new FormData();
+    formData.append('settings_file', settingsFile);
+    
+    const response = await this.api.post('/settings/user/import/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
+  async resetSettingsToDefault(): Promise<UserSettings> {
+    return this.post('/settings/user/reset/', {});
+  }
+
+  // Advanced Trading API Methods
+  async getAdvancedTradingData(): Promise<AdvancedTradingData> {
+    return this.get('/trading/advanced/');
+  }
+
+  async getActiveStrategies(): Promise<AdvancedTradingStrategy[]> {
+    return this.get('/trading/strategies/active/');
+  }
+
+  async getStrategyTypes(): Promise<StrategyType[]> {
+    return this.get('/trading/strategies/types/');
+  }
+
+  async getRiskMetrics(): Promise<RiskMetric[]> {
+    return this.get('/trading/risk/metrics/');
+  }
+
+  async getPortfolioRisk(): Promise<PortfolioRisk> {
+    return this.get('/trading/portfolio/risk/');
+  }
+
+  async deployStrategy(config: {
+    strategyType: string;
+    configuration: StrategyConfiguration;
+  }): Promise<StrategyDeployment> {
+    return this.post('/trading/strategies/deploy/', config);
+  }
+
+  async quickDeployStrategy(config: QuickDeployConfig): Promise<StrategyDeployment> {
+    return this.post('/trading/strategies/quick-deploy/', config);
+  }
+
+  async updateStrategyStatus(
+    strategyId: number, 
+    action: 'start' | 'pause' | 'stop'
+  ): Promise<AdvancedTradingStrategy> {
+    return this.patch(`/trading/strategies/${strategyId}/status/`, { action });
+  }
+
+  async removeStrategy(strategyId: number): Promise<{ status: string }> {
+    await this.delete(`/trading/strategies/${strategyId}/`);
+    return { status: 'removed' };
+  }
+
+  async getAdvancedTradingStrategyDetails(strategyId: number): Promise<AdvancedTradingStrategy> {
+    return this.get(`/trading/strategies/${strategyId}/`);
+  }
+
+  async updateStrategyConfiguration(
+    strategyId: number, 
+    configuration: Partial<StrategyConfiguration>
+  ): Promise<AdvancedTradingStrategy> {
+    return this.patch(`/trading/strategies/${strategyId}/config/`, configuration);
+  }
+
+  async getMarketDataAdvanced(symbols?: string[]): Promise<MarketData[]> {
+    const params = symbols ? { symbols: symbols.join(',') } : {};
+    return this.get('/trading/market-data/', params);
+  }
+
+  async getOrderBook(symbol: string): Promise<OrderBook> {
+    return this.get(`/trading/order-book/${symbol}/`);
+  }
+
+  async getPortfolioOptimization(): Promise<PortfolioOptimization> {
+    return this.get('/trading/portfolio/optimization/');
+  }
+
+  async optimizePortfolio(preferences: {
+    riskTolerance: 'conservative' | 'moderate' | 'aggressive';
+    targetReturn?: number;
+    constraints?: string[];
+  }): Promise<PortfolioOptimization> {
+    return this.post('/trading/portfolio/optimize/', preferences);
+  }
+
+  async rebalancePortfolio(allocations: AllocationItem[]): Promise<{ status: string; orders: any[] }> {
+    return this.post('/trading/portfolio/rebalance/', { allocations });
+  }
+
+  async getStrategyPerformance(
+    strategyId: number, 
+    timeframe: '1D' | '1W' | '1M' | '3M' | '1Y' = '1M'
+  ): Promise<PerformancePoint[]> {
+    return this.get(`/trading/strategies/${strategyId}/performance/`, { timeframe });
+  }
+
+  async getStrategyBacktest(
+    strategyType: string,
+    configuration: StrategyConfiguration,
+    backtestPeriod: { start: string; end: string }
+  ): Promise<{
+    returns: PerformancePoint[];
+    metrics: {
+      totalReturn: number;
+      sharpeRatio: number;
+      maxDrawdown: number;
+      winRate: number;
+      averageTrade: number;
+    };
+  }> {
+    return this.post('/trading/strategies/backtest/', {
+      strategy_type: strategyType,
+      configuration,
+      backtest_period: backtestPeriod
+    });
+  }
+
+  // Real-time data subscription endpoints
+  async subscribeToRealTimeUpdates(subscriptions: {
+    strategies?: boolean;
+    riskMetrics?: boolean;
+    marketData?: boolean;
+    portfolio?: boolean;
+  }): Promise<{ websocket_url: string; token: string }> {
+    return this.post('/trading/realtime/subscribe/', subscriptions);
+  }
+
+  async unsubscribeFromRealTimeUpdates(): Promise<{ status: string }> {
+    return this.post('/trading/realtime/unsubscribe/', {});
+  }
+
+  // Risk management endpoints
+  async updateRiskLimits(limits: {
+    maxPositionSize?: number;
+    dailyLossLimit?: number;
+    sectorConcentration?: number;
+    leverageRatio?: number;
+  }): Promise<PortfolioRisk> {
+    return this.patch('/trading/risk/limits/', limits);
+  }
+
+  async triggerRiskCheck(): Promise<{
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    violations: string[];
+    recommendations: string[];
+  }> {
+    return this.post('/trading/risk/check/', {});
+  }
+
+  // Advanced charts and analytics
+  async getAdvancedChartData(
+    symbol: string, 
+    timeframe: string, 
+    indicators?: string[]
+  ): Promise<{
+    ohlcv: { timestamp: string; open: number; high: number; low: number; close: number; volume: number }[];
+    indicators: { [key: string]: number[] };
+  }> {
+    return this.get(`/trading/charts/${symbol}/`, { timeframe, indicators: indicators?.join(',') });
+  }
+
+  async getVolumeProfile(symbol: string, period: string): Promise<{
+    priceVolume: { price: number; volume: number }[];
+    poc: number; // Point of Control
+    vah: number; // Value Area High
+    val: number; // Value Area Low
+  }> {
+    return this.get(`/trading/volume-profile/${symbol}/`, { period });
+  }
+
+  async getMarketScanner(criteria: {
+    filters: string[];
+    sortBy: string;
+    limit?: number;
+  }): Promise<MarketData[]> {
+    return this.post('/trading/scanner/', criteria);
+  }
+
+  async getCorrelationMatrix(symbols: string[]): Promise<CorrelationMatrix> {
+    return this.post('/trading/correlation/', { symbols });
+  }
+
+  // Portfolio API Methods - using trading app endpoints
+  async getPortfolioData(): Promise<PortfolioData> {
+    return this.get('/trading/portfolio/overview/');
+  }
+
+  async getPortfolioHoldings(): Promise<PortfolioHolding[]> {
+    return this.get('/trading/portfolio/positions/');
+  }
+
+  async getPortfolioPerformance(period: string = '1M'): Promise<PortfolioPerformance> {
+    return this.get('/trading/reports/performance/', { period });
+  }
+
+  async updateHolding(holdingId: string, data: Partial<PortfolioHolding>): Promise<PortfolioHolding> {
+    return this.patch(`/trading/portfolio/positions/${holdingId}/`, data);
+  }
+
+  async sellHolding(holdingId: string, quantity: number): Promise<{ status: string; orderId: string }> {
+    return this.post(`/trading/orders/`, { 
+      action: 'SELL',
+      quantity: quantity,
+      holding_id: holdingId
+    });
+  }
+
+  // Strategies API Methods - using trading app endpoints
+  async getTradingStrategies(filters?: {
+    type?: string;
+    status?: string;
+    riskProfile?: string;
+    minRating?: number;
+  }): Promise<TradingStrategyInfo[]> {
+    return this.get('/trading/strategies/', filters);
+  }
+
+  async getMyStrategies(): Promise<TradingStrategyInfo[]> {
+    // Since backend doesn't have 'my' endpoint, filter by user on frontend or use regular strategies
+    return this.get('/trading/strategies/');
+  }
+
+  async getStrategyDetails(strategyId: string): Promise<TradingStrategyInfo> {
+    return this.get(`/trading/strategies/${strategyId}/`);
+  }
+
+  async createStrategy(strategy: Partial<TradingStrategyInfo>): Promise<TradingStrategyInfo> {
+    return this.post('/trading/strategies/', strategy);
+  }
+
+  async updateTradingStrategy(strategyId: string, updates: Partial<TradingStrategyInfo>): Promise<TradingStrategyInfo> {
+    return this.patch(`/trading/strategies/${strategyId}/`, updates);
+  }
+
+  async deleteStrategy(strategyId: string): Promise<{ status: string }> {
+    await this.delete(`/strategies/${strategyId}/`);
+    return { status: 'deleted' };
+  }
+
+  async followStrategy(strategyId: string): Promise<{ status: string }> {
+    return this.post(`/strategies/${strategyId}/follow/`, {});
+  }
+
+  async unfollowStrategy(strategyId: string): Promise<{ status: string }> {
+    return this.post(`/strategies/${strategyId}/unfollow/`, {});
+  }
+
+  async backtestStrategy(strategyId: string, parameters: {
+    startDate: string;
+    endDate: string;
+    initialCapital: number;
+  }): Promise<BacktestResult> {
+    return this.post(`/strategies/${strategyId}/backtest/`, parameters);
+  }
+
+  // AI Studio API Methods
+  async getAIModels(): Promise<AIModel[]> {
+    return this.get('/ai-studio/models/');
+  }
+
+  async getAIModelDetails(modelId: string): Promise<AIModel> {
+    return this.get(`/ai-studio/models/${modelId}/`);
+  }
+
+  async createAIModel(model: Partial<AIModel>): Promise<AIModel> {
+    return this.post('/ai-studio/models/', model);
+  }
+
+  async trainAIModel(modelId: string, parameters: {
+    trainingData: string;
+    features: string[];
+    algorithm: string;
+    hyperparameters: { [key: string]: any };
+  }): Promise<{ status: string; taskId: string }> {
+    return this.post(`/ai-studio/models/${modelId}/train/`, parameters);
+  }
+
+  async getModelPredictions(modelId: string, symbols?: string[]): Promise<ModelPrediction[]> {
+    const params = symbols ? { symbols: symbols.join(',') } : {};
+    return this.get(`/ai-studio/models/${modelId}/predictions/`, params);
+  }
+
+  async generatePrediction(modelId: string, symbol: string, timeframe: string): Promise<ModelPrediction> {
+    return this.post(`/ai-studio/models/${modelId}/predict/`, { symbol, timeframe });
+  }
+
+  async getModelPerformance(modelId: string): Promise<ModelPerformance> {
+    return this.get(`/ai-studio/models/${modelId}/performance/`);
+  }
+
+  async deployAIModel(modelId: string): Promise<{ status: string; deploymentId: string }> {
+    return this.post(`/ai-studio/models/${modelId}/deploy/`, {});
+  }
+
+  // Analytics API Methods
+  async getAnalyticsData(timeframe: string = '1M'): Promise<AnalyticsData> {
+    return this.get('/analytics/overview/', { timeframe });
+  }
+
+  async getAnalyticsOverview(): Promise<AnalyticsOverview> {
+    return this.get('/analytics/overview/summary/');
+  }
+
+  async getAnalyticsPerformance(period: string = '1M'): Promise<AnalyticsPerformance> {
+    return this.get('/analytics/performance/', { period });
+  }
+
+  async getAnalyticsRiskMetrics(): Promise<AnalyticsRiskMetrics> {
+    return this.get('/analytics/risk-metrics/');
+  }
+
+  async getTradingActivity(period: string = '1M'): Promise<TradingActivity> {
+    return this.get('/analytics/trading-activity/', { period });
+  }
+
+  async getSectorAnalysis(): Promise<SectorAnalysis[]> {
+    return this.get('/analytics/sector-analysis/');
+  }
+
+  async getUserInsights(): Promise<UserInsights> {
+    return this.get('/analytics/user-insights/');
+  }
+
+  async getCorrelationAnalysis(symbols: string[]): Promise<CorrelationData> {
+    return this.post('/analytics/correlation/', { symbols });
+  }
+
+  // Custom Tools API Methods
+  async getCustomTools(category?: string): Promise<CustomTool[]> {
+    const params = category ? { category } : {};
+    return this.get('/tools/', params);
+  }
+
+  async getCustomToolDetails(toolId: string): Promise<CustomTool> {
+    return this.get(`/tools/${toolId}/`);
+  }
+
+  async createCustomTool(tool: Partial<CustomTool>): Promise<CustomTool> {
+    return this.post('/tools/', tool);
+  }
+
+  async updateCustomTool(toolId: string, updates: Partial<CustomTool>): Promise<CustomTool> {
+    return this.patch(`/tools/${toolId}/`, updates);
+  }
+
+  async deleteCustomTool(toolId: string): Promise<{ status: string }> {
+    await this.delete(`/tools/${toolId}/`);
+    return { status: 'deleted' };
+  }
+
+  async executeCustomTool(toolId: string, parameters: { [key: string]: any }): Promise<ToolResult> {
+    return this.post(`/tools/${toolId}/execute/`, { parameters });
+  }
+
+  async getToolResults(toolId: string, limit: number = 10): Promise<ToolResult[]> {
+    return this.get(`/tools/${toolId}/results/`, { limit });
+  }
+
+  // Quick Tips API Methods
+  async getQuickTips(userRole?: string, category?: string): Promise<QuickTip[]> {
+    const params: any = {};
+    if (userRole) params.userRole = userRole;
+    if (category) params.category = category;
+    return this.get('/tips/', params);
+  }
+
+  async getPersonalizedTips(): Promise<QuickTip[]> {
+    return this.get('/tips/personalized/');
+  }
+
+  async markTipAsHelpful(tipId: string): Promise<{ status: string }> {
+    return this.post(`/tips/${tipId}/helpful/`, {});
+  }
+
+  async markTipAsViewed(tipId: string): Promise<{ status: string }> {
+    return this.post(`/tips/${tipId}/viewed/`, {});
+  }
+
+  async executeTipAction(tipId: string, actionType: string): Promise<{ status: string; result?: any }> {
+    return this.post(`/tips/${tipId}/execute/`, { actionType });
+  }
+
+  // Test custom API endpoint
+  async testCustomEndpoint(testConfig: {
+    endpoint: string;
+    method: string;
+    headers?: any;
+    data?: any;
+  }): Promise<any> {
+    try {
+      const { endpoint, method, headers = {}, data } = testConfig;
+      
+      switch (method.toUpperCase()) {
+        case 'GET':
+          return await this.get(endpoint);
+        case 'POST':
+          return await this.post(endpoint, data || {});
+        case 'PUT':
+          return await this.put(endpoint, data || {});
+        case 'DELETE':
+          return await this.delete(endpoint);
+        default:
+          throw new Error(`Unsupported HTTP method: ${method}`);
+      }
+    } catch (error: any) {
+      // Return a structured error response
+      return {
+        success: false,
+        error: error.message || 'API test failed',
+        status: error.response?.status || 500,
+        data: error.response?.data || null
+      };
+    }
   }
 }
 

@@ -43,6 +43,13 @@ class MarketDataService {
   }
 
   private connect() {
+    // DISABLED: WebSocket connections until backend WebSocket server is ready
+    console.log('Market data WebSocket connection disabled - using REST API instead');
+    this.setConnectionStatus('disconnected');
+    return;
+
+    /* 
+    // Original WebSocket connection code commented out to avoid TypeScript errors
     if (this.ws?.readyState === WebSocket.OPEN) {
       return;
     }
@@ -52,14 +59,14 @@ class MarketDataService {
     // Get auth token
     const token = localStorage.getItem('access_token');
     if (!token) {
-      console.error('No auth token found');
+      console.warn('No auth token found - WebSocket connection skipped');
       this.setConnectionStatus('error');
       return;
     }
 
-    // Construct WebSocket URL
+    // Construct WebSocket URL - connect to backend on port 8000
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws/market-data/`;
+    const wsUrl = `${wsProtocol}//localhost:8000/ws/market-data/`;
     
     try {
       this.ws = new WebSocket(wsUrl);
@@ -115,6 +122,7 @@ class MarketDataService {
       console.error('Error creating WebSocket connection:', error);
       this.setConnectionStatus('error');
     }
+    */
   }
 
   private setConnectionStatus(status: typeof this.connectionStatus) {
@@ -248,27 +256,14 @@ class MarketDataService {
   }
 
   private subscribeToSymbols(symbols: string[]) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({
-        type: 'subscribe',
-        symbols: symbols
-      }));
-      
-      symbols.forEach(symbol => this.subscribedSymbols.add(symbol));
-    } else {
-      // Store for later subscription when connected
-      symbols.forEach(symbol => this.subscribedSymbols.add(symbol));
-    }
+    // WebSocket disabled - store symbols for future use when WebSocket is enabled
+    console.log('WebSocket subscription disabled, storing symbols:', symbols);
+    symbols.forEach(symbol => this.subscribedSymbols.add(symbol));
   }
 
   private unsubscribeFromSymbols(symbols: string[]) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({
-        type: 'unsubscribe',
-        symbols: symbols
-      }));
-    }
-    
+    // WebSocket disabled - remove from stored symbols
+    console.log('WebSocket unsubscription disabled, removing symbols:', symbols);
     symbols.forEach(symbol => this.subscribedSymbols.delete(symbol));
   }
 

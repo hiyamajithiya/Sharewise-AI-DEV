@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -34,6 +34,7 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Skeleton,
 } from '@mui/material';
 import {
   ShowChart,
@@ -51,6 +52,16 @@ import {
 import { useSelector } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
 import StatCard from '../components/common/StatCard';
+import { 
+  AdvancedTradingStrategy, 
+  StrategyType, 
+  RiskMetric, 
+  StrategyConfiguration, 
+  QuickDeployConfig,
+  PortfolioRisk,
+  AdvancedTradingData
+} from '../types';
+import { apiService } from '../services/api';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,22 +69,7 @@ interface TabPanelProps {
   value: number;
 }
 
-interface Strategy {
-  id: number;
-  name: string;
-  status: 'RUNNING' | 'PAUSED' | 'STOPPED';
-  pnl: number;
-  trades: number;
-  winRate: number;
-  capital?: number;
-  timeframe?: string;
-  instruments?: string;
-  maxDrawdown?: number;
-  dailyLossLimit?: number;
-  positionSize?: number;
-  enableStopLoss?: boolean;
-  deployedAt?: string;
-}
+// Using AdvancedTradingStrategy from types
 
 function TabPanel({ children, value, index }: TabPanelProps) {
   return (
@@ -109,12 +105,120 @@ const AdvancedTrading: React.FC = () => {
     capital: '100000',
     enableRisk: true
   });
-  const [activeStrategies, setActiveStrategies] = useState<Strategy[]>([
-    { id: 1, name: 'Momentum Breakout', status: 'RUNNING', pnl: 12450, trades: 24, winRate: 68.5 },
-    { id: 2, name: 'Mean Reversion', status: 'PAUSED', pnl: -2340, trades: 15, winRate: 45.2 },
-    { id: 3, name: 'Arbitrage Bot', status: 'STOPPED', pnl: 8760, trades: 89, winRate: 72.1 },
-  ]);
+  const [activeStrategies, setActiveStrategies] = useState<AdvancedTradingStrategy[]>([]);
+  const [strategyTypes, setStrategyTypes] = useState<StrategyType[]>([]);
+  const [riskMetrics, setRiskMetrics] = useState<RiskMetric[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [strategyIntervals, setStrategyIntervals] = useState<{[key: number]: NodeJS.Timeout}>({});
+
+  // Fetch initial data
+  const fetchAdvancedTradingData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [strategiesData, typesData, metricsData] = await Promise.all([
+        apiService.getActiveStrategies(),
+        apiService.getStrategyTypes(),
+        apiService.getRiskMetrics()
+      ]);
+
+      setActiveStrategies(strategiesData);
+      setStrategyTypes(typesData);
+      setRiskMetrics(metricsData);
+    } catch (err) {
+      console.error('Error fetching advanced trading data:', err);
+      setError('Failed to load trading data. Please try again.');
+      
+      // Set empty arrays if API fails
+      setActiveStrategies([]);
+      setStrategyTypes([]);
+      setRiskMetrics([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data fetch and refresh interval
+  useEffect(() => {
+    fetchAdvancedTradingData();
+
+    // Set up auto-refresh every 30 seconds for fallback
+    const refreshInterval = setInterval(() => {
+      if (!error) { // Only refresh if no errors
+        fetchAdvancedTradingData();
+      }
+    }, 30000);
+
+    // Set up WebSocket connection for real-time updates
+    let websocket: WebSocket | null = null;
+    
+    const setupWebSocket = async () => {
+      try {
+        const wsConfig = await apiService.subscribeToRealTimeUpdates({
+          strategies: true,
+          riskMetrics: true,
+          marketData: true,
+          portfolio: true
+        });
+        
+        websocket = new WebSocket(wsConfig.websocket_url);
+        
+        websocket.onopen = () => {
+          console.log('Advanced Trading WebSocket connected');
+          // Send authentication token
+          websocket?.send(JSON.stringify({ token: wsConfig.token }));
+        };
+        
+        websocket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            // Handle different types of real-time updates
+            if (data.type === 'strategy_update') {
+              setActiveStrategies(prev => 
+                prev.map(s => s.id === data.strategy.id ? { ...s, ...data.strategy } : s)
+              );
+            } else if (data.type === 'risk_metrics') {
+              setRiskMetrics(data.metrics);
+            } else if (data.type === 'portfolio_update') {
+              // Handle portfolio updates
+              console.log('Portfolio update received:', data);
+            }
+          } catch (err) {
+            console.error('Error parsing WebSocket message:', err);
+          }
+        };
+        
+        websocket.onerror = (error) => {
+          console.error('WebSocket error:', error);
+        };
+        
+        websocket.onclose = () => {
+          console.log('Advanced Trading WebSocket disconnected');
+          // Attempt to reconnect after 5 seconds
+          setTimeout(setupWebSocket, 5000);
+        };
+      } catch (err) {
+        console.error('Failed to setup WebSocket:', err);
+      }
+    };
+    
+    // Setup WebSocket after initial data fetch
+    setTimeout(setupWebSocket, 1000);
+
+    return () => {
+      clearInterval(refreshInterval);
+      if (websocket) {
+        websocket.close();
+      }
+      // Unsubscribe from real-time updates
+      apiService.unsubscribeFromRealTimeUpdates().catch(err => 
+        console.error('Failed to unsubscribe from real-time updates:', err)
+      );
+    };
+  }, [error]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -147,12 +251,7 @@ const AdvancedTrading: React.FC = () => {
     'Review & Deploy'
   ];
 
-  const strategyTypes = [
-    { name: 'Momentum Breakout', description: 'Identifies strong price movements and trends', icon: '📈' },
-    { name: 'Mean Reversion', description: 'Takes advantage of price corrections', icon: '🔄' },
-    { name: 'Arbitrage', description: 'Exploits price differences across markets', icon: '⚖️' },
-    { name: 'Custom Strategy', description: 'Create your own algorithmic strategy', icon: '🛠️' }
-  ];
+  // strategyTypes now managed by state
 
   const handleNextStep = () => {
     // Step 1: Validate configuration parameters
@@ -400,49 +499,47 @@ const AdvancedTrading: React.FC = () => {
   };
 
   // Strategy control functions
-  const handleStrategyAction = (strategyId: number, action: 'play' | 'pause' | 'stop') => {
+  const handleStrategyAction = async (strategyId: number, action: 'play' | 'pause' | 'stop') => {
     const strategy = activeStrategies.find(s => s.id === strategyId);
     if (!strategy) return;
 
-    if (action === 'play') {
-      startStrategySimulation(strategyId);
-      window.alert(`✅ ${strategy.name} strategy resumed! Trading will begin shortly.`);
-    } else {
-      // Clear interval for pause/stop
-      if (strategyIntervals[strategyId]) {
-        clearInterval(strategyIntervals[strategyId]);
-        setStrategyIntervals(prev => {
-          const newIntervals = { ...prev };
-          delete newIntervals[strategyId];
-          return newIntervals;
-        });
-      }
+    try {
+      // Map actions to API actions
+      const apiAction = action === 'play' ? 'start' : action === 'pause' ? 'pause' : 'stop';
       
-      if (action === 'pause') {
-        window.alert(`⏸️ ${strategy.name} strategy paused. Trading stopped temporarily.`);
-      } else if (action === 'stop') {
-        window.alert(`🛑 ${strategy.name} strategy stopped completely. All positions will be closed.`);
-      }
-    }
+      // Call API to update strategy status
+      const updatedStrategy = await apiService.updateStrategyStatus(strategyId, apiAction);
+      
+      // Update local state
+      setActiveStrategies(prev => prev.map(s => 
+        s.id === strategyId ? { ...s, ...updatedStrategy } : s
+      ));
 
-    setActiveStrategies(prev => prev.map(s => {
-      if (s.id === strategyId) {
-        let newStatus: 'RUNNING' | 'PAUSED' | 'STOPPED';
-        switch (action) {
-          case 'play':
-            newStatus = 'RUNNING';
-            break;
-          case 'pause':
-            newStatus = 'PAUSED';
-            break;
-          case 'stop':
-            newStatus = 'STOPPED';
-            break;
+      // Handle intervals for simulation
+      if (action === 'play') {
+        startStrategySimulation(strategyId);
+        window.alert(`✅ ${strategy.name} strategy resumed! Trading will begin shortly.`);
+      } else {
+        // Clear interval for pause/stop
+        if (strategyIntervals[strategyId]) {
+          clearInterval(strategyIntervals[strategyId]);
+          setStrategyIntervals(prev => {
+            const newIntervals = { ...prev };
+            delete newIntervals[strategyId];
+            return newIntervals;
+          });
         }
-        return { ...s, status: newStatus };
+        
+        if (action === 'pause') {
+          window.alert(`⏸️ ${strategy.name} strategy paused. Trading stopped temporarily.`);
+        } else if (action === 'stop') {
+          window.alert(`🛑 ${strategy.name} strategy stopped completely. All positions will be closed.`);
+        }
       }
-      return s;
-    }));
+    } catch (error) {
+      console.error('Error updating strategy status:', error);
+      window.alert(`Failed to ${action} strategy. Please try again.`);
+    }
   };
 
   // Settings button handler
@@ -488,24 +585,32 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
   };
 
   // Remove strategy function
-  const handleRemoveStrategy = (strategyId: number) => {
+  const handleRemoveStrategy = async (strategyId: number) => {
     const strategy = activeStrategies.find(s => s.id === strategyId);
     if (!strategy) return;
 
-    // Clear any running intervals
-    if (strategyIntervals[strategyId]) {
-      clearInterval(strategyIntervals[strategyId]);
-      setStrategyIntervals(prev => {
-        const newIntervals = { ...prev };
-        delete newIntervals[strategyId];
-        return newIntervals;
-      });
-    }
+    try {
+      // Call API to remove strategy
+      await apiService.removeStrategy(strategyId);
 
-    // Remove from active strategies
-    setActiveStrategies(prev => prev.filter(s => s.id !== strategyId));
-    
-    window.alert(`🗑️ Strategy "${strategy.name}" has been removed successfully.`);
+      // Clear any running intervals
+      if (strategyIntervals[strategyId]) {
+        clearInterval(strategyIntervals[strategyId]);
+        setStrategyIntervals(prev => {
+          const newIntervals = { ...prev };
+          delete newIntervals[strategyId];
+          return newIntervals;
+        });
+      }
+
+      // Remove from active strategies
+      setActiveStrategies(prev => prev.filter(s => s.id !== strategyId));
+      
+      window.alert(`🗑️ Strategy "${strategy.name}" has been removed successfully.`);
+    } catch (error) {
+      console.error('Error removing strategy:', error);
+      window.alert(`Failed to remove strategy "${strategy.name}". Please try again.`);
+    }
   };
 
   const handleQuickConfigChange = (field: string, value: string | boolean) => {
@@ -522,40 +627,16 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
       return;
     }
 
-    // Map quick deploy template to strategy name
-    const strategyMap: { [key: string]: string } = {
-      momentum: 'Momentum Breakout',
-      meanrev: 'Mean Reversion',
-      arbitrage: 'Arbitrage',
-      grid: 'Grid Trading'
-    };
-
-    const strategyName = strategyMap[quickDeployConfig.strategyTemplate];
-    const defaults = getStrategyDefaults(strategyName);
-    
     try {
       // Show loading state
       setDeploySuccess(true);
       
-      // Create new strategy with quick deploy config
-      const newStrategy: Strategy = {
-        id: activeStrategies.length + 1,
-        name: strategyName,
-        status: 'RUNNING',
-        pnl: 0,
-        trades: 0,
-        winRate: 0,
-        capital: parseInt(quickDeployConfig.capital),
-        timeframe: defaults.timeframe,
-        instruments: defaults.instruments,
-        deployedAt: new Date().toLocaleString()
-      };
-
-      // Simulate deployment time
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call API to deploy strategy
+      const deployment = await apiService.quickDeployStrategy(quickDeployConfig);
       
-      // Add to active strategies list
-      setActiveStrategies(prev => [...prev, newStrategy]);
+      // Fetch updated strategies list
+      const updatedStrategies = await apiService.getActiveStrategies();
+      setActiveStrategies(updatedStrategies);
       
       // Reset form
       setQuickDeployConfig({
@@ -565,10 +646,22 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
       });
       
       setDeploySuccess(false);
+      
+      const strategyMap: { [key: string]: string } = {
+        momentum: 'Momentum Breakout',
+        meanrev: 'Mean Reversion',
+        arbitrage: 'Statistical Arbitrage',
+        grid: 'Grid Trading'
+      };
+      
+      const strategyName = strategyMap[quickDeployConfig.strategyTemplate];
       window.alert(`${strategyName} deployed successfully with ₹${parseInt(quickDeployConfig.capital).toLocaleString()} capital!`);
       
-      // Start simulating trading activity for this strategy
-      startStrategySimulation(newStrategy.id);
+      // Start simulating trading activity for this strategy if deployment has an ID
+      if (deployment.id) {
+        const newStrategyId = parseInt(deployment.id);
+        startStrategySimulation(newStrategyId);
+      }
       
     } catch (error) {
       console.error('Quick deployment failed:', error);
@@ -588,31 +681,15 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
       // Show loading state
       setDeploySuccess(true);
       
-      // Create new strategy with full configuration
-      const newStrategy: Strategy = {
-        id: activeStrategies.length + 1,
-        name: selectedStrategy,
-        status: 'RUNNING',
-        pnl: 0,
-        trades: 0,
-        winRate: 0,
-        capital: parseInt(strategyConfig.capital),
-        timeframe: strategyConfig.timeframe,
-        instruments: strategyConfig.instruments,
-        maxDrawdown: parseFloat(strategyConfig.maxDrawdown),
-        dailyLossLimit: parseInt(strategyConfig.dailyLossLimit),
-        positionSize: parseFloat(strategyConfig.positionSize),
-        enableStopLoss: strategyConfig.enableStopLoss,
-        deployedAt: new Date().toLocaleString()
-      };
+      // Call API to deploy strategy
+      const deployment = await apiService.deployStrategy({
+        strategyType: selectedStrategy,
+        configuration: strategyConfig
+      });
       
-      console.log('Deploying strategy with full config:', newStrategy);
-      
-      // Simulate deployment time
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Add to active strategies list
-      setActiveStrategies(prev => [...prev, newStrategy]);
+      // Fetch updated strategies list
+      const updatedStrategies = await apiService.getActiveStrategies();
+      setActiveStrategies(updatedStrategies);
       
       // Reset dialog and show success
       handleCloseDialog();
@@ -620,8 +697,11 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
       
       window.alert(`Strategy "${selectedStrategy}" deployed successfully with ₹${parseInt(strategyConfig.capital).toLocaleString()} capital!`);
       
-      // Start simulating trading activity for this strategy
-      startStrategySimulation(newStrategy.id);
+      // Start simulating trading activity if deployment has an ID
+      if (deployment.id) {
+        const newStrategyId = parseInt(deployment.id);
+        startStrategySimulation(newStrategyId);
+      }
       
     } catch (error) {
       console.error('Deployment failed:', error);
@@ -645,12 +725,7 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
     };
   }, []);  // Run once on component mount
 
-  const riskMetrics = [
-    { title: 'Portfolio VaR', value: '₹45,230', subtitle: 'Daily 95% VaR', color: 'warning' as const },
-    { title: 'Sharpe Ratio', value: '1.24', subtitle: 'Risk-adjusted returns', color: 'success' as const },
-    { title: 'Max Drawdown', value: '8.5%', subtitle: 'Historical maximum', color: 'error' as const },
-    { title: 'Beta', value: '0.87', subtitle: 'Market correlation', color: 'info' as const },
-  ];
+  // riskMetrics now managed by state
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -704,6 +779,21 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
           </Typography>
         </Box>
 
+        {/* Error Display */}
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ mb: 3 }}
+            action={
+              <Button color="inherit" size="small" onClick={fetchAdvancedTradingData}>
+                Retry
+              </Button>
+            }
+          >
+            {error}
+          </Alert>
+        )}
+
         {/* Elite Feature Notice */}
         <Box sx={{
           mb: 4,
@@ -722,17 +812,34 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
 
       {/* Risk Metrics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        {riskMetrics.map((metric, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <StatCard
-              title={metric.title}
-              value={metric.value}
-              icon={<BarChart />}
-              color={metric.color}
-              subtitle={metric.subtitle}
-            />
-          </Grid>
-        ))}
+        {loading ? (
+          // Loading skeletons
+          Array.from({ length: 4 }).map((_, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card sx={{ p: 2, borderRadius: '16px' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Skeleton variant="circular" width={40} height={40} />
+                  <Box sx={{ flex: 1 }}>
+                    <Skeleton variant="text" width="60%" />
+                    <Skeleton variant="text" width="80%" />
+                  </Box>
+                </Box>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          riskMetrics.map((metric, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <StatCard
+                title={metric.title}
+                value={metric.value}
+                icon={<BarChart />}
+                color={metric.color}
+                subtitle={metric.subtitle}
+              />
+            </Grid>
+          ))
+        )}
       </Grid>
 
         {/* Main Content Tabs */}
@@ -839,7 +946,34 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {activeStrategies.map((strategy) => (
+                      {loading ? (
+                        // Loading skeleton rows
+                        Array.from({ length: 3 }).map((_, index) => (
+                          <TableRow key={index}>
+                            <TableCell><Skeleton variant="text" width="80%" /></TableCell>
+                            <TableCell><Skeleton variant="rectangular" width={80} height={24} /></TableCell>
+                            <TableCell align="right"><Skeleton variant="text" width="60%" /></TableCell>
+                            <TableCell align="right"><Skeleton variant="text" width="40%" /></TableCell>
+                            <TableCell align="right"><Skeleton variant="text" width="50%" /></TableCell>
+                            <TableCell align="center">
+                              <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                  <Skeleton key={i} variant="circular" width={32} height={32} />
+                                ))}
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : activeStrategies.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              No active strategies found. Deploy a new strategy to get started.
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        activeStrategies.map((strategy) => (
                         <TableRow key={strategy.id} hover>
                           <TableCell>
                             <Typography variant="body2" sx={{ fontWeight: 600, color: '#1F2937' }}>
@@ -940,7 +1074,8 @@ ${strategy.deployedAt ? `Deployed: ${strategy.deployedAt}` : ''}
                             </Box>
                           </TableCell>
                         </TableRow>
-                      ))}
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </TableContainer>

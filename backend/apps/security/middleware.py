@@ -194,6 +194,11 @@ class RateLimitMiddleware(MiddlewareMixin):
     def _should_skip_rate_limit(self, request: HttpRequest) -> bool:
         """Check if request should skip rate limiting"""
         
+        # TEMPORARY: Skip rate limiting in development mode
+        from django.conf import settings
+        if settings.DEBUG:
+            return True
+        
         # Skip for health checks
         if request.path.startswith('/health/'):
             return True

@@ -19,6 +19,7 @@ import {
   Menu,
   MenuItem,
   Badge,
+  Skeleton,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -37,6 +38,8 @@ import {
 import { useSelector } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
 import StatCard from '../components/common/StatCard';
+import { PortfolioData, PortfolioHolding, PortfolioPerformance } from '../types';
+import { apiService } from '../services/api';
 
 const Portfolio: React.FC = () => {
   const [viewMode, setViewMode] = useState<'holdings' | 'performance' | 'analysis'>('holdings');
@@ -102,18 +105,12 @@ const Portfolio: React.FC = () => {
   const tierFeatures = getTierFeatures(subscriptionTier);
 
   // Portfolio state and API integration
-  const [portfolioData, setPortfolioData] = useState({
-    totalValue: 0,
-    dayChange: 0,
-    dayChangePercent: 0,
-    totalPnL: 0,
-    totalPnLPercent: 0,
-    investedAmount: 0,
-    cashBalance: 0,
-  });
-  const [holdings, setHoldings] = useState<any[]>([]);
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
+  const [holdings, setHoldings] = useState<PortfolioHolding[]>([]);
+  const [portfolioPerformance, setPortfolioPerformance] = useState<PortfolioPerformance | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Fetch portfolio data on component mount
   useEffect(() => {
@@ -122,24 +119,38 @@ const Portfolio: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // TODO: Replace with actual API calls
-        // const portfolioResponse = await apiService.getPortfolio();
-        // const holdingsResponse = await apiService.getHoldings();
+        // Fetch all portfolio-related data in parallel
+        const [portfolioResponse, holdingsResponse, performanceResponse] = await Promise.all([
+          apiService.getPortfolioData(),
+          apiService.getPortfolioHoldings(),
+          apiService.getPortfolioPerformance('1M')
+        ]);
         
-        // setPortfolioData(portfolioResponse);
-        // setHoldings(holdingsResponse);
-        
-        // For now, just set loading to false - no mock data
-        setLoading(false);
+        setPortfolioData(portfolioResponse);
+        setHoldings(holdingsResponse);
+        setPortfolioPerformance(performanceResponse);
         
       } catch (err: any) {
+        console.error('Portfolio data fetch error:', err);
         setError(err.message || 'Failed to fetch portfolio data');
+      } finally {
         setLoading(false);
       }
     };
 
     fetchPortfolioData();
-  }, []);
+  }, [refreshKey]);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    if (!loading && !error) {
+      const interval = setInterval(() => {
+        setRefreshKey(prev => prev + 1);
+      }, 30000);
+
+      return () => clearInterval(interval);
+    }
+  }, [loading, error]);
 
   // Filter holdings based on tier limits
   const getFilteredHoldings = () => {
@@ -191,16 +202,23 @@ const Portfolio: React.FC = () => {
 
   // Quick Actions handlers
   const handleAddMoney = () => {
+    if (!portfolioData) return;
     window.alert(`💰 Add Money Feature\n\nRedirecting to add funds to your portfolio...\n\nCurrent Portfolio Value: ₹${portfolioData.totalValue.toLocaleString()}\nCash Balance: ₹${portfolioData.cashBalance.toLocaleString()}`);
   };
 
   const handlePlaceOrder = () => {
+    if (!portfolioData) return;
     window.alert(`📈 Place Order Feature\n\nOpening order placement interface...\n\nAvailable Cash: ₹${portfolioData.cashBalance.toLocaleString()}\nCurrent Holdings: ${filteredHoldings.length} stocks`);
   };
 
   const handleDownloadReport = () => {
     if (!tierFeatures.exportReports) {
       window.alert(`🔒 Premium Feature\n\nReport export is available for ${tierFeatures.label === 'Elite Plan' ? 'Elite' : 'Pro and Elite'} subscribers only.\n\nUpgrade your plan to access detailed portfolio reports and analytics.`);
+      return;
+    }
+
+    if (!portfolioData) {
+      window.alert('Portfolio data is not available for report generation.');
       return;
     }
 
@@ -250,7 +268,35 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
     handleMenuClose();
   };
 
-  const portfolioStats = [
+  // Sell holding handler
+  const handleSellHolding = async (holding: PortfolioHolding) => {
+    try {
+      const sellQuantity = prompt(`How many shares of ${holding.symbol} do you want to sell?\n\nAvailable: ${holding.quantity} shares\nCurrent Price: ₹${holding.currentPrice}`);
+      
+      if (!sellQuantity || isNaN(Number(sellQuantity))) {
+        return;
+      }
+
+      const quantity = Number(sellQuantity);
+      if (quantity <= 0 || quantity > holding.quantity) {
+        alert('Invalid quantity. Please enter a valid number of shares.');
+        return;
+      }
+
+      const result = await apiService.sellHolding(holding.id, quantity);
+      
+      alert(`✅ Sell order placed successfully!\n\nOrder ID: ${result.orderId}\nSymbol: ${holding.symbol}\nQuantity: ${quantity} shares\nStatus: ${result.status}`);
+      
+      // Refresh portfolio data
+      setRefreshKey(prev => prev + 1);
+      
+    } catch (err: any) {
+      console.error('Sell order error:', err);
+      alert(`❌ Failed to place sell order: ${err.message || 'Unknown error'}`);
+    }
+  };
+
+  const portfolioStats = portfolioData ? [
     {
       title: 'Portfolio Value',
       value: `₹${portfolioData.totalValue.toLocaleString()}`,
@@ -287,24 +333,60 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
       color: 'info' as const,
       subtitle: 'Buying power',
     },
-  ];
+  ] : [];
 
-  // Show loading state
+  // Show loading state with skeletons
   if (loading) {
     return (
       <Box sx={{ 
         minHeight: '100vh',
         background: '#f5f7fa',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+        position: 'relative',
       }}>
-        <Box sx={{ textAlign: 'center' }}>
-          <LinearProgress sx={{ width: 200, mb: 2 }} />
-          <Typography variant="body1" sx={{ color: '#6B7280' }}>
-            Loading your portfolio...
-          </Typography>
-        </Box>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          {/* Header Skeleton */}
+          <Paper sx={{ p: 3, mb: 4, borderRadius: '20px' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Skeleton variant="text" width={200} height={40} />
+              <Skeleton variant="circular" width={40} height={40} />
+            </Box>
+            <Skeleton variant="text" width={300} height={20} />
+          </Paper>
+
+          {/* Stats Cards Skeleton */}
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            {[1, 2, 3, 4].map((item) => (
+              <Grid item xs={12} sm={6} md={3} key={item}>
+                <Paper sx={{ p: 3, borderRadius: '16px' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Skeleton variant="text" width={100} height={20} />
+                      <Skeleton variant="text" width={80} height={32} />
+                    </Box>
+                    <Skeleton variant="circular" width={40} height={40} />
+                  </Box>
+                  <Skeleton variant="text" width={60} height={16} />
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Holdings Table Skeleton */}
+          <Paper sx={{ borderRadius: '16px', overflow: 'hidden' }}>
+            <Box sx={{ p: 3 }}>
+              <Skeleton variant="text" width={150} height={24} sx={{ mb: 2 }} />
+              {[1, 2, 3, 4, 5].map((row) => (
+                <Box key={row} sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #f0f0f0' }}>
+                  <Skeleton variant="text" width={100} height={20} sx={{ mr: 3 }} />
+                  <Skeleton variant="text" width={80} height={20} sx={{ mr: 3 }} />
+                  <Skeleton variant="text" width={80} height={20} sx={{ mr: 3 }} />
+                  <Skeleton variant="text" width={80} height={20} sx={{ mr: 3 }} />
+                  <Skeleton variant="rectangular" width={60} height={24} sx={{ borderRadius: 1 }} />
+                </Box>
+              ))}
+            </Box>
+          </Paper>
+        </Container>
       </Box>
     );
   }
@@ -582,12 +664,13 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
                       <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>Market Value</TableCell>
                       <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>P&L</TableCell>
                       <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>P&L %</TableCell>
+                      <TableCell sx={{ color: '#1F2937', fontWeight: 700 }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {filteredHoldings.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                        <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
                           <Typography variant="body2" sx={{ color: '#6B7280' }}>
                             No holdings found. Add stocks to your portfolio to get started.
                           </Typography>
@@ -604,7 +687,7 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
                                 {holding.symbol}
                               </Typography>
                               <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
-                                {holding.name}
+                                {holding.companyName}
                               </Typography>
                             </Box>
                           </TableCell>
@@ -639,6 +722,17 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
                                 <TrendingDown color="error" sx={{ ml: 0.5, fontSize: 16 }} />
                               }
                             </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="error"
+                              onClick={() => handleSellHolding(holding)}
+                              sx={{ minWidth: '60px' }}
+                            >
+                              Sell
+                            </Button>
                           </TableCell>
                         </TableRow>
                       );
@@ -810,7 +904,7 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
                   </Typography>
                 </Box>
               )}
-              {portfolioData.totalPnLPercent > 0 && (
+              {portfolioData && portfolioData.totalPnLPercent > 0 && (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <CheckCircle color="success" sx={{ mr: 1, fontSize: 20 }} />
                   <Typography variant="body2" sx={{ color: '#1F2937' }}>

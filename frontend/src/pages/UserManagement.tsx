@@ -804,7 +804,7 @@ const UserManagement: React.FC = () => {
                           width: 40,
                           height: 40,
                         }}>
-                          {user.first_name[0]}
+                          {user.first_name?.[0] || 'U'}
                         </Avatar>
                         <Box>
                           <Typography sx={{ fontWeight: 600, color: '#1F2937' }}>

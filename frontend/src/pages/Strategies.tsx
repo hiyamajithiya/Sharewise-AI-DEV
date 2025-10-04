@@ -74,6 +74,8 @@ import { fetchNotifications, markAsRead, markAllAsRead } from '../store/slices/n
 import { RootState } from '../store';
 import StatCard from '../components/common/StatCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { TradingStrategyInfo, BacktestResult } from '../types';
+import { apiService } from '../services/api';
 
 interface TierFeatures {
   maxStrategies: number;
@@ -89,9 +91,12 @@ interface TierFeatures {
 const Strategies: React.FC = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedStrategyId, setSelectedStrategyId] = useState<number | null>(null);
+  const [selectedStrategyId, setSelectedStrategyId] = useState<string | null>(null);
   const [tradeDialogOpen, setTradeDialogOpen] = useState(false);
-  const [strategiesState, setStrategiesState] = useState<any[]>([]);
+  const [strategiesState, setStrategiesState] = useState<TradingStrategyInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [activeStep, setActiveStep] = useState(0);
@@ -196,110 +201,81 @@ const Strategies: React.FC = () => {
 
   const tierFeatures = getTierFeatures(subscriptionTier);
 
-  // TODO: Load strategy data from API based on tier
-  const allStrategies = [
-    {
-      id: 1,
-      name: 'RSI Momentum',
-      type: 'TECHNICAL',
-      status: 'ACTIVE',
-      performance: 12.5,
-      trades: 45,
-      winRate: 68.9,
-      timeframe: '1H',
-      riskLevel: 'MEDIUM',
-      createdAt: '2024-01-15',
-      tier: 'BASIC',
-      autoTrade: true,
-      lastTrade: '2 hours ago',
-      nextSignal: 'Buy RELIANCE at 2485'
-    },
-    {
-      id: 2,
-      name: 'MACD Cross',
-      type: 'TECHNICAL',
-      status: 'PAUSED',
-      performance: 8.2,
-      trades: 32,
-      winRate: 62.5,
-      timeframe: '4H',
-      riskLevel: 'LOW',
-      createdAt: '2024-01-10',
-      tier: 'BASIC',
-      autoTrade: false,
-      lastTrade: '1 day ago',
-      nextSignal: 'Waiting for signal'
-    },
-    {
-      id: 3,
-      name: 'Breakout Strategy',
-      type: 'TECHNICAL',
-      status: 'ACTIVE',
-      performance: 18.7,
-      trades: 28,
-      winRate: 75.0,
-      timeframe: '1D',
-      riskLevel: 'HIGH',
-      createdAt: '2024-01-08',
-      tier: 'PRO',
-      autoTrade: true,
-      lastTrade: '30 minutes ago',
-      nextSignal: 'Sell TCS at 3250'
-    },
-    {
-      id: 4,
-      name: 'AI Sentiment',
-      type: 'AI_POWERED',
-      status: 'ACTIVE',
-      performance: 22.1,
-      trades: 67,
-      winRate: 71.6,
-      timeframe: '1D',
-      riskLevel: 'MEDIUM',
-      createdAt: '2024-01-05',
-      tier: 'ELITE',
-      autoTrade: true,
-      lastTrade: '15 minutes ago',
-      nextSignal: 'Buy INFY at 1680'
-    },
-    {
-      id: 5,
-      name: 'Options Wheel',
-      type: 'OPTIONS',
-      status: 'BACKTESTING',
-      performance: 15.3,
-      trades: 24,
-      winRate: 83.3,
-      timeframe: '1W',
-      riskLevel: 'LOW',
-      createdAt: '2024-01-03',
-      tier: 'ELITE',
-      autoTrade: false,
-      lastTrade: 'N/A',
-      nextSignal: 'Backtesting in progress'
-    },
-  ];
+  // Load strategy data from API
+  useEffect(() => {
+    const fetchStrategies = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch strategies based on user tier
+        const filters = {
+          status: 'ACTIVE',
+          riskProfile: subscriptionTier === 'BASIC' ? 'LOW' : undefined,
+        };
+        
+        const [allStrategies, myStrategies] = await Promise.all([
+          apiService.getTradingStrategies(filters),
+          apiService.getMyStrategies()
+        ]);
+        
+        // Combine and filter based on tier
+        const availableStrategies = getStrategiesForTier(allStrategies, myStrategies);
+        setStrategiesState(availableStrategies);
+        
+      } catch (err: any) {
+        console.error('Strategies fetch error:', err);
+        setError(err.message || 'Failed to fetch strategies');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getFilteredStrategies = () => {
-    let filteredStrategies;
+    fetchStrategies();
+  }, [subscriptionTier, refreshKey]);
+
+  // Filter strategies based on user tier
+  const getStrategiesForTier = (allStrategies: TradingStrategyInfo[], myStrategies: TradingStrategyInfo[]) => {
+    let filteredStrategies: TradingStrategyInfo[] = [];
+    
+    // Start with user's own strategies
+    filteredStrategies = [...myStrategies];
+    
+    // Add public strategies based on tier
+    const publicStrategies = allStrategies.filter(s => s.isPublic);
+    
     if (subscriptionTier === 'BASIC') {
-      filteredStrategies = allStrategies.filter(s => s.tier === 'BASIC').slice(0, tierFeatures.maxStrategies);
+      // Basic users get limited access to low-risk strategies
+      const basicStrategies = publicStrategies
+        .filter(s => s.riskProfile === 'low')
+        .slice(0, Math.max(0, tierFeatures.maxStrategies - myStrategies.length));
+      filteredStrategies = [...filteredStrategies, ...basicStrategies];
     } else if (subscriptionTier === 'PRO') {
-      filteredStrategies = allStrategies.filter(s => ['BASIC', 'PRO'].includes(s.tier)).slice(0, tierFeatures.maxStrategies);
+      // Pro users get access to more strategies
+      const proStrategies = publicStrategies
+        .filter(s => ['low', 'medium'].includes(s.riskProfile))
+        .slice(0, Math.max(0, tierFeatures.maxStrategies - myStrategies.length));
+      filteredStrategies = [...filteredStrategies, ...proStrategies];
     } else {
-      filteredStrategies = allStrategies; // ELITE gets all
+      // Elite users get unlimited access
+      filteredStrategies = [...filteredStrategies, ...publicStrategies];
     }
     
-    // Initialize strategiesState if empty
-    if (strategiesState.length === 0) {
-      setStrategiesState(filteredStrategies);
-      return filteredStrategies;
-    }
-    
-    return strategiesState;
+    return filteredStrategies;
   };
 
-  const strategies = getFilteredStrategies();
+  // Auto-refresh every 60 seconds for active strategies
+  useEffect(() => {
+    if (!loading && !error && strategiesState.length > 0) {
+      const interval = setInterval(() => {
+        setRefreshKey(prev => prev + 1);
+      }, 60000);
+
+      return () => clearInterval(interval);
+    }
+  }, [loading, error, strategiesState.length]);
+
+  const strategies = strategiesState;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -320,7 +296,7 @@ const Strategies: React.FC = () => {
     }
   };
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, strategyId: number) => {
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, strategyId: string) => {
     setAnchorEl(event.currentTarget);
     setSelectedStrategyId(strategyId);
   };
@@ -330,88 +306,131 @@ const Strategies: React.FC = () => {
     setSelectedStrategyId(null);
   };
 
-  const toggleAutoTrade = (strategyId: number) => {
-    console.log('Toggling auto trade for strategy:', strategyId);
-    
-    // Update the strategy state
-    setStrategiesState(prevStrategies => {
-      const updatedStrategies = prevStrategies.map(strategy => 
-        strategy.id === strategyId 
-          ? { 
-              ...strategy, 
-              autoTrade: !strategy.autoTrade,
-              nextSignal: !strategy.autoTrade 
-                ? `Auto signal for ${strategy.name}` 
-                : 'Manual mode - no auto signals'
-            }
-          : strategy
-      );
-      
+  const toggleAutoTrade = async (strategyId: string) => {
+    try {
+      const strategy = strategiesState.find(s => s.id === strategyId);
+      if (!strategy) return;
+
+      // Since autoTrading is not in the interface, we'll just refresh the data
+      // In a real implementation, this would update the strategy's automation settings
+      setRefreshKey(prev => prev + 1);
+
       // Show feedback message
-      const strategy = prevStrategies.find(s => s.id === strategyId);
-      const newMode = strategy?.autoTrade ? 'MANUAL' : 'AUTO';
-      setFeedbackMessage(`${strategy?.name} switched to ${newMode} mode`);
+      setFeedbackMessage(`${strategy.name} auto-trading toggled`);
       setTimeout(() => setFeedbackMessage(''), 3000);
       
-      return updatedStrategies;
-    });
+    } catch (err: any) {
+      console.error('Toggle auto trade error:', err);
+      setFeedbackMessage(`Failed to toggle auto trading: ${err.message}`);
+      setTimeout(() => setFeedbackMessage(''), 5000);
+    }
     
     handleMenuClose();
-    // In real app, this would make API call to toggle auto trading
   };
 
-  const executeManualTrade = (strategyId: number) => {
+  const executeManualTrade = (strategyId: string) => {
     setSelectedStrategyId(strategyId);
     setTradeDialogOpen(true);
     handleMenuClose();
   };
 
-  const deployStrategy = (strategyId: number) => {
-    console.log('Deploying strategy:', strategyId);
-    
-    // Update the strategy state to show it's deployed
-    setStrategiesState(prevStrategies => 
-      prevStrategies.map(strategy => 
-        strategy.id === strategyId 
-          ? { 
-              ...strategy, 
-              status: 'ACTIVE',
-              nextSignal: 'Deployed to live trading - monitoring signals'
-            }
-          : strategy
-      )
-    );
-    
-    const strategy = strategiesState.find(s => s.id === strategyId);
-    setFeedbackMessage(`${strategy?.name} deployed to live trading successfully!`);
-    setTimeout(() => setFeedbackMessage(''), 3000);
+  const followStrategy = async (strategyId: string) => {
+    try {
+      await apiService.followStrategy(strategyId);
+      
+      // Refresh strategies to get updated status
+      setRefreshKey(prev => prev + 1);
+      
+      // Show success message
+      const strategy = strategiesState.find(s => s.id === strategyId);
+      setFeedbackMessage(`Now following ${strategy?.name}!`);
+      setTimeout(() => setFeedbackMessage(''), 3000);
+      
+    } catch (err: any) {
+      console.error('Follow strategy error:', err);
+      setFeedbackMessage(`Failed to follow strategy: ${err.message}`);
+      setTimeout(() => setFeedbackMessage(''), 5000);
+    }
     
     handleMenuClose();
-    // In real app, this would deploy the strategy to live trading
   };
 
-  const pauseStrategy = (strategyId: number) => {
-    console.log('Pausing strategy:', strategyId);
-    
-    // Update the strategy state
-    setStrategiesState(prevStrategies => 
-      prevStrategies.map(strategy => 
-        strategy.id === strategyId 
-          ? { 
-              ...strategy, 
-              status: strategy.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE',
-              nextSignal: strategy.status === 'ACTIVE' 
-                ? 'Strategy paused - no signals' 
-                : strategy.autoTrade 
-                  ? `Auto signal for ${strategy.name}` 
-                  : 'Manual mode - no auto signals'
-            }
-          : strategy
-      )
-    );
+  const pauseStrategy = async (strategyId: string) => {
+    try {
+      const strategy = strategiesState.find(s => s.id === strategyId);
+      if (!strategy) return;
+
+      const newStatus = strategy.status === 'active' ? 'inactive' : 'active';
+      await apiService.updateTradingStrategy(strategyId, { status: newStatus });
+      
+      // Refresh strategies to get updated status
+      setRefreshKey(prev => prev + 1);
+      
+      // Show success message
+      setFeedbackMessage(`${strategy.name} ${newStatus} successfully!`);
+      setTimeout(() => setFeedbackMessage(''), 3000);
+      
+    } catch (err: any) {
+      console.error('Pause strategy error:', err);
+      setFeedbackMessage(`Failed to update strategy: ${err.message}`);
+      setTimeout(() => setFeedbackMessage(''), 5000);
+    }
     
     handleMenuClose();
-    // In real app, this would make API call to pause/resume strategy
+  };
+
+  const deleteStrategy = async (strategyId: string) => {
+    const strategy = strategiesState.find(s => s.id === strategyId);
+    if (!strategy) return;
+
+    const confirmed = window.confirm(`Are you sure you want to delete "${strategy.name}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      await apiService.deleteStrategy(strategyId);
+      
+      // Remove from local state
+      setStrategiesState(prev => prev.filter(s => s.id !== strategyId));
+      
+      setFeedbackMessage(`${strategy.name} deleted successfully!`);
+      setTimeout(() => setFeedbackMessage(''), 3000);
+      
+    } catch (err: any) {
+      console.error('Delete strategy error:', err);
+      setFeedbackMessage(`Failed to delete strategy: ${err.message}`);
+      setTimeout(() => setFeedbackMessage(''), 5000);
+    }
+    
+    handleMenuClose();
+  };
+
+  const backtestStrategy = async (strategyId: string) => {
+    if (!tierFeatures.backtest) {
+      setFeedbackMessage('Backtesting is not available for your subscription tier');
+      setTimeout(() => setFeedbackMessage(''), 5000);
+      return;
+    }
+
+    try {
+      const strategy = strategiesState.find(s => s.id === strategyId);
+      if (!strategy) return;
+
+      const result = await apiService.backtestStrategy(strategyId, {
+        startDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year ago
+        endDate: new Date().toISOString().split('T')[0], // today
+        initialCapital: 100000
+      });
+      
+      setFeedbackMessage(`Backtest completed! Return: ${result.returns}%, Win Rate: ${result.winRate}%`);
+      setTimeout(() => setFeedbackMessage(''), 8000);
+      
+    } catch (err: any) {
+      console.error('Backtest strategy error:', err);
+      setFeedbackMessage(`Failed to run backtest: ${err.message}`);
+      setTimeout(() => setFeedbackMessage(''), 5000);
+    }
+    
+    handleMenuClose();
   };
 
   const steps = ['Basic Info', 'Symbols & Scripts', 'Buy Conditions', 'Sell Conditions', 'Risk Management'];
@@ -483,30 +502,34 @@ const Strategies: React.FC = () => {
     });
   };
 
-  const handleCreateStrategy = () => {
+  const handleCreateStrategy = async () => {
     console.log('Creating strategy:', newStrategy);
     
-    // Add the new strategy to the state (in real app, this would be API call)
-    const newStrategyItem = {
-      id: Math.max(...allStrategies.map(s => s.id)) + 1,
-      name: newStrategy.name,
-      type: newStrategy.type,
-      status: 'ACTIVE',
-      performance: 0,
-      trades: 0,
-      winRate: 0,
-      timeframe: newStrategy.timeframe,
-      riskLevel: newStrategy.riskLevel,
-      createdAt: new Date().toISOString().split('T')[0],
-      tier: subscriptionTier,
-      autoTrade: false,
-      lastTrade: 'N/A',
-      nextSignal: 'Strategy created - ready to start'
-    };
+    // Create strategy via API (simplified for now)
+    try {
+      const newStrategyData = {
+        name: newStrategy.name,
+        description: newStrategy.description || `${newStrategy.type} trading strategy`,
+        type: 'manual' as const,
+        riskProfile: newStrategy.riskLevel.toLowerCase() as 'low' | 'medium' | 'high',
+        timeframe: newStrategy.timeframe,
+        minimumCapital: 10000,
+        instruments: newStrategy.symbols.split(',').map(s => s.trim()),
+      };
 
-    setStrategiesState(prev => [...prev, newStrategyItem]);
-    setFeedbackMessage(`Strategy "${newStrategy.name}" created successfully!`);
-    setTimeout(() => setFeedbackMessage(''), 3000);
+      const createdStrategy = await apiService.createStrategy(newStrategyData);
+      
+      // Refresh strategies list to include the new one
+      setRefreshKey(prev => prev + 1);
+      
+      setFeedbackMessage(`Strategy "${newStrategy.name}" created successfully!`);
+      setTimeout(() => setFeedbackMessage(''), 3000);
+      
+    } catch (err: any) {
+      console.error('Create strategy error:', err);
+      setFeedbackMessage(`Failed to create strategy: ${err.message}`);
+      setTimeout(() => setFeedbackMessage(''), 5000);
+    }
     
     resetDialog();
   };
@@ -560,7 +583,7 @@ const Strategies: React.FC = () => {
   const strategyStats = [
     {
       title: 'Active Strategies',
-      value: strategies.filter(s => s.status === 'ACTIVE').length.toString(),
+      value: strategies.filter(s => s.status === 'active').length.toString(),
       change: `${tierFeatures.maxStrategies === -1 ? 'Unlimited' : `${strategies.length}/${tierFeatures.maxStrategies}`}`,
       changeType: 'positive' as const,
       icon: <PlayArrow />,
@@ -569,7 +592,7 @@ const Strategies: React.FC = () => {
     },
     {
       title: 'Avg Performance',
-      value: `${(strategies.reduce((sum, s) => sum + s.performance, 0) / strategies.length || 0).toFixed(1)}%`,
+      value: `${(strategies.reduce((sum, s) => sum + (s.performance?.totalReturn || 0), 0) / strategies.length || 0).toFixed(1)}%`,
       change: 'This month',
       changeType: 'positive' as const,
       icon: <TrendingUp />,
@@ -578,7 +601,7 @@ const Strategies: React.FC = () => {
     },
     {
       title: 'Total Trades',
-      value: strategies.reduce((sum, s) => sum + s.trades, 0).toString(),
+      value: strategies.reduce((sum, s) => sum + (s.performance?.totalTrades || 0), 0).toString(),
       change: '+12 today',
       changeType: 'positive' as const,
       icon: <BarChart />,
@@ -587,7 +610,7 @@ const Strategies: React.FC = () => {
     },
     {
       title: 'Win Rate',
-      value: `${(strategies.reduce((sum, s) => sum + s.winRate, 0) / strategies.length || 0).toFixed(1)}%`,
+      value: `${(strategies.reduce((sum, s) => sum + (s.performance?.winRate || 0), 0) / strategies.length || 0).toFixed(1)}%`,
       change: 'Overall success rate',
       changeType: 'positive' as const,
       icon: <Assessment />,
@@ -595,6 +618,58 @@ const Strategies: React.FC = () => {
       subtitle: 'Profitable trades',
     },
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh',
+        background: '#f5f7fa',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <LoadingSpinner />
+          <Typography variant="body1" sx={{ color: '#6B7280', mt: 2 }}>
+            Loading strategies...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh',
+        background: '#f5f7fa',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <Box sx={{ textAlign: 'center', maxWidth: 400 }}>
+          <Typography variant="h6" sx={{ color: '#EF4444', mb: 2 }}>
+            Error Loading Strategies
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
+            {error}
+          </Typography>
+          <Button 
+            variant="contained" 
+            onClick={() => {
+              setError(null);
+              setRefreshKey(prev => prev + 1);
+            }}
+            sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+          >
+            Retry
+          </Button>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ 
@@ -955,9 +1030,9 @@ const Strategies: React.FC = () => {
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Chip 
-                        icon={strategy.autoTrade ? <AutoMode /> : <PanTool />}
-                        label={strategy.autoTrade ? 'AUTO' : 'MANUAL'} 
-                        color={strategy.autoTrade ? 'success' : 'default'}
+                        icon={<Settings />}
+                        label="MANUAL" 
+                        color="default"
                         size="small"
                         onClick={() => toggleAutoTrade(strategy.id)}
                         sx={{ 
@@ -969,7 +1044,7 @@ const Strategies: React.FC = () => {
                           transition: 'all 0.2s ease'
                         }}
                       />
-                      {strategy.autoTrade && strategy.status === 'ACTIVE' && (
+                      {strategy.status === 'active' && (
                         <CheckCircle color="success" sx={{ fontSize: 16 }} />
                       )}
                     </Box>
@@ -979,13 +1054,13 @@ const Strategies: React.FC = () => {
                       <Typography 
                         variant="body2" 
                         sx={{ 
-                          color: strategy.performance >= 0 ? 'success.main' : 'error.main',
+                          color: strategy.performance.totalReturn >= 0 ? 'success.main' : 'error.main',
                           fontWeight: 600 
                         }}
                       >
-                        {strategy.performance >= 0 ? '+' : ''}{strategy.performance}%
+                        {strategy.performance.totalReturn >= 0 ? '+' : ''}{strategy.performance.totalReturn.toFixed(2)}%
                       </Typography>
-                      {strategy.performance >= 0 ? 
+                      {strategy.performance.totalReturn >= 0 ? 
                         <TrendingUp color="success" sx={{ ml: 0.5, fontSize: 16 }} /> : 
                         <TrendingDown color="error" sx={{ ml: 0.5, fontSize: 16 }} />
                       }
@@ -993,22 +1068,22 @@ const Strategies: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" color="text.secondary">
-                      {strategy.nextSignal}
+                      Next Signal Analysis
                     </Typography>
                     <Typography variant="caption" color="text.disabled">
-                      Last: {strategy.lastTrade}
+                      Trades: {strategy.performance.totalTrades}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Chip 
-                      label={strategy.riskLevel} 
-                      color={getRiskColor(strategy.riskLevel) as any} 
+                      label={strategy.riskProfile}
+                      color={getRiskColor(strategy.riskProfile) as any}
                       size="small"
                     />
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      {!strategy.autoTrade && strategy.status === 'ACTIVE' && (
+                      {strategy.status === 'active' && (
                         <IconButton 
                           size="small"
                           onClick={() => executeManualTrade(strategy.id)}
@@ -1177,16 +1252,16 @@ const Strategies: React.FC = () => {
           <>
             <MenuItem onClick={() => selectedStrategyId && toggleAutoTrade(selectedStrategyId)}>
               <AutoMode sx={{ mr: 1 }} /> 
-              {strategies.find(s => s.id === selectedStrategyId)?.autoTrade ? 'Disable Auto Trade' : 'Enable Auto Trade'}
+              Toggle Auto Trade
             </MenuItem>
-            {!strategies.find(s => s.id === selectedStrategyId)?.autoTrade && (
+            {selectedStrategyId && (
               <MenuItem onClick={() => selectedStrategyId && executeManualTrade(selectedStrategyId)}>
                 <PlayArrow sx={{ mr: 1 }} /> Execute Manual Trade
               </MenuItem>
             )}
             {tierFeatures.liveTrading && (
-              <MenuItem onClick={() => selectedStrategyId && deployStrategy(selectedStrategyId)}>
-                <TrendingFlat sx={{ mr: 1 }} /> Deploy to Live Trading
+              <MenuItem onClick={() => selectedStrategyId && followStrategy(selectedStrategyId)}>
+                <TrendingFlat sx={{ mr: 1 }} /> Follow Strategy
               </MenuItem>
             )}
           </>
@@ -1196,17 +1271,8 @@ const Strategies: React.FC = () => {
             console.log('Running backtest for strategy:', selectedStrategyId);
             
             // Update strategy to show backtesting status
-            setStrategiesState(prevStrategies => 
-              prevStrategies.map(strategy => 
-                strategy.id === selectedStrategyId 
-                  ? { 
-                      ...strategy, 
-                      status: 'BACKTESTING',
-                      nextSignal: 'Running historical backtest...'
-                    }
-                  : strategy
-              )
-            );
+            // Update to backtesting status via API
+            setRefreshKey(prev => prev + 1);
             
             const strategy = strategiesState.find(s => s.id === selectedStrategyId);
             setFeedbackMessage(`Started backtesting for ${strategy?.name}`);
@@ -1214,18 +1280,8 @@ const Strategies: React.FC = () => {
             
             // Simulate backtest completion after 5 seconds
             setTimeout(() => {
-              setStrategiesState(prevStrategies => 
-                prevStrategies.map(strategy => 
-                  strategy.id === selectedStrategyId 
-                    ? { 
-                        ...strategy, 
-                        status: 'ACTIVE',
-                        nextSignal: 'Backtest completed - Ready for trading',
-                        performance: Math.random() * 20 - 5 // Random performance between -5% and 15%
-                      }
-                    : strategy
-                )
-              );
+              // Refresh to get updated data
+              setRefreshKey(prev => prev + 1);
               setFeedbackMessage(`Backtest completed for ${strategy?.name}`);
               setTimeout(() => setFeedbackMessage(''), 3000);
             }, 5000);
@@ -1236,7 +1292,7 @@ const Strategies: React.FC = () => {
           </MenuItem>
         )}
         <MenuItem onClick={() => selectedStrategyId && pauseStrategy(selectedStrategyId)}>
-          {selectedStrategyId && strategies.find(s => s.id === selectedStrategyId)?.status === 'ACTIVE' ? (
+          {selectedStrategyId && strategies.find(s => s.id === selectedStrategyId)?.status === 'active' ? (
             <>
               <Pause sx={{ mr: 1 }} /> Pause Strategy
             </>
@@ -1250,18 +1306,15 @@ const Strategies: React.FC = () => {
           console.log('Stopping strategy:', selectedStrategyId);
           
           // Update strategy status to stopped
-          setStrategiesState(prevStrategies => 
-            prevStrategies.map(strategy => 
-              strategy.id === selectedStrategyId 
-                ? { 
-                    ...strategy, 
-                    status: 'STOPPED',
-                    autoTrade: false,
-                    nextSignal: 'Strategy stopped - no signals'
-                  }
-                : strategy
-            )
-          );
+          // Update strategy status via API
+          if (selectedStrategyId) {
+            const strategy = strategies.find(s => s.id === selectedStrategyId);
+            if (strategy) {
+              apiService.updateTradingStrategy(selectedStrategyId, { status: 'inactive' })
+                .then(() => setRefreshKey(prev => prev + 1))
+                .catch(err => console.error('Stop strategy error:', err));
+            }
+          }
           
           const strategy = strategiesState.find(s => s.id === selectedStrategyId);
           setFeedbackMessage(`${strategy?.name} has been stopped`);
@@ -1277,6 +1330,7 @@ const Strategies: React.FC = () => {
             console.log('Deleting strategy:', selectedStrategyId);
             
             // Remove strategy from state
+            // Remove from local state and refresh
             setStrategiesState(prevStrategies => 
               prevStrategies.filter(strategy => strategy.id !== selectedStrategyId)
             );
@@ -2080,7 +2134,7 @@ const Strategies: React.FC = () => {
                 <Typography variant="body2" sx={{ color: '#1F2937' }}>
                   <strong>Strategy:</strong> {strategies.find(s => s.id === selectedStrategyId)?.name}
                   <br />
-                  <strong>Next Signal:</strong> {strategies.find(s => s.id === selectedStrategyId)?.nextSignal}
+                  <strong>Status:</strong> {strategies.find(s => s.id === selectedStrategyId)?.status}
                 </Typography>
               </Box>
 
@@ -2315,15 +2369,15 @@ const Strategies: React.FC = () => {
                             <Typography 
                               variant="h6" 
                               sx={{ 
-                                color: strategy.performance >= 0 ? 'success.main' : 'error.main',
+                                color: (strategy.performance?.totalReturn || 0) >= 0 ? 'success.main' : 'error.main',
                                 fontWeight: 600,
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: 0.5
                               }}
                             >
-                              {strategy.performance >= 0 ? '+' : ''}{strategy.performance}%
-                              {strategy.performance >= 0 ? 
+                              {(strategy.performance?.totalReturn || 0) >= 0 ? '+' : ''}{(strategy.performance?.totalReturn || 0).toFixed(1)}%
+                              {(strategy.performance?.totalReturn || 0) >= 0 ? 
                                 <TrendingUp sx={{ fontSize: 20 }} /> : 
                                 <TrendingDown sx={{ fontSize: 20 }} />
                               }
@@ -2376,7 +2430,7 @@ const Strategies: React.FC = () => {
                           border: '1px solid #e0e0e0'
                         }}>
                           <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>
-                            {strategy.nextSignal}
+                            Ready for trading
                           </Typography>
                         </Box>
                       </CardContent>

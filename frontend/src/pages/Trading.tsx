@@ -50,6 +50,7 @@ import { useSelector } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
 import { marketDataService, MarketQuote, OptionChainData, MarketDataAPI } from '../services/marketDataService';
 import apiService from '../services/api';
+// Remove notistack import - using custom notification approach
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -79,6 +80,18 @@ function TabPanel(props: TabPanelProps) {
 
 const Trading: React.FC = () => {
   const location = useLocation();
+  
+  // Custom notification function (can be replaced with proper toast library later)
+  const showNotification = (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
+    // For now, using browser notification API or console for development
+    // In production, this should be replaced with proper toast notifications
+    if (type === 'error') {
+      console.error(message);
+    } else {
+      console.log(message);
+    }
+    // Optionally show a temporary overlay or use browser notification
+  };
   const [selectedSignal, setSelectedSignal] = useState<any>(null);
   const [orderAmount, setOrderAmount] = useState('');
   const [orderType, setOrderType] = useState('MARKET');
@@ -90,6 +103,8 @@ const Trading: React.FC = () => {
   const [foDialogOpen, setFoDialogOpen] = useState(false);
   const [selectedFoInstrument, setSelectedFoInstrument] = useState<any>(null);
   const [algoStrategy, setAlgoStrategy] = useState('');
+  const [quickTradeLoading, setQuickTradeLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   // Real-time data states
   const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
@@ -288,29 +303,42 @@ const Trading: React.FC = () => {
     return true; // ELITE gets all signals
   });
 
-  // Mock active orders
-  const activeOrders = [
-    {
-      id: 1,
-      symbol: 'RELIANCE',
-      type: 'BUY',
-      quantity: 10,
-      price: 2485.50,
-      status: 'EXECUTED',
-      time: '09:45 AM',
-      pnl: '+₹1,250'
-    },
-    {
-      id: 2,
-      symbol: 'TCS',
-      type: 'SELL',
-      quantity: 5,
-      price: 3245.75,
-      status: 'PENDING',
-      time: '10:30 AM',
-      pnl: '₹0'
-    },
-  ];
+  // Dynamic active orders from API
+  const [activeOrders, setActiveOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Load active orders from API
+  const loadActiveOrders = useCallback(async () => {
+    try {
+      setLoadingOrders(true);
+      const orders = await apiService.getOrders({ status: 'ACTIVE' });
+      setActiveOrders(orders.results || []);
+    } catch (error) {
+      console.error("Failed to load active orders:", error);
+      // Fallback to empty array instead of mock data
+      setActiveOrders([]);
+    } finally {
+      setLoadingOrders(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadActiveOrders();
+  }, [loadActiveOrders]);
+
+  // Example order structure for reference (removed from active use)
+  // const sampleOrders = [
+  //   {
+  //     id: 1,
+  //     symbol: 'RELIANCE',
+  //     type: 'BUY',
+  //     quantity: 10,
+  //     price: 2485.50,
+  //     status: 'EXECUTED',
+  //     time: '09:45 AM',
+  //     pnl: '+₹1,250'
+  //   }
+  // ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -323,7 +351,7 @@ const Trading: React.FC = () => {
   };
 
   // TODO: Load F&O chain data from API
-  // Get option chain data (real-time if available, fallback to mock)
+  // Get option chain data from real-time API
   const getOptionChainForUnderlying = (underlying: string) => {
     const realTimeData = optionChainData[underlying];
     if (realTimeData && realTimeData.strikes) {
@@ -337,46 +365,63 @@ const Trading: React.FC = () => {
       }));
     }
     
-    // Fallback to mock data
-    const mockOptionChain = {
-    'NIFTY': [
-      { strike: 18500, callPrice: 850.25, putPrice: 45.75, callOI: 2500000, putOI: 1800000 },
-      { strike: 19000, callPrice: 425.50, putPrice: 95.25, callOI: 3200000, putOI: 2100000 },
-      { strike: 19500, callPrice: 185.75, putPrice: 245.50, callOI: 2800000, putOI: 2950000 }
-    ],
-    'BANKNIFTY': [
-      { strike: 47000, callPrice: 1250.50, putPrice: 85.25, callOI: 850000, putOI: 650000 },
-      { strike: 48000, callPrice: 675.75, putPrice: 185.50, callOI: 1200000, putOI: 950000 },
-      { strike: 49000, callPrice: 325.25, putPrice: 425.75, callOI: 980000, putOI: 1150000 }
-    ]
-    };
-    return mockOptionChain[underlying as keyof typeof mockOptionChain] || [];
+    // Return empty array if no data available
+    return [];
   };
 
-  const mockFuturesChain = {
-    'NIFTY': [
-      { symbol: 'NIFTY24DEC', price: 19125.50, expiry: '2024-12-26', oi: 15500000 },
-      { symbol: 'NIFTY25JAN', price: 19155.75, expiry: '2025-01-30', oi: 8750000 },
-      { symbol: 'NIFTY25FEB', price: 19185.25, expiry: '2025-02-27', oi: 4200000 }
-    ],
-    'BANKNIFTY': [
-      { symbol: 'BANKNIFTY24DEC', price: 48125.25, expiry: '2024-12-26', oi: 5500000 },
-      { symbol: 'BANKNIFTY25JAN', price: 48195.50, expiry: '2025-01-30', oi: 3200000 },
-      { symbol: 'BANKNIFTY25FEB', price: 48265.75, expiry: '2025-02-27', oi: 1800000 }
-    ]
+  // Get futures chain data dynamically
+  const getFuturesChainForUnderlying = async (underlying: string) => {
+    try {
+      // Use signals API to get futures information for the underlying
+      const response = await apiService.getSignals(`?instrument_type=FUTURES&underlying_symbol=${underlying}`);
+      return response.results?.map((future: any) => ({
+        symbol: future.symbol,
+        price: future.ltp || future.price,
+        expiry: future.expiry_date || future.expiry,
+        oi: future.open_interest || future.oi
+      })) || [];
+    } catch (error) {
+      console.error('Error fetching futures chain:', error);
+      return [];
+    }
   };
 
-  const handlePlaceOrder = (signal: any) => {
-    console.log('Placing order:', { signal, amount: orderAmount, type: orderType });
-    // In real app, this would make API call
-    const instrumentDisplay = signal.instrument_type === 'OPTIONS' 
-      ? `${signal.underlying_symbol} ${signal.strike_price} ${signal.option_type}`
-      : signal.instrument_type === 'FUTURES'
-      ? `${signal.underlying_symbol} FUT`
-      : signal.symbol;
-    alert(`Order placed for ${instrumentDisplay} - ${signal.type} at ₹${signal.price}`);
-    setSelectedSignal(null);
-    setOrderAmount('');
+  const handlePlaceOrder = async (signal: any) => {
+    if (!orderAmount) {
+      showNotification('Please enter order amount', 'warning');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const instrumentDisplay = signal.instrument_type === 'OPTIONS' 
+        ? `${signal.underlying_symbol} ${signal.strike_price} ${signal.option_type}`
+        : signal.instrument_type === 'FUTURES'
+        ? `${signal.underlying_symbol} FUT`
+        : signal.symbol;
+
+      const orderData = {
+        symbol: signal.symbol,
+        quantity: parseInt(orderAmount),
+        price: signal.price,
+        order_type: orderType,
+        transaction_type: signal.type,
+        instrument_type: signal.instrument_type
+      };
+
+      const result = await apiService.placeOrder(orderData);
+      showNotification(`✅ Order placed successfully for ${instrumentDisplay}! Order ID: ${result.id}`, 'success');
+      
+      setSelectedSignal(null);
+      setOrderAmount('');
+      
+      // Refresh active orders
+      await loadActiveOrders();
+    } catch (error: any) {
+      showNotification(`❌ Order failed: ${error.message || 'Unknown error'}`, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -386,6 +431,78 @@ const Trading: React.FC = () => {
   const handleFoInstrumentSelect = (instrument: any) => {
     setSelectedFoInstrument(instrument);
     setFoDialogOpen(true);
+  };
+
+  // QuickTrade execution handler
+  const handleQuickTradeExecution = async () => {
+    if (!selectedSignal || !orderAmount) {
+      showNotification('Please select a signal and enter order amount', 'warning');
+      return;
+    }
+
+    try {
+      setQuickTradeLoading(true);
+      
+      const orderData = {
+        signal_id: selectedSignal.id,
+        symbol: selectedSignal.symbol,
+        order_type: orderType,
+        transaction_type: selectedSignal.type, // BUY/SELL from signal
+        quantity: Math.floor(parseFloat(orderAmount) / selectedSignal.price),
+        price: orderType === 'LIMIT' ? selectedSignal.price : undefined,
+      };
+
+      const result = await apiService.placeOrder(orderData);
+      
+      // Refresh active orders after placing order
+      const updatedOrders = await apiService.getOrders({ status: 'ACTIVE' });
+      setActiveOrders(updatedOrders.results || []);
+      
+      // Clear form
+      setSelectedSignal(null);
+      setOrderAmount('');
+      
+      showNotification(`✅ QuickTrade order placed successfully! Order ID: ${result.id}`, 'success');
+    } catch (error: any) {
+      console.error('QuickTrade execution failed:', error);
+      showNotification(`❌ QuickTrade order failed: ${error.message || 'Unknown error'}`, 'error');
+    } finally {
+      setQuickTradeLoading(false);
+    }
+  };
+
+  // Handle F&O order placement
+  const handleFoOrder = async (transactionType: 'BUY' | 'SELL') => {
+    if (!selectedFoInstrument) {
+      showNotification('Please select an instrument', 'warning');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const orderData = {
+        symbol: selectedFoInstrument.symbol,
+        quantity: 1, // Default quantity, should be configurable
+        price: selectedFoInstrument.price || selectedFoInstrument.callPrice,
+        order_type: 'MARKET',
+        transaction_type: transactionType,
+        instrument_type: selectedFoInstrument.instrument_type || 'OPTIONS'
+      };
+
+      const result = await apiService.placeOrder(orderData);
+      showNotification(`✅ F&O ${transactionType} order placed successfully! Order ID: ${result.id}`, 'success');
+      
+      setFoDialogOpen(false);
+      setSelectedFoInstrument(null);
+      
+      // Refresh active orders
+      await loadActiveOrders();
+    } catch (error: any) {
+      showNotification(`❌ F&O order failed: ${error.message || 'Unknown error'}`, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderInstrumentSymbol = (signal: any) => {
@@ -1028,15 +1145,8 @@ const Trading: React.FC = () => {
                       fullWidth
                       variant="contained"
                       size="large"
-                      onClick={() => {
-                        // Handle trade execution
-                        if (orderType === 'ALGO') {
-                          alert(`Launching ${algoStrategy || 'Algorithm'} strategy for ${selectedSignal.symbol} ${selectedSignal.type} with ₹${orderAmount}`);
-                        } else {
-                          alert(`Executing ${selectedSignal.type} order for ${selectedSignal.symbol} with ₹${orderAmount}`);
-                        }
-                      }}
-                      disabled={!orderAmount || parseInt(orderAmount) > tierFeatures.maxOrderValue || (orderType === 'ALGO' && !algoStrategy)}
+                      onClick={handleQuickTradeExecution}
+                      disabled={quickTradeLoading || !orderAmount || parseInt(orderAmount) > tierFeatures.maxOrderValue || (orderType === 'ALGO' && !algoStrategy)}
                       sx={{
                         mt: 3,
                         py: 1.5,
@@ -1062,9 +1172,11 @@ const Trading: React.FC = () => {
                         }
                       }}
                     >
-                      {orderType === 'ALGO' 
-                        ? `🤖 Launch ${algoStrategy || 'Algorithm'} Strategy`
-                        : `Execute ${selectedSignal.type} Order`
+                      {quickTradeLoading 
+                        ? '⏳ Processing Order...'
+                        : orderType === 'ALGO' 
+                          ? `🤖 Launch ${algoStrategy || 'Algorithm'} Strategy`
+                          : `⚡ Execute ${selectedSignal.type} Order`
                       }
                     </Button>
                   </Box>
@@ -1364,22 +1476,22 @@ const Trading: React.FC = () => {
           <Button 
             variant="contained" 
             color="success"
-            onClick={() => {
-              alert(`F&O Order placed successfully!`);
-              setFoDialogOpen(false);
+            onClick={async () => {
+              await handleFoOrder('BUY');
             }}
+            disabled={loading}
           >
-            Buy
+            {loading ? '⏳ Processing...' : '📈 Buy'}
           </Button>
           <Button 
             variant="contained" 
             color="error"
-            onClick={() => {
-              alert(`F&O Order placed successfully!`);
-              setFoDialogOpen(false);
+            onClick={async () => {
+              await handleFoOrder('SELL');
             }}
+            disabled={loading}
           >
-            Sell
+            {loading ? '⏳ Processing...' : '📉 Sell'}
           </Button>
         </DialogActions>
       </Dialog>

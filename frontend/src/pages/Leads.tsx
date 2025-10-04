@@ -373,7 +373,7 @@ const Leads: React.FC = () => {
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Avatar sx={{ width: 32, height: 32, mr: 2, bgcolor: 'rgba(255,255,255,0.2)' }}>
-                            {lead.name.split(' ').map(n => n[0]).join('')}
+                            {lead.name?.split(' ').map(n => n?.[0] || '').join('') || 'N/A'}
                           </Avatar>
                           <Box>
                             <Typography variant="body2" sx={{ color: '#1F2937', fontWeight: 600 }}>

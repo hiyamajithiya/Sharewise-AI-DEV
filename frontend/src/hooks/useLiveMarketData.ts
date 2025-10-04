@@ -15,8 +15,8 @@ interface MarketQuote {
 
 interface PortfolioHolding {
   symbol: string;
-  shares: number;
-  avgCost: number;
+  quantity: number;
+  avg_price: number;
 }
 
 export const useLiveMarketData = (symbols: string[] = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']) => {
@@ -48,60 +48,52 @@ export const useLiveMarketData = (symbols: string[] = ['AAPL', 'GOOGL', 'MSFT', 
         }
         
         setMarketData(data);
-        setError(null);
-      } catch (error) {
-        console.error('Failed to fetch market data:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error');
-      } finally {
+        setLoading(false);
+      } catch (error: any) {
+        setError(error.message);
         setLoading(false);
       }
     };
 
     fetchData();
     const interval = setInterval(fetchData, 30000); // Update every 30 seconds
+
     return () => clearInterval(interval);
   }, [symbols.join(',')]);
 
-  // Calculate portfolio metrics from live data
-  const calculatePortfolioMetrics = (holdings: PortfolioHolding[]) => {
-    let totalValue = 0;
-    let totalCost = 0;
-    let dayChange = 0;
-
-    holdings.forEach(holding => {
+  // Calculate portfolio value with market data
+  const calculatePortfolioValue = (holdings: PortfolioHolding[]) => {
+    return holdings.reduce((total, holding) => {
       const quote = marketData[holding.symbol];
       if (quote) {
-        const currentValue = quote.last_price * holding.shares;
-        const costBasis = holding.avgCost * holding.shares;
-        const dayChangeValue = (quote.change * holding.shares);
-        
-        totalValue += currentValue;
-        totalCost += costBasis;
-        dayChange += dayChangeValue;
+        return total + (quote.last_price * holding.quantity);
       }
-    });
-
-    const totalPnL = totalValue - totalCost;
-    const totalPnLPercent = totalCost > 0 ? (totalPnL / totalCost) * 100 : 0;
-    const dayChangePercent = totalValue > 0 ? (dayChange / (totalValue - dayChange)) * 100 : 0;
-
-    return {
-      totalValue: Math.round(totalValue),
-      dayChange: Math.round(dayChange),
-      dayChangePercent: parseFloat(dayChangePercent.toFixed(2)),
-      totalPnL: Math.round(totalPnL),
-      totalPnLPercent: parseFloat(totalPnLPercent.toFixed(2)),
-      investedAmount: Math.round(totalCost),
-    };
+      return total + (holding.avg_price * holding.quantity); // Fallback to avg price
+    }, 0);
   };
 
-  return { 
-    marketData, 
-    loading, 
-    error, 
-    calculatePortfolioMetrics,
-    isDataAvailable: Object.keys(marketData).length > 0
+  // Get market data for specific symbol
+  const getQuote = (symbol: string): MarketQuote | null => {
+    return marketData[symbol] || null;
+  };
+
+  // Check if market is open (simplified - you might want more sophisticated logic)
+  const isMarketOpen = (): boolean => {
+    const now = new Date();
+    const hour = now.getHours();
+    const day = now.getDay();
+    
+    // Simple US market hours check (9:30 AM - 4 PM ET, Mon-Fri)
+    // This is very simplified and doesn't account for holidays or exact timezone
+    return day >= 1 && day <= 5 && hour >= 9 && hour < 16;
+  };
+
+  return {
+    marketData,
+    loading,
+    error,
+    calculatePortfolioValue,
+    getQuote,
+    isMarketOpen: isMarketOpen(),
   };
 };
-
-// Default holdings removed - portfolio data should come from backend API

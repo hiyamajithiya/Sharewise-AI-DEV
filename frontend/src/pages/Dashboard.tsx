@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLiveMarketData } from '../hooks/useLiveMarketData';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -15,6 +15,9 @@ import {
   Fade,
   Slide,
   Zoom,
+  Skeleton,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -33,11 +36,23 @@ import {
   Speed,
   Star,
   Timeline,
+  ErrorOutline,
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import DataTable, { TableColumn } from '../components/common/DataTable';
 import { MarketDataAPI } from '../services/marketDataService';
 import LiveMarketWidget from '../components/common/LiveMarketWidget';
+import apiService from '../services/api';
+import { 
+  DashboardData, 
+  PortfolioStats, 
+  Holding, 
+  TradingSignal, 
+  AdminDashboardData,
+  SupportDashboardData,
+  SalesDashboardData,
+  MarketOverview 
+} from '../types';
 // Removed AddUserModal import - now using User Management page
 
 // Custom styles for clean modern design
@@ -88,11 +103,19 @@ const styles = {
 };
 
 const Dashboard: React.FC = () => {
+  // State management
   const [activeTab] = useState(0);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [adminData, setAdminData] = useState<AdminDashboardData | null>(null);
+  const [supportData, setSupportData] = useState<SupportDashboardData | null>(null);
+  const [salesData, setSalesData] = useState<SalesDashboardData | null>(null);
   const [systemInfo, setSystemInfo] = useState<any>(null);
-  // Removed addUserModalOpen state - now navigating to User Management
-  const [isLoading, setIsLoading] = useState(true);
-  const { marketData, loading } = useLiveMarketData(['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  
+  const { marketData, loading: marketLoading } = useLiveMarketData(['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']);
   const [marketPeriod, setMarketPeriod] = useState('1W');
   const navigate = useNavigate();
   const user = useSelector((state: any) => state.auth.user);
@@ -101,43 +124,77 @@ const Dashboard: React.FC = () => {
     { id: "symbol", label: "Symbol", minWidth: 100 },
     { id: "signal_type", label: "Signal", minWidth: 80 },
     { id: "entry_price", label: "Entry Price", minWidth: 120, format: (value) => `$${value?.toFixed(2)}` },
-    { id: "target_price", label: "Target Price", minWidth: 120, format: (value) => `$${value?.toFixed(2)}` },
+    { id: "target_price", label: "Target Price", minWidth: 120, format: (value) => value ? `$${value.toFixed(2)}` : 'N/A' },
     { id: "confidence_score", label: "Confidence", minWidth: 100, format: (value) => `${(value * 100)?.toFixed(1)}%` },
-    { id: "status", label: "Status", minWidth: 100 },
+    { id: "executed", label: "Status", minWidth: 100, format: (value) => value ? "Executed" : "Active" },
   ];
 
-  const recentSignals = loading ? [] : Object.keys(marketData).map((symbol, index) => {
-    const quote = marketData[symbol];
-    if (!quote) return null;
-
-    const isPositive = quote.change_percent > 0;
-    return {
-      id: symbol + index,
-      symbol: symbol,
-      signal_type: isPositive ? "BUY" : "SELL",
-      entry_price: quote.last_price,
-      target_price: isPositive ? quote.last_price * 1.05 : quote.last_price * 0.95,
-      confidence_score: Math.min(0.95, 0.7 + Math.abs(quote.change_percent) / 10),
-      timestamp: quote.timestamp,
-      status: index < 2 ? "Active" : "Executed",
-    };
-  }).filter(Boolean).slice(0, 5);
-
-  const fetchSystemInfo = async () => {
+  // Fetch dashboard data based on user role
+  const fetchDashboardData = useCallback(async () => {
     try {
-      setIsLoading(true);
-      const apiService = (await import('../services/api')).default;
-      const systemData: any = await apiService.get('/users/system/info/');
+      setError(null);
+      const userRole = user?.role || 'USER';
+      
+      // Add delay to prevent rate limiting
+      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      
+      // Fetch common dashboard data
+      const commonData = await apiService.getDashboardData();
+      setDashboardData(commonData);
+
+      // Add delay between requests
+      await delay(200);
+
+      // Fetch role-specific data
+      switch (userRole) {
+        case 'SUPER_ADMIN':
+          const adminDashboardData = await apiService.getAdminDashboardData();
+          setAdminData(adminDashboardData);
+          break;
+        case 'SUPPORT':
+          const supportDashboardData = await apiService.getSupportDashboardData();
+          setSupportData(supportDashboardData);
+          break;
+        case 'SALES':
+          const salesDashboardData = await apiService.getSalesDashboardData();
+          setSalesData(salesDashboardData);
+          break;
+        default:
+          // USER role - common data is sufficient
+          break;
+      }
+
+      // Also fetch system info
+      const systemData = await apiService.get('/users/system/info/');
       setSystemInfo(systemData);
       
-      // Simulate smooth loading for better UX
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 800);
-    } catch (error) {
-      console.error('Failed to fetch system info:', error);
-      setSystemInfo(null);
-      setIsLoading(false);
+      setLastRefreshed(new Date());
+    } catch (error: any) {
+      console.error('Failed to fetch dashboard data:', error);
+      setError(error.response?.data?.detail || 'Failed to load dashboard data. Please try again.');
+      
+      // Fallback to basic system info on error
+      try {
+        const systemData = await apiService.get('/users/system/info/');
+        setSystemInfo(systemData);
+      } catch (systemError) {
+        console.error('Failed to fetch system info:', systemError);
+        setSystemInfo(null);
+      }
+    }
+  }, [user?.role]);
+
+  // Refresh dashboard data
+  const handleRefreshData = async () => {
+    try {
+      setRefreshing(true);
+      await apiService.refreshDashboardData();
+      await fetchDashboardData();
+    } catch (error: any) {
+      console.error('Failed to refresh dashboard data:', error);
+      setError('Failed to refresh data. Please try again.');
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -145,19 +202,46 @@ const Dashboard: React.FC = () => {
     return user;
   };
 
+  // Initialize dashboard
   useEffect(() => {
-    fetchSystemInfo();
-  }, []);
+    const initializeDashboard = async () => {
+      setLoading(true);
+      await fetchDashboardData();
+      setLoading(false);
+    };
 
+    initializeDashboard();
+  }, [fetchDashboardData]);
 
-  const portfolioStats = {
+  // Auto-refresh every 5 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!refreshing && !loading) {
+        handleRefreshData();
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [refreshing, loading]);
+
+  // Get current portfolio stats or use defaults
+  const portfolioStats: PortfolioStats = dashboardData?.portfolioStats || {
     totalValue: 0,
     todayPnl: 0,
     todayPnlPercent: 0,
     totalPnl: 0,
     totalPnlPercent: 0,
+    allocatedCapital: 0,
+    availableFunds: 0,
+    activePositions: 0,
+    currency: 'INR'
   };
-  const topHoldings: any[] = [];
+
+  // Get current holdings or use empty array
+  const topHoldings: Holding[] = dashboardData?.topHoldings || [];
+
+  // Get recent signals or use empty array
+  const recentSignals: TradingSignal[] = dashboardData?.recentSignals || [];
 
   const holdingColumns: TableColumn[] = [
     { id: 'symbol', label: 'Symbol', minWidth: 100 },
@@ -165,6 +249,28 @@ const Dashboard: React.FC = () => {
     { id: 'current_price', label: 'Price', minWidth: 120, align: 'right' },
     { id: 'pnl_percent', label: 'P&L %', minWidth: 100, align: 'right' },
   ];
+
+  // Format time ago
+  const formatTimeAgo = (date: Date | null) => {
+    if (!date) return 'Never';
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+  };
+
+  // Format currency values
+  const formatCurrency = (value: number, currency: string = 'INR') => {
+    const symbol = currency === 'INR' ? '₹' : '$';
+    return `${symbol}${value.toLocaleString()}`;
+  };
 
   const getUserTierFeatures = (subscriptionTier: string) => {
     const tierFeatures = {
@@ -174,7 +280,7 @@ const Dashboard: React.FC = () => {
         aiStudioAccess: false,
         advancedAnalytics: false,
         customIndicators: false,
-        portfolioValue: '₹50,000',
+        portfolioValue: formatCurrency(portfolioStats.totalValue),
         tierColor: 'info',
         tierLabel: 'Basic Plan'
       },
@@ -184,7 +290,7 @@ const Dashboard: React.FC = () => {
         aiStudioAccess: true,
         advancedAnalytics: true,
         customIndicators: false,
-        portfolioValue: '₹2,50,000',
+        portfolioValue: formatCurrency(portfolioStats.totalValue),
         tierColor: 'success',
         tierLabel: 'Pro Plan'
       },
@@ -194,13 +300,55 @@ const Dashboard: React.FC = () => {
         aiStudioAccess: true,
         advancedAnalytics: true,
         customIndicators: true,
-        portfolioValue: '₹10,00,000',
+        portfolioValue: formatCurrency(portfolioStats.totalValue),
         tierColor: 'warning',
         tierLabel: 'Elite Plan'
       }
     };
     return tierFeatures[subscriptionTier as keyof typeof tierFeatures] || tierFeatures.BASIC;
   };
+
+  // Error retry component
+  const ErrorState = ({ onRetry }: { onRetry: () => void }) => (
+    <Card sx={{ ...styles.glassCard, p: 4, textAlign: 'center' }}>
+      <ErrorOutline sx={{ fontSize: 64, color: '#EF4444', mb: 2 }} />
+      <Typography variant="h6" sx={{ color: '#EF4444', mb: 2 }}>
+        Failed to Load Dashboard
+      </Typography>
+      <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
+        {error}
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={onRetry}
+        sx={styles.animatedButton}
+        startIcon={<Refresh />}
+      >
+        Retry
+      </Button>
+    </Card>
+  );
+
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <>
+      <Skeleton variant="rectangular" height={80} sx={{ mb: 3, borderRadius: 2 }} />
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        {[1, 2, 3, 4].map((i) => (
+          <Grid item xs={12} sm={6} md={3} key={i}>
+            <Skeleton variant="rectangular" height={140} sx={{ borderRadius: 2 }} />
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container spacing={3}>
+        {[1, 2].map((i) => (
+          <Grid item xs={12} md={6} key={i}>
+            <Skeleton variant="rectangular" height={350} sx={{ borderRadius: 2 }} />
+          </Grid>
+        ))}
+      </Grid>
+    </>
+  );
 
   const getRoleDashboardContent = (effectiveUser: any) => {
     const userRole = effectiveUser?.role || 'USER';
@@ -270,33 +418,33 @@ const Dashboard: React.FC = () => {
         {[
           {
             title: "Total Users",
-            value: systemInfo?.total_users?.toString() || '5',
-            change: systemInfo?.recent_registrations_24h ? `+${systemInfo.recent_registrations_24h} today` : '+2 today',
+            value: loading ? <Skeleton width={40} /> : (adminData?.systemMetrics?.totalUsers?.toString() || systemInfo?.total_users?.toString() || '0'),
+            change: loading ? <Skeleton width={60} /> : (adminData?.systemMetrics?.totalUsers || systemInfo?.recent_registrations_24h ? `+${adminData?.systemMetrics?.totalUsers || systemInfo.recent_registrations_24h} today` : '+0 today'),
             icon: <Person />,
             color: "#667eea",
             delay: 100
           },
           {
             title: "Verified Users",
-            value: systemInfo?.verified_users?.toString() || '5',
-            change: `${Math.round((systemInfo?.verified_users || 5) / (systemInfo?.total_users || 5) * 100)}% verified`,
+            value: loading ? <Skeleton width={40} /> : (adminData?.systemMetrics?.totalUsers?.toString() || systemInfo?.verified_users?.toString() || '0'),
+            change: loading ? <Skeleton width={60} /> : `${Math.round(((adminData?.systemMetrics?.totalUsers || systemInfo?.verified_users || 0) / (adminData?.systemMetrics?.totalUsers || systemInfo?.total_users || 1)) * 100)}% verified`,
             icon: <CheckCircle />,
             color: "#10B981",
             delay: 200
           },
           {
-            title: "Super Admins",
-            value: systemInfo?.super_admins?.toString() || '1',
-            change: "System administrators",
-            icon: <AdminPanelSettings />,
+            title: "Active Strategies",
+            value: loading ? <Skeleton width={40} /> : (adminData?.systemMetrics?.activeTraders?.toString() || '0'),
+            change: loading ? <Skeleton width={60} /> : "Live strategies",
+            icon: <ShowChart />,
             color: "#F59E0B",
             delay: 300
           },
           {
-            title: "Support Team",
-            value: systemInfo?.support_team?.toString() || '1',
-            change: "Support staff",
-            icon: <Support />,
+            title: "System Health",
+            value: loading ? <Skeleton width={40} /> : `${adminData?.systemHealth?.uptime || '99.9%'}`,
+            change: loading ? <Skeleton width={60} /> : "Uptime",
+            icon: <Speed />,
             color: "#3B82F6",
             delay: 400
           }
@@ -954,8 +1102,8 @@ const Dashboard: React.FC = () => {
           },
           {
             title: "Today's P&L",
-            value: `₹${portfolioStats.todayPnl.toLocaleString()}`,
-            change: `${portfolioStats.todayPnl >= 0 ? '+' : ''}${portfolioStats.todayPnlPercent}%`,
+            value: loading ? <Skeleton width={80} /> : formatCurrency(portfolioStats.todayPnl),
+            change: loading ? <Skeleton width={60} /> : `${portfolioStats.todayPnl >= 0 ? '+' : ''}${portfolioStats.todayPnlPercent.toFixed(2)}%`,
             icon: portfolioStats.todayPnl >= 0 ? <TrendingUp /> : <TrendingDown />,
             color: portfolioStats.todayPnl >= 0 ? "#10B981" : "#EF4444",
             delay: 200
@@ -1254,7 +1402,7 @@ const Dashboard: React.FC = () => {
   };
 
   // Loading state
-  if (isLoading) {
+  if (loading) {
     return (
       <Box sx={styles.gradientBackground}>
         <Container maxWidth="xl" sx={{ py: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
@@ -1275,10 +1423,24 @@ const Dashboard: React.FC = () => {
             <Typography variant="h5" sx={{ fontWeight: 600, color: '#667eea', mb: 1 }}>
               Loading Dashboard
             </Typography>
-            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>
               Preparing your personalized trading experience...
             </Typography>
           </Card>
+        </Container>
+      </Box>
+    );
+  }
+
+  // Error state
+  if (error && !dashboardData) {
+    return (
+      <Box sx={styles.gradientBackground}>
+        <Container maxWidth="xl" sx={{ py: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
+          <ErrorState onRetry={() => {
+            setError(null);
+            fetchDashboardData();
+          }} />
         </Container>
       </Box>
     );
@@ -1307,6 +1469,16 @@ const Dashboard: React.FC = () => {
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#6B7280', fontSize: '1rem', lineHeight: 1.4 }}>
                       Here's what's happening with your trading portfolio today
+                      {lastRefreshed && (
+                        <Typography component="span" variant="caption" sx={{ ml: 1, color: '#9CA3AF' }}>
+                          • Last updated: {formatTimeAgo(lastRefreshed)}
+                        </Typography>
+                      )}
+                      {error && (
+                        <Alert severity="warning" sx={{ mt: 1, py: 0.5 }}>
+                          Some data may be outdated due to connectivity issues
+                        </Alert>
+                      )}
                     </Typography>
                   </Box>
                   
@@ -1319,7 +1491,8 @@ const Dashboard: React.FC = () => {
                       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                         {/* Refresh button - available to all roles */}
                         <IconButton
-                          onClick={fetchSystemInfo}
+                          onClick={handleRefreshData}
+                          disabled={refreshing}
                           sx={{
                             ...styles.animatedButton,
                             width: 48,
@@ -1335,7 +1508,7 @@ const Dashboard: React.FC = () => {
                             }
                           }}
                         >
-                          <Refresh sx={{ color: 'white' }} />
+                          {refreshing ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <Refresh sx={{ color: 'white' }} />}
                         </IconButton>
                         
                         {/* Role-specific action buttons */}

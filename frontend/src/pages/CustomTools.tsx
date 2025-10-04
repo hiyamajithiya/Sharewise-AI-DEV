@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Container,
   Typography,
@@ -32,6 +33,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Skeleton,
 } from '@mui/material';
 import {
   Build,
@@ -49,9 +51,17 @@ import {
   Storage,
   CloudSync,
   BugReport,
+  Refresh,
+  TrendingUp,
+  Security,
+  Assessment,
+  AccountBalance,
+  BarChart,
 } from '@mui/icons-material';
-import { useSelector } from 'react-redux';
+import { apiService } from '../services/api';
+import { RootState } from '../store';
 import { selectTestingState } from '../store/slices/testingSlice';
+import { CustomTool, ToolResult } from '../types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -80,58 +90,108 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 const CustomTools: React.FC = () => {
   const testingState = useSelector(selectTestingState);
   const { isTestingMode, selectedUser } = testingState;
+  const user = useSelector((state: RootState) => state.auth.user);
+  const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
+  const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+
+  // State management
   const [tabValue, setTabValue] = useState(0);
+  const [customTools, setCustomTools] = useState<CustomTool[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Dialog states
   const [createToolDialog, setCreateToolDialog] = useState(false);
   const [editToolDialog, setEditToolDialog] = useState(false);
-  const [selectedTool, setSelectedTool] = useState<any>(null);
+  const [selectedTool, setSelectedTool] = useState<CustomTool | null>(null);
   const [deleteConfirmDialog, setDeleteConfirmDialog] = useState(false);
-  const [toolToDelete, setToolToDelete] = useState<any>(null);
+  const [toolToDelete, setToolToDelete] = useState<CustomTool | null>(null);
   const [apiTestDialog, setApiTestDialog] = useState(false);
   const [selectedEndpoint, setSelectedEndpoint] = useState<any>(null);
   const [documentationDialog, setDocumentationDialog] = useState(false);
   const [testResponse, setTestResponse] = useState('');
+  
+  // Form states
+  const [toolResults, setToolResults] = useState<{ [key: string]: ToolResult[] }>({});
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
   // Tool action handlers
-  const handleEditTool = (tool: any) => {
+  const handleEditTool = (tool: CustomTool) => {
     setSelectedTool(tool);
     setEditToolDialog(true);
     console.log('Editing tool:', tool.name);
   };
 
-  const handlePlayTool = (tool: any) => {
-    console.log('Starting tool:', tool.name);
-    // In a real app, this would trigger the tool execution
-    alert(`Starting ${tool.name}...`);
+  const handleExecuteTool = async (tool: CustomTool) => {
+    try {
+      console.log('Executing tool:', tool.name);
+      const result = await apiService.executeCustomTool(tool.id, {});
+      console.log('Tool execution result:', result);
+      
+      // Refresh tools to get updated usage count
+      handleRefresh();
+      
+      alert(`Tool "${tool.name}" executed successfully!`);
+    } catch (err: any) {
+      console.error('Tool execution failed:', err);
+      alert(`Tool execution failed: ${err.message}`);
+    }
   };
 
-  const handlePauseTool = (tool: any) => {
-    console.log('Pausing tool:', tool.name);
-    // In a real app, this would pause the tool
-    alert(`Pausing ${tool.name}...`);
+  const handleToggleToolStatus = async (tool: CustomTool) => {
+    try {
+      const updatedTool = await apiService.updateCustomTool(tool.id, {
+        isActive: !tool.isActive
+      });
+      
+      // Update local state
+      setCustomTools(prev => prev.map(t => 
+        t.id === tool.id ? updatedTool : t
+      ));
+      
+      console.log(`Tool ${tool.name} ${updatedTool.isActive ? 'activated' : 'deactivated'}`);
+    } catch (err: any) {
+      console.error('Failed to update tool status:', err);
+      alert(`Failed to update tool status: ${err.message}`);
+    }
   };
 
-  const handleToolSettings = (tool: any) => {
+  const handleToolSettings = (tool: CustomTool) => {
+    setSelectedTool(tool);
+    setEditToolDialog(true);
     console.log('Opening settings for tool:', tool.name);
-    // In a real app, this would open tool settings
-    alert(`Opening settings for ${tool.name}...`);
   };
 
-  const handleDeleteTool = (tool: any) => {
+  const handleDeleteTool = (tool: CustomTool) => {
     setToolToDelete(tool);
     setDeleteConfirmDialog(true);
   };
 
-  const confirmDeleteTool = () => {
+  const confirmDeleteTool = async () => {
     if (toolToDelete) {
-      console.log('Deleting tool:', toolToDelete.name);
-      // In a real app, this would delete the tool
-      alert(`Deleted ${toolToDelete.name}`);
-      setDeleteConfirmDialog(false);
-      setToolToDelete(null);
+      try {
+        await apiService.deleteCustomTool(toolToDelete.id);
+        
+        // Remove from local state
+        setCustomTools(prev => prev.filter(t => t.id !== toolToDelete.id));
+        
+        console.log('Deleted tool:', toolToDelete.name);
+        alert(`Deleted ${toolToDelete.name}`);
+      } catch (err: any) {
+        console.error('Failed to delete tool:', err);
+        alert(`Failed to delete tool: ${err.message}`);
+      } finally {
+        setDeleteConfirmDialog(false);
+        setToolToDelete(null);
+      }
     }
   };
 
@@ -142,21 +202,33 @@ const CustomTools: React.FC = () => {
     console.log('Testing API endpoint:', endpoint.name);
   };
 
-  const executeApiTest = () => {
+  const executeApiTest = async () => {
     if (selectedEndpoint) {
-      console.log('Executing API test for:', selectedEndpoint.endpoint);
-      // Simulate API response
-      const mockResponse = {
-        status: 200,
-        data: {
-          message: `Mock response from ${selectedEndpoint.endpoint}`,
-          timestamp: new Date().toISOString(),
+      try {
+        setLoading(true);
+        console.log('Executing API test for:', selectedEndpoint.endpoint);
+        
+        // Make actual API call based on the endpoint
+        const response = await apiService.testCustomEndpoint({
+          endpoint: selectedEndpoint.endpoint,
           method: selectedEndpoint.method,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        setTestResponse(JSON.stringify(response, null, 2));
+        console.log(`API test executed successfully for ${selectedEndpoint.name}!`);
+      } catch (error: any) {
+        const errorResponse = {
+          status: error.response?.status || 500,
+          error: error.message || 'API test failed',
+          timestamp: new Date().toISOString(),
           endpoint: selectedEndpoint.endpoint
-        }
-      };
-      setTestResponse(JSON.stringify(mockResponse, null, 2));
-      alert(`API test executed successfully for ${selectedEndpoint.name}!`);
+        };
+        setTestResponse(JSON.stringify(errorResponse, null, 2));
+        console.error(`API test failed for ${selectedEndpoint.name}:`, error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -165,36 +237,39 @@ const CustomTools: React.FC = () => {
     console.log('Opening API documentation');
   };
 
-  // Sample custom tools data
-  const customTools = [
-    {
-      id: 1,
-      name: 'Price Alert Bot',
-      description: 'Automated price monitoring and alerts via Telegram',
-      type: 'webhook',
-      status: 'active',
-      lastRun: '2 minutes ago',
-      executions: 247
-    },
-    {
-      id: 2,
-      name: 'Portfolio Rebalancer',
-      description: 'Automatically rebalance portfolio based on drift thresholds',
-      type: 'scheduler',
-      status: 'active',
-      lastRun: '1 hour ago',
-      executions: 89
-    },
-    {
-      id: 3,
-      name: 'News Sentiment Analyzer',
-      description: 'Analyze news sentiment for portfolio stocks',
-      type: 'api',
-      status: 'paused',
-      lastRun: '1 day ago',
-      executions: 156
-    },
-  ];
+  // Fetch custom tools data
+  const fetchCustomTools = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const tools = await apiService.getCustomTools();
+      setCustomTools(tools);
+      
+      // Fetch results for each tool
+      const results: { [key: string]: ToolResult[] } = {};
+      for (const tool of tools) {
+        try {
+          const toolResults = await apiService.getToolResults(tool.id, 5);
+          results[tool.id] = toolResults;
+        } catch (err) {
+          console.warn(`Could not fetch results for tool ${tool.id}:`, err);
+          results[tool.id] = [];
+        }
+      }
+      setToolResults(results);
+      
+    } catch (err: any) {
+      console.error('Failed to fetch custom tools:', err);
+      setError(err.message || 'Failed to load custom tools');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomTools();
+  }, [refreshKey]);
 
   const apiEndpoints = [
     { name: 'Portfolio Data', endpoint: '/api/v1/portfolio', method: 'GET', calls: 1247 },
@@ -203,20 +278,32 @@ const CustomTools: React.FC = () => {
     { name: 'Risk Metrics', endpoint: '/api/v1/risk', method: 'GET', calls: 567 },
   ];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'success';
-      case 'paused': return 'warning';
-      case 'error': return 'error';
-      default: return 'default';
+  const getStatusColor = (isActive: boolean) => {
+    return isActive ? 'success' : 'warning';
+  };
+
+  const getStatusLabel = (isActive: boolean) => {
+    return isActive ? 'Active' : 'Inactive';
+  };
+
+  const getToolIcon = (type: CustomTool['type']) => {
+    switch (type) {
+      case 'screener': return <Assessment />;
+      case 'calculator': return <Code />;
+      case 'analyzer': return <TrendingUp />;
+      case 'monitor': return <Schedule />;
+      case 'alerts': return <Webhook />;
+      default: return <Build />;
     }
   };
 
-  const getToolIcon = (type: string) => {
-    switch (type) {
-      case 'webhook': return <Webhook />;
-      case 'scheduler': return <Schedule />;
-      case 'api': return <Api />;
+  const getCategoryIcon = (category: CustomTool['category']) => {
+    switch (category) {
+      case 'technical': return <TrendingUp />;
+      case 'fundamental': return <Assessment />;
+      case 'risk': return <Security />;
+      case 'portfolio': return <AccountBalance />;
+      case 'market': return <BarChart />;
       default: return <Build />;
     }
   };
@@ -253,27 +340,54 @@ const CustomTools: React.FC = () => {
               }
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setCreateToolDialog(true)}
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              borderRadius: '12px',
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 3,
-              '&:hover': {
-                background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.25)',
-              },
-            }}
-          >
-            Create Tool
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Chip 
+              label={`${subscriptionTier} Plan`}
+              sx={{ 
+                fontWeight: 600,
+                backgroundColor: '#f0f9ff',
+                color: '#1e40af',
+                border: '1px solid #3b82f6'
+              }} 
+            />
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={handleRefresh}
+              disabled={loading}
+              sx={{ borderRadius: '8px' }}
+            >
+              Refresh
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setCreateToolDialog(true)}
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 3,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b4c96 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.25)',
+                },
+              }}
+            >
+              Create Tool
+            </Button>
+          </Box>
         </Box>
       </Paper>
+
+      {/* Error Display */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* Elite Feature Notice */}
       <Paper 
@@ -417,7 +531,51 @@ const CustomTools: React.FC = () => {
         <TabPanel value={tabValue} index={0}>
         {/* My Tools */}
         <Grid container spacing={3}>
-          {customTools.map((tool) => (
+          {loading && customTools.length === 0 ? (
+            // Loading skeletons
+            Array.from({ length: 6 }).map((_, index) => (
+              <Grid item xs={12} md={6} lg={4} key={index}>
+                <Paper sx={{
+                  background: 'white',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '20px',
+                  p: 3,
+                  height: '250px'
+                }}>
+                  <Skeleton variant="rectangular" height={40} sx={{ mb: 2, borderRadius: '8px' }} />
+                  <Skeleton height={20} sx={{ mb: 1 }} />
+                  <Skeleton height={20} width="80%" sx={{ mb: 2 }} />
+                  <Skeleton height={32} width="60%" />
+                </Paper>
+              </Grid>
+            ))
+          ) : customTools.length === 0 ? (
+            <Grid item xs={12}>
+              <Paper sx={{ 
+                p: 4, 
+                textAlign: 'center',
+                borderRadius: '20px',
+                border: '2px dashed #e0e0e0'
+              }}>
+                <Build sx={{ fontSize: 64, color: '#9ca3af', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                  No Custom Tools Yet
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Create your first custom tool to automate your trading workflows
+                </Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={() => setCreateToolDialog(true)}
+                  sx={{ borderRadius: '8px' }}
+                >
+                  Create Your First Tool
+                </Button>
+              </Paper>
+            </Grid>
+          ) : (
+            customTools.map((tool) => (
             <Grid item xs={12} md={6} lg={4} key={tool.id}>
               <Paper sx={{
                 background: 'white',
@@ -443,8 +601,8 @@ const CustomTools: React.FC = () => {
                       </Typography>
                     </Box>
                     <Chip
-                      label={tool.status}
-                      color={getStatusColor(tool.status) as any}
+                      label={getStatusLabel(tool.isActive)}
+                      color={getStatusColor(tool.isActive) as any}
                       size="small"
                     />
                   </Box>
@@ -455,10 +613,10 @@ const CustomTools: React.FC = () => {
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                     <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                      Last run: {tool.lastRun}
+                      Last used: {tool.lastUsed}
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                      {tool.executions} executions
+                      {tool.usageCount} uses
                     </Typography>
                   </Box>
 
@@ -474,7 +632,7 @@ const CustomTools: React.FC = () => {
                     <IconButton 
                       size="small" 
                       color="success"
-                      onClick={() => handlePlayTool(tool)}
+                      onClick={() => handleExecuteTool(tool)}
                       title="Start Tool"
                     >
                       <PlayArrow />
@@ -482,7 +640,7 @@ const CustomTools: React.FC = () => {
                     <IconButton 
                       size="small" 
                       color="warning"
-                      onClick={() => handlePauseTool(tool)}
+                      onClick={() => handleToggleToolStatus(tool)}
                       title="Pause Tool"
                     >
                       <Pause />
@@ -507,10 +665,11 @@ const CustomTools: React.FC = () => {
                 </Box>
               </Paper>
             </Grid>
-          ))}
+            ))
+          )}
 
-          {/* Empty State */}
-          {customTools.length === 0 && (
+          {/* Duplicate Empty State - Remove this section */}
+          {false && customTools.length === 0 && (
             <Grid item xs={12}>
               <Card sx={{
               borderRadius: '16px',
@@ -1031,7 +1190,7 @@ const CustomTools: React.FC = () => {
                 }
               }}>
                 <InputLabel>Status</InputLabel>
-                <Select label="Status" defaultValue={selectedTool?.status}>
+                <Select label="Status" defaultValue={selectedTool?.isActive ? "active" : "inactive"}>
                   <MenuItem value="active">✅ Active</MenuItem>
                   <MenuItem value="paused">⏸️ Paused</MenuItem>
                   <MenuItem value="error">❌ Error</MenuItem>
@@ -1100,7 +1259,7 @@ const CustomTools: React.FC = () => {
             Are you sure you want to delete <strong>"{toolToDelete?.name}"</strong>?
           </Typography>
           <Typography variant="body2" sx={{ mt: 1, color: '#6B7280' }}>
-            This tool has been executed {toolToDelete?.executions} times and was last run {toolToDelete?.lastRun}.
+            This tool has been used {toolToDelete?.usageCount} times and was last used {toolToDelete?.lastUsed}.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>

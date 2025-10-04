@@ -1,5 +1,139 @@
 // Type definitions for ShareWise AI Trading Platform
 
+// Trading Monitor Types
+export interface SystemMetrics {
+  totalUsers: number;
+  activeTraders: number;
+  totalVolume: string;
+  systemHealth: number;
+  refreshedAt: string;
+}
+
+export interface TradingStrategy {
+  id: string;
+  name: string;
+  users: number;
+  performance: number;
+  status: 'active' | 'warning' | 'error' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SystemAlert {
+  id: string;
+  type: 'warning' | 'error' | 'success' | 'info';
+  message: string;
+  timestamp: string;
+  resolved: boolean;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+}
+
+export interface TradingMonitorData {
+  systemMetrics: SystemMetrics;
+  activeStrategies: TradingStrategy[];
+  recentAlerts: SystemAlert[];
+}
+
+// Support Center Types
+export interface SupportMetrics {
+  openTickets: number;
+  resolvedToday: number;
+  avgResponseTime: string;
+  satisfaction: number;
+  refreshedAt: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  title: string;
+  user: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'pending' | 'in-progress' | 'resolved' | 'escalated' | 'closed';
+  createdAt: string;
+  updatedAt: string;
+  assignedTo: string;
+  category: string;
+  description?: string;
+}
+
+export interface SupportChannel {
+  id: string;
+  name: string;
+  count: number;
+  icon: string;
+  color: string;
+  isActive: boolean;
+  lastActivity?: string;
+}
+
+export interface SupportCenterData {
+  supportMetrics: SupportMetrics;
+  recentTickets: SupportTicket[];
+  supportChannels: SupportChannel[];
+}
+
+// Sales Analytics Types
+export interface SalesMetrics {
+  revenue: number;
+  revenueGrowth: number;
+  totalLeads: number;
+  leadsGrowth: number;
+  conversionRate: number;
+  conversionGrowth: number;
+  avgDealSize: number;
+  dealSizeGrowth: number;
+  refreshedAt: string;
+}
+
+export interface SalesRepPerformance {
+  id: string;
+  name: string;
+  avatar: string;
+  role: string;
+  revenue: number;
+  deals: number;
+  conversionRate: number;
+  target: number;
+  performance: number;
+  email?: string;
+}
+
+export interface MonthlyTrend {
+  month: string;
+  revenue: number;
+  leads: number;
+  deals: number;
+  conversionRate?: number;
+}
+
+export interface TopCustomer {
+  id: string;
+  name: string;
+  value: number;
+  tier: 'Enterprise' | 'Professional' | 'Basic';
+  deals: number;
+  lastActivity?: string;
+  industry?: string;
+}
+
+export interface LeadSource {
+  id: string;
+  source: string;
+  count: number;
+  conversion: number;
+  color: string;
+  cost?: number;
+  roi?: number;
+}
+
+export interface SalesAnalyticsData {
+  salesMetrics: SalesMetrics;
+  salesTeamPerformance: SalesRepPerformance[];
+  monthlyTrends: MonthlyTrend[];
+  topCustomers: TopCustomer[];
+  leadSources: LeadSource[];
+}
+
 export interface User {
   id: string;
   email: string;
@@ -616,4 +750,1039 @@ export interface ComplianceState {
   legalDisclosures: Record<string, LegalDisclaimer>;
   loading: boolean;
   error: string | null;
+}
+
+// Dashboard Types
+export interface DashboardData {
+  portfolioStats: PortfolioStats;
+  topHoldings: Holding[];
+  recentSignals: TradingSignal[];
+  systemMetrics?: SystemMetrics;
+  userMetrics?: UserMetrics;
+  marketOverview?: MarketOverview;
+}
+
+export interface PortfolioStats {
+  totalValue: number;
+  todayPnl: number;
+  todayPnlPercent: number;
+  totalPnl: number;
+  totalPnlPercent: number;
+  allocatedCapital: number;
+  availableFunds: number;
+  activePositions: number;
+  currency: string;
+}
+
+export interface UserMetrics {
+  login_streak: number;
+  total_trades: number;
+  successful_trades: number;
+  win_rate: number;
+  favorite_instruments: string[];
+  risk_score: number;
+  portfolio_growth: number;
+}
+
+export interface MarketOverview {
+  indices: MarketIndex[];
+  trending_stocks: TrendingStock[];
+  market_status: 'OPEN' | 'CLOSED' | 'PRE_MARKET' | 'POST_MARKET';
+  market_sentiment: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+}
+
+export interface MarketIndex {
+  name: string;
+  symbol: string;
+  current_value: number;
+  change: number;
+  change_percent: number;
+  volume: number;
+}
+
+export interface TrendingStock {
+  symbol: string;
+  name: string;
+  price: number;
+  change_percent: number;
+  volume: number;
+  market_cap: number;
+}
+
+// Role-specific dashboard data
+export interface AdminDashboardData extends DashboardData {
+  systemMetrics: SystemMetrics;
+  userActivity: UserActivity[];
+  systemHealth: SystemHealth;
+}
+
+export interface UserActivity {
+  id: string;
+  user_id: string;
+  username: string;
+  action: string;
+  timestamp: string;
+  ip_address?: string;
+}
+
+export interface SystemHealth {
+  cpu_usage: number;
+  memory_usage: number;
+  disk_usage: number;
+  database_connections: number;
+  redis_status: 'HEALTHY' | 'WARNING' | 'ERROR';
+  api_response_time: number;
+  uptime: string;
+}
+
+export interface SupportDashboardData extends DashboardData {
+  supportMetrics: SupportMetrics;
+  recentTickets: SupportTicket[];
+  ticketsByPriority: { priority: string; count: number }[];
+}
+
+export interface SalesDashboardData extends DashboardData {
+  salesMetrics: SalesMetrics;
+  salesTargets: SalesTarget[];
+  leadSources: LeadSource[];
+  recentDeals: Deal[];
+}
+
+export interface SalesTarget {
+  period: string;
+  target: number;
+  achieved: number;
+  percentage: number;
+}
+
+export interface Deal {
+  id: string;
+  client_name: string;
+  amount: number;
+  stage: string;
+  probability: number;
+  expected_close: string;
+}
+
+// Settings Types
+export interface UserSettings {
+  id: string;
+  user_id: string;
+  profile: UserProfile;
+  preferences: UserPreferences;
+  notifications: NotificationSettings;
+  security: SecuritySettings;
+  subscription: SubscriptionSettings;
+  billing: BillingSettings;
+  theme: ThemeSettings;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserProfile {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number?: string;
+  timezone: string;
+  language: string;
+  currency: string;
+  avatar_url?: string;
+  bio?: string;
+  company?: string;
+  location?: string;
+}
+
+export interface UserPreferences {
+  dashboard_layout: 'compact' | 'expanded' | 'custom';
+  default_view: 'dashboard' | 'portfolio' | 'trading' | 'analytics';
+  auto_refresh_interval: number; // in seconds
+  data_retention_days: number;
+  export_format: 'csv' | 'excel' | 'pdf';
+  chart_type: 'line' | 'candlestick' | 'bar';
+  show_advanced_features: boolean;
+  portfolio_grouping: 'sector' | 'asset_type' | 'performance';
+}
+
+export interface NotificationSettings {
+  email_notifications: boolean;
+  push_notifications: boolean;
+  sms_notifications: boolean;
+  whatsapp_notifications: boolean;
+  price_alerts: boolean;
+  portfolio_updates: boolean;
+  news_alerts: boolean;
+  system_maintenance: boolean;
+  marketing_emails: boolean;
+  weekly_reports: boolean;
+  monthly_statements: boolean;
+  trade_confirmations: boolean;
+}
+
+export interface SecuritySettings {
+  two_factor_enabled: boolean;
+  login_notifications: boolean;
+  session_timeout: number; // in minutes
+  allowed_ip_addresses: string[];
+  api_access_enabled: boolean;
+  api_keys: ApiKey[];
+  password_last_changed: string;
+  security_questions_set: boolean;
+  biometric_enabled: boolean;
+  trusted_devices: TrustedDevice[];
+}
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  key_prefix: string;
+  permissions: string[];
+  created_at: string;
+  last_used: string;
+  expires_at?: string;
+  is_active: boolean;
+}
+
+export interface TrustedDevice {
+  id: string;
+  device_name: string;
+  device_type: 'desktop' | 'mobile' | 'tablet';
+  browser: string;
+  location: string;
+  last_access: string;
+  is_current: boolean;
+}
+
+export interface SubscriptionSettings {
+  tier: 'BASIC' | 'PRO' | 'ELITE';
+  status: 'active' | 'cancelled' | 'expired' | 'suspended';
+  start_date: string;
+  end_date: string;
+  auto_renewal: boolean;
+  features: SubscriptionFeature[];
+  usage_limits: UsageLimits;
+  upgrade_available: boolean;
+}
+
+export interface SubscriptionFeature {
+  name: string;
+  enabled: boolean;
+  limit?: number;
+  usage?: number;
+}
+
+export interface UsageLimits {
+  max_strategies: number;
+  max_signals: number;
+  max_api_calls: number;
+  max_portfolios: number;
+  storage_limit_gb: number;
+  current_usage: {
+    strategies: number;
+    signals: number;
+    api_calls: number;
+    portfolios: number;
+    storage_used_gb: number;
+  };
+}
+
+export interface BillingSettings {
+  payment_method: PaymentMethod;
+  billing_address: BillingAddress;
+  billing_history: BillingRecord[];
+  next_billing_date: string;
+  billing_cycle: 'monthly' | 'yearly';
+  auto_pay_enabled: boolean;
+  tax_id?: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  type: 'card' | 'bank' | 'upi' | 'wallet';
+  last_four?: string;
+  expiry_month?: number;
+  expiry_year?: number;
+  card_brand?: string;
+  bank_name?: string;
+  upi_id?: string;
+  is_default: boolean;
+  is_verified: boolean;
+}
+
+export interface BillingAddress {
+  street: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  company?: string;
+  tax_id?: string;
+}
+
+export interface BillingRecord {
+  id: string;
+  invoice_number: string;
+  date: string;
+  amount: number;
+  currency: string;
+  status: 'paid' | 'pending' | 'failed' | 'refunded';
+  description: string;
+  pdf_url?: string;
+  payment_method: string;
+}
+
+export interface ThemeSettings {
+  mode: 'light' | 'dark' | 'auto';
+  primary_color: string;
+  accent_color: string;
+  font_size: 'small' | 'medium' | 'large';
+  sidebar_collapsed: boolean;
+  animations_enabled: boolean;
+  high_contrast: boolean;
+  custom_css?: string;
+}
+
+export interface SystemSettings {
+  general: GeneralSettings;
+  security: SystemSecuritySettings;
+  email: EmailSettings;
+  integrations: IntegrationSettings;
+  maintenance: MaintenanceSettings;
+  backup: BackupSettings;
+}
+
+export interface GeneralSettings {
+  site_name: string;
+  site_description: string;
+  default_timezone: string;
+  default_currency: string;
+  default_language: string;
+  maintenance_mode: boolean;
+  registration_enabled: boolean;
+  demo_mode: boolean;
+  max_users: number;
+  session_timeout: number;
+}
+
+export interface SystemSecuritySettings {
+  password_policy: PasswordPolicy;
+  login_attempts: number;
+  lockout_duration: number;
+  require_2fa: boolean;
+  allowed_domains: string[];
+  ip_whitelist: string[];
+  audit_logs_retention: number;
+  encryption_enabled: boolean;
+}
+
+export interface PasswordPolicy {
+  min_length: number;
+  require_uppercase: boolean;
+  require_lowercase: boolean;
+  require_numbers: boolean;
+  require_symbols: boolean;
+  expiry_days: number;
+  history_count: number;
+}
+
+export interface EmailSettings {
+  smtp_host: string;
+  smtp_port: number;
+  smtp_username: string;
+  smtp_password?: string;
+  use_tls: boolean;
+  from_email: string;
+  from_name: string;
+  template_settings: EmailTemplateSettings;
+}
+
+export interface EmailTemplateSettings {
+  welcome_email: boolean;
+  password_reset: boolean;
+  trade_confirmations: boolean;
+  price_alerts: boolean;
+  weekly_reports: boolean;
+  system_notifications: boolean;
+}
+
+export interface IntegrationSettings {
+  broker_integrations: BrokerIntegration[];
+  market_data_providers: MarketDataProvider[];
+  webhook_settings: WebhookSettings;
+  api_rate_limits: ApiRateLimit[];
+}
+
+export interface BrokerIntegration {
+  id: string;
+  name: string;
+  provider: string;
+  is_enabled: boolean;
+  api_credentials: Record<string, any>;
+  supported_features: string[];
+  last_sync: string;
+  status: 'connected' | 'disconnected' | 'error';
+}
+
+export interface MarketDataProvider {
+  id: string;
+  name: string;
+  provider: string;
+  is_active: boolean;
+  data_types: string[];
+  refresh_interval: number;
+  api_key?: string;
+}
+
+export interface WebhookSettings {
+  enabled: boolean;
+  endpoints: WebhookEndpoint[];
+  retry_attempts: number;
+  timeout_seconds: number;
+}
+
+export interface WebhookEndpoint {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  is_active: boolean;
+  secret?: string;
+}
+
+export interface ApiRateLimit {
+  endpoint: string;
+  requests_per_minute: number;
+  requests_per_hour: number;
+  requests_per_day: number;
+}
+
+export interface MaintenanceSettings {
+  scheduled_maintenance: ScheduledMaintenance[];
+  backup_schedule: BackupSchedule;
+  log_retention_days: number;
+  cleanup_schedule: string;
+}
+
+export interface ScheduledMaintenance {
+  id: string;
+  title: string;
+  description: string;
+  start_time: string;
+  end_time: string;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  affected_services: string[];
+}
+
+export interface BackupSchedule {
+  enabled: boolean;
+  frequency: 'daily' | 'weekly' | 'monthly';
+  time: string;
+  retention_days: number;
+  include_user_data: boolean;
+  include_system_data: boolean;
+}
+
+export interface BackupSettings {
+  auto_backup: boolean;
+  backup_location: 'local' | 'cloud' | 'both';
+  encryption_enabled: boolean;
+  last_backup: string;
+  backup_history: BackupRecord[];
+}
+
+export interface BackupRecord {
+  id: string;
+  timestamp: string;
+  type: 'full' | 'incremental';
+  size_mb: number;
+  status: 'success' | 'failed' | 'in_progress';
+  file_path?: string;
+}
+
+// Advanced Trading Types
+export interface AdvancedTradingStrategy {
+  id: number;
+  name: string;
+  status: 'RUNNING' | 'PAUSED' | 'STOPPED';
+  pnl: number;
+  trades: number;
+  winRate: number;
+  capital?: number;
+  timeframe?: string;
+  instruments?: string[];
+  maxDrawdown?: number;
+  dailyLossLimit?: number;
+  positionSize?: number;
+  enableStopLoss?: boolean;
+  deployedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  description?: string;
+  riskLevel?: 'low' | 'medium' | 'high';
+  expectedReturn?: number;
+  volatility?: number;
+  drawdownHistory?: number[];
+  performanceHistory?: PerformancePoint[];
+}
+
+export interface PerformancePoint {
+  timestamp: string;
+  pnl: number;
+  trades: number;
+  winRate: number;
+  drawdown: number;
+}
+
+export interface StrategyType {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'momentum' | 'mean_reversion' | 'arbitrage' | 'custom';
+  riskLevel: 'low' | 'medium' | 'high';
+  expectedReturn: string;
+  timeframe: string[];
+  instruments: string[];
+  minCapital: number;
+  features: string[];
+  isActive: boolean;
+}
+
+export interface RiskMetric {
+  title: string;
+  value: string;
+  subtitle: string;
+  color: 'primary' | 'success' | 'error' | 'warning' | 'info';
+  trend?: 'up' | 'down' | 'neutral';
+  percentage?: number;
+  threshold?: {
+    warning: number;
+    critical: number;
+  };
+}
+
+export interface StrategyConfiguration {
+  capital: string;
+  timeframe: string;
+  instruments: string;
+  maxDrawdown: string;
+  dailyLossLimit: string;
+  positionSize: string;
+  enableStopLoss: boolean;
+  stopLossPercent?: string;
+  takeProfitPercent?: string;
+  riskRewardRatio?: string;
+  maxPositions?: number;
+  entryConditions?: EntryCondition[];
+  exitConditions?: ExitCondition[];
+}
+
+export interface EntryCondition {
+  id: string;
+  type: 'technical_indicator' | 'price_action' | 'volume' | 'custom';
+  indicator?: string;
+  comparison: 'greater_than' | 'less_than' | 'equals' | 'crosses_above' | 'crosses_below';
+  value: number;
+  timeframe?: string;
+}
+
+export interface ExitCondition {
+  id: string;
+  type: 'stop_loss' | 'take_profit' | 'time' | 'technical' | 'custom';
+  value: number;
+  percentage?: boolean;
+  timeframe?: string;
+}
+
+export interface QuickDeployConfig {
+  strategyTemplate: string;
+  capital: string;
+  enableRisk: boolean;
+  riskLevel?: 'conservative' | 'moderate' | 'aggressive';
+  autoRebalance?: boolean;
+  notificationsEnabled?: boolean;
+}
+
+export interface PortfolioRisk {
+  portfolioHeat: number;
+  maxPositionSize: number;
+  dailyLossLimit: number;
+  sectorConcentration: number;
+  leverageRatio: number;
+  var95: number; // Value at Risk 95%
+  sharpeRatio: number;
+  maxDrawdown: number;
+  beta: number;
+  correlation: number;
+  exposures: SectorExposure[];
+}
+
+export interface SectorExposure {
+  sector: string;
+  exposure: number;
+  limit: number;
+  risk: 'low' | 'medium' | 'high';
+}
+
+export interface MarketData {
+  symbol: string;
+  price: number;
+  change: number;
+  changePercent: number;
+  volume: number;
+  high: number;
+  low: number;
+  open: number;
+  previousClose: number;
+  marketCap?: number;
+  pe?: number;
+  timestamp: string;
+}
+
+export interface OrderBookEntry {
+  price: number;
+  quantity: number;
+  orders: number;
+}
+
+export interface OrderBook {
+  symbol: string;
+  bids: OrderBookEntry[];
+  asks: OrderBookEntry[];
+  spread: number;
+  timestamp: string;
+}
+
+export interface PortfolioOptimization {
+  recommendations: OptimizationRecommendation[];
+  currentAllocation: AllocationItem[];
+  optimizedAllocation: AllocationItem[];
+  expectedReturn: number;
+  expectedVolatility: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  correlationMatrix: CorrelationMatrix;
+}
+
+export interface OptimizationRecommendation {
+  id: string;
+  type: 'rebalance' | 'add_position' | 'reduce_position' | 'close_position';
+  symbol: string;
+  currentWeight: number;
+  recommendedWeight: number;
+  reason: string;
+  impact: 'high' | 'medium' | 'low';
+  priority: number;
+}
+
+export interface AllocationItem {
+  symbol: string;
+  weight: number;
+  value: number;
+  quantity: number;
+  sector: string;
+}
+
+export interface CorrelationMatrix {
+  symbols: string[];
+  matrix: number[][];
+}
+
+export interface AdvancedTradingData {
+  activeStrategies: AdvancedTradingStrategy[];
+  strategyTypes: StrategyType[];
+  riskMetrics: RiskMetric[];
+  portfolioRisk: PortfolioRisk;
+  marketData: MarketData[];
+  orderBooks: { [symbol: string]: OrderBook };
+  portfolioOptimization: PortfolioOptimization;
+  lastUpdated: string;
+}
+
+export interface StrategyDeployment {
+  id: string;
+  strategyId: string;
+  strategyName: string;
+  configuration: StrategyConfiguration;
+  status: 'pending' | 'deploying' | 'active' | 'failed';
+  deployedAt?: string;
+  error?: string;
+  progress?: number;
+}
+
+// Portfolio Types
+export interface PortfolioData {
+  totalValue: number;
+  dayChange: number;
+  dayChangePercent: number;
+  totalPnL: number;
+  totalPnLPercent: number;
+  investedAmount: number;
+  cashBalance: number;
+  availableMargin?: number;
+  usedMargin?: number;
+  marginUtilization?: number;
+  lastUpdated: string;
+}
+
+export interface PortfolioHolding {
+  id: string;
+  symbol: string;
+  companyName: string;
+  quantity: number;
+  avgPrice: number;
+  currentPrice: number;
+  marketValue: number;
+  pnl: number;
+  pnlPercent: number;
+  dayChange: number;
+  dayChangePercent: number;
+  sector: string;
+  exchange: string;
+  holdingType: 'equity' | 'derivative' | 'mutual_fund' | 'bond' | 'etf';
+  lastTradeDate: string;
+}
+
+export interface PortfolioPerformance {
+  period: '1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
+  returns: number;
+  benchmark?: number;
+  volatility: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  winRate: number;
+  dataPoints: PerformanceDataPoint[];
+}
+
+export interface PerformanceDataPoint {
+  date: string;
+  value: number;
+  benchmark?: number;
+}
+
+// Strategies Page Types
+export interface TradingStrategyInfo {
+  id: string;
+  name: string;
+  description: string;
+  type: 'manual' | 'algorithmic' | 'copy_trading' | 'ai_generated';
+  status: 'active' | 'inactive' | 'backtesting' | 'paper_trading';
+  performance: TradingStrategyPerformance;
+  riskProfile: 'low' | 'medium' | 'high';
+  minimumCapital: number;
+  timeframe: string;
+  instruments: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  isPublic: boolean;
+  followers: number;
+  rating: number;
+  tags: string[];
+}
+
+export interface TradingStrategyPerformance {
+  totalReturn: number;
+  annualizedReturn: number;
+  volatility: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  winRate: number;
+  profitFactor: number;
+  totalTrades: number;
+  avgTradeReturn: number;
+  bestTrade: number;
+  worstTrade: number;
+}
+
+// AI Studio Types
+export interface AIModel {
+  id: string;
+  name: string;
+  type: 'price_prediction' | 'sentiment_analysis' | 'pattern_recognition' | 'risk_assessment' | 'portfolio_optimization';
+  status: 'training' | 'ready' | 'deployed' | 'error';
+  accuracy: number;
+  confidence: number;
+  trainingProgress: number;
+  lastTrained: string;
+  predictions: ModelPrediction[];
+  parameters: ModelParameters;
+  performance: ModelPerformance;
+}
+
+export interface ModelPrediction {
+  id: string;
+  symbol: string;
+  prediction: number;
+  confidence: number;
+  timeframe: string;
+  createdAt: string;
+  actualOutcome?: number;
+  accuracy?: number;
+}
+
+export interface ModelParameters {
+  algorithm: string;
+  features: string[];
+  trainingPeriod: string;
+  validationSplit: number;
+  hyperparameters: { [key: string]: any };
+}
+
+export interface ModelPerformance {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+  mae: number;
+  rmse: number;
+  backtestResults: BacktestResult[];
+}
+
+export interface BacktestResult {
+  period: string;
+  returns: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  winRate: number;
+  totalTrades: number;
+}
+
+// Analytics Types
+export interface AnalyticsData {
+  overview: AnalyticsOverview;
+  performance: AnalyticsPerformance;
+  riskMetrics: AnalyticsRiskMetrics;
+  tradingActivity: TradingActivity;
+  sectorAnalysis: SectorAnalysis[];
+  correlationMatrix: CorrelationData;
+  userInsights: UserInsights;
+}
+
+export interface AnalyticsOverview {
+  totalUsers: number;
+  activeUsers: number;
+  totalTrades: number;
+  totalVolume: number;
+  profitableUsers: number;
+  averageReturn: number;
+  topPerformers: TopPerformer[];
+}
+
+export interface AnalyticsPerformance {
+  periodicReturns: PeriodicReturn[];
+  benchmarkComparison: BenchmarkData;
+  riskAdjustedReturns: RiskAdjustedReturn[];
+}
+
+export interface AnalyticsRiskMetrics {
+  portfolioVaR: number;
+  expectedShortfall: number;
+  beta: number;
+  alpha: number;
+  treynorRatio: number;
+  informationRatio: number;
+  trackingError: number;
+}
+
+export interface TradingActivity {
+  dailyVolume: VolumeData[];
+  instrumentBreakdown: InstrumentData[];
+  orderFlow: OrderFlowData[];
+  executionQuality: ExecutionMetrics;
+}
+
+export interface SectorAnalysis {
+  sector: string;
+  allocation: number;
+  performance: number;
+  risk: number;
+  momentum: number;
+}
+
+export interface CorrelationData {
+  symbols: string[];
+  matrix: number[][];
+  heatmapData: HeatmapPoint[];
+}
+
+export interface HeatmapPoint {
+  x: string;
+  y: string;
+  value: number;
+}
+
+export interface UserInsights {
+  behaviorPatterns: BehaviorPattern[];
+  recommendations: Recommendation[];
+  alerts: InsightAlert[];
+}
+
+export interface BehaviorPattern {
+  pattern: string;
+  frequency: number;
+  impact: 'positive' | 'negative' | 'neutral';
+  suggestion: string;
+}
+
+export interface Recommendation {
+  id: string;
+  type: 'rebalance' | 'new_opportunity' | 'risk_warning' | 'performance_tip';
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  actionable: boolean;
+}
+
+export interface InsightAlert {
+  id: string;
+  type: 'warning' | 'opportunity' | 'milestone';
+  message: string;
+  severity: 'low' | 'medium' | 'high';
+  timestamp: string;
+}
+
+// Custom Tools Types
+export interface CustomTool {
+  id: string;
+  name: string;
+  description: string;
+  type: 'screener' | 'calculator' | 'analyzer' | 'monitor' | 'alerts';
+  category: 'technical' | 'fundamental' | 'risk' | 'portfolio' | 'market';
+  parameters: ToolParameter[];
+  results: ToolResult[];
+  isActive: boolean;
+  createdBy: string;
+  createdAt: string;
+  lastUsed: string;
+  usageCount: number;
+  isPremium: boolean;
+}
+
+export interface ToolParameter {
+  id: string;
+  name: string;
+  type: 'number' | 'string' | 'boolean' | 'select' | 'multiselect' | 'date' | 'daterange';
+  label: string;
+  description?: string;
+  required: boolean;
+  defaultValue?: any;
+  options?: ToolOption[];
+  validation?: ParameterValidation;
+}
+
+export interface ToolOption {
+  value: any;
+  label: string;
+  description?: string;
+}
+
+export interface ParameterValidation {
+  min?: number;
+  max?: number;
+  pattern?: string;
+  customValidator?: string;
+}
+
+export interface ToolResult {
+  id: string;
+  timestamp: string;
+  parameters: { [key: string]: any };
+  data: any;
+  metadata: ToolResultMetadata;
+}
+
+export interface ToolResultMetadata {
+  executionTime: number;
+  dataPoints: number;
+  accuracy?: number;
+  confidence?: number;
+  source: string;
+}
+
+// Quick Tips Types
+export interface QuickTip {
+  id: string;
+  title: string;
+  content: string;
+  type: 'strategy' | 'risk' | 'technical' | 'fundamental' | 'market' | 'portfolio';
+  category: 'beginner' | 'intermediate' | 'advanced';
+  priority: number;
+  isPersonalized: boolean;
+  userRoles: ('BASIC' | 'PRO' | 'ELITE' | 'ADMIN' | 'STAFF')[];
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  viewCount: number;
+  helpfulCount: number;
+  relatedSymbols?: string[];
+  actionable?: boolean;
+  action?: TipAction;
+}
+
+export interface TipAction {
+  type: 'navigate' | 'execute' | 'alert' | 'learn_more';
+  target: string;
+  label: string;
+  parameters?: { [key: string]: any };
+}
+
+// Supporting Types
+export interface TopPerformer {
+  userId: string;
+  username: string;
+  returns: number;
+  sharpeRatio: number;
+  risk: string;
+}
+
+export interface PeriodicReturn {
+  period: string;
+  returns: number;
+  benchmark: number;
+  outperformance: number;
+}
+
+export interface BenchmarkData {
+  name: string;
+  returns: number;
+  correlation: number;
+  beta: number;
+  alpha: number;
+}
+
+export interface RiskAdjustedReturn {
+  metric: string;
+  value: number;
+  benchmark: number;
+  percentile: number;
+}
+
+export interface VolumeData {
+  date: string;
+  volume: number;
+  value: number;
+  trades: number;
+}
+
+export interface InstrumentData {
+  instrument: string;
+  volume: number;
+  percentage: number;
+  avgPrice: number;
+}
+
+export interface OrderFlowData {
+  time: string;
+  buyVolume: number;
+  sellVolume: number;
+  netFlow: number;
+  price: number;
+}
+
+export interface ExecutionMetrics {
+  avgSlippage: number;
+  fillRate: number;
+  avgExecutionTime: number;
+  priceImprovement: number;
 }

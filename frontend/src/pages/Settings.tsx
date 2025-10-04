@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -27,6 +27,9 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  Skeleton,
+  CircularProgress,
+  Snackbar,
 } from '@mui/material';
 import {
   Person,
@@ -44,6 +47,9 @@ import {
   Add,
   Refresh,
   Close,
+  ErrorOutline,
+  CloudUpload,
+  CloudDownload,
 } from '@mui/icons-material';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
@@ -51,9 +57,22 @@ import { setThemeMode } from '../store/slices/themeSlice';
 import { updateUserProfile } from '../store/slices/authSlice';
 import { RootState } from '../store';
 import EmailConfiguration from '../components/settings/EmailConfiguration';
+import apiService from '../services/api';
+import {
+  UserSettings,
+  UserProfile,
+  NotificationSettings,
+  SecuritySettings,
+  SubscriptionSettings,
+  BillingSettings,
+  BillingRecord,
+  ThemeSettings
+} from '../types';
 
 const Settings: React.FC = () => {
   const dispatch = useDispatch();
+  
+  // UI State
   const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'notifications' | 'preferences' | 'subscription' | 'billing' | 'email' | 'brokers'>('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [upgradeDialog, setUpgradeDialog] = useState(false);
@@ -62,11 +81,30 @@ const Settings: React.FC = () => {
   const [brokerManageDialog, setBrokerManageDialog] = useState(false);
   const [selectedBrokerForManage, setSelectedBrokerForManage] = useState<any>(null);
   const [syncingAccounts, setSyncingAccounts] = useState(false);
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    sms: true,
-    whatsapp: true
+  
+  // Data State
+  const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
+  const [billingHistory, setBillingHistory] = useState<BillingRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  
+  // Notification state from API data
+  const [notifications, setNotifications] = useState<NotificationSettings>({
+    email_notifications: true,
+    push_notifications: true,
+    sms_notifications: true,
+    whatsapp_notifications: true,
+    price_alerts: true,
+    portfolio_updates: true,
+    news_alerts: true,
+    system_maintenance: true,
+    marketing_emails: false,
+    weekly_reports: true,
+    monthly_statements: true,
+    trade_confirmations: true,
   });
   
   const user = useSelector((state: any) => state.auth.user);
@@ -76,29 +114,80 @@ const Settings: React.FC = () => {
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
   
   const [formData, setFormData] = useState({
-    firstName: effectiveUser?.first_name || 'John',
-    lastName: effectiveUser?.last_name || 'Doe',
-    email: effectiveUser?.email || 'john.doe@example.com',
-    phone: effectiveUser?.phone_number || '+91-9876543210',
-    timezone: effectiveUser?.timezone || 'Asia/Kolkata',
-    language: effectiveUser?.language || 'English',
-    currency: effectiveUser?.currency || 'INR',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    timezone: 'Asia/Kolkata',
+    language: 'English',
+    currency: 'INR',
   });
   
-  // Update form data when user data changes in Redux
-  useEffect(() => {
-    if (effectiveUser) {
+  // Fetch all user settings
+  const fetchUserSettings = useCallback(async () => {
+    try {
+      setError(null);
+      const settings = await apiService.getUserSettings();
+      setUserSettings(settings);
+      
+      // Update form data with actual user data
       setFormData({
-        firstName: effectiveUser.first_name || 'John',
-        lastName: effectiveUser.last_name || 'Doe',
-        email: effectiveUser.email || 'john.doe@example.com',
-        phone: effectiveUser.phone_number || '+91-9876543210',
-        timezone: effectiveUser.timezone || 'Asia/Kolkata',
-        language: effectiveUser.language || 'English',
-        currency: effectiveUser.currency || 'INR',
+        firstName: settings.profile.first_name || '',
+        lastName: settings.profile.last_name || '',
+        email: settings.profile.email || '',
+        phone: settings.profile.phone_number || '',
+        timezone: settings.profile.timezone || 'Asia/Kolkata',
+        language: settings.profile.language || 'English',
+        currency: settings.profile.currency || 'INR',
       });
+      
+      // Update notification settings
+      setNotifications(settings.notifications);
+      
+    } catch (error: any) {
+      console.error('Failed to fetch user settings:', error);
+      setError(error.response?.data?.detail || 'Failed to load settings');
+      
+      // Fallback to user data from Redux if available
+      if (effectiveUser) {
+        setFormData({
+          firstName: effectiveUser.first_name || '',
+          lastName: effectiveUser.last_name || '',
+          email: effectiveUser.email || '',
+          phone: effectiveUser.phone_number || '',
+          timezone: effectiveUser.timezone || 'Asia/Kolkata',
+          language: effectiveUser.language || 'English',
+          currency: effectiveUser.currency || 'INR',
+        });
+      }
     }
   }, [effectiveUser]);
+
+  // Fetch billing history
+  const fetchBillingHistory = useCallback(async () => {
+    try {
+      const history = await apiService.getBillingHistory();
+      setBillingHistory(history);
+    } catch (error: any) {
+      console.error('Failed to fetch billing history:', error);
+      // Use empty array as fallback
+      setBillingHistory([]);
+    }
+  }, []);
+
+  // Initialize settings
+  useEffect(() => {
+    const initializeSettings = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchUserSettings(),
+        fetchBillingHistory()
+      ]);
+      setLoading(false);
+    };
+
+    initializeSettings();
+  }, [fetchUserSettings, fetchBillingHistory]);
   
   // Theme configuration
   const getThemeColors = (mode: 'light' | 'dark' | 'auto') => {
@@ -203,10 +292,11 @@ const Settings: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      console.log('Saving settings:', formData);
+      setSaving(true);
+      setError(null);
       
       // Prepare the data for API call
-      const profileData = {
+      const profileData: Partial<UserProfile> = {
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
@@ -216,37 +306,85 @@ const Settings: React.FC = () => {
         currency: formData.currency,
       };
       
-      // Dispatch Redux action to update profile
+      // Update profile via API
+      await apiService.updateUserSettings(profileData);
+      
+      // Also dispatch Redux action to update local state
       const resultAction = await dispatch(updateUserProfile(profileData) as any);
       
       if (updateUserProfile.fulfilled.match(resultAction)) {
         console.log('Profile updated successfully:', resultAction.payload);
         setIsEditing(false);
+        setSuccessMessage('Profile settings saved successfully!');
         
-        // Show success message
-        alert('Profile settings saved successfully!');
+        // Refresh settings data
+        await fetchUserSettings();
       } else {
         throw new Error(resultAction.payload || 'Failed to update profile');
       }
       
     } catch (error: any) {
       console.error('Failed to update profile:', error);
-      alert(error.message || 'Failed to update profile. Please try again.');
+      setError(error.response?.data?.detail || error.message || 'Failed to update profile. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleNotificationToggle = (type: keyof typeof notifications) => {
-    setNotifications(prev => ({ ...prev, [type]: !prev[type] }));
-    console.log(`${type} notifications ${notifications[type] ? 'disabled' : 'enabled'}`);
+  const handleNotificationToggle = async (type: keyof NotificationSettings) => {
+    try {
+      const updatedNotifications = { ...notifications, [type]: !notifications[type] };
+      setNotifications(updatedNotifications);
+      
+      // Update via API
+      await apiService.updateNotificationSettings({ [type]: !notifications[type] });
+      setSuccessMessage(`${type.replace('_', ' ')} notifications ${notifications[type] ? 'disabled' : 'enabled'}`);
+      
+    } catch (error: any) {
+      console.error('Failed to update notifications:', error);
+      // Revert the change
+      setNotifications(notifications);
+      setError('Failed to update notification settings');
+    }
   };
 
-  const handleDownloadInvoice = (month: string) => {
-    console.log(`Downloading invoice for ${month}`);
-    alert(`Invoice for ${month} would be downloaded in a real application.`);
+  const handleDownloadInvoice = async (invoiceId: string) => {
+    try {
+      const blob = await apiService.downloadInvoice(invoiceId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `invoice-${invoiceId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setSuccessMessage('Invoice downloaded successfully!');
+    } catch (error: any) {
+      console.error('Failed to download invoice:', error);
+      setError('Failed to download invoice. Please try again.');
+    }
   };
 
   const handleUpdatePayment = () => {
     setPaymentDialog(true);
+  };
+
+  const handleRefreshData = async () => {
+    try {
+      setRefreshing(true);
+      await Promise.all([
+        fetchUserSettings(),
+        fetchBillingHistory()
+      ]);
+      setSuccessMessage('Settings refreshed successfully!');
+    } catch (error: any) {
+      console.error('Failed to refresh data:', error);
+      setError('Failed to refresh data');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleChangePassword = () => {
@@ -336,8 +474,9 @@ const Settings: React.FC = () => {
         </Typography>
         <Button
           variant={isEditing ? 'contained' : 'outlined'}
-          startIcon={isEditing ? <Save /> : <Edit />}
+          startIcon={saving ? <CircularProgress size={20} color="inherit" /> : (isEditing ? <Save /> : <Edit />)}
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
+          disabled={saving}
           sx={{
             color: isEditing ? 'white' : '#374151',
             borderColor: '#d1d5db',
@@ -347,7 +486,7 @@ const Settings: React.FC = () => {
             },
           }}
         >
-          {isEditing ? 'Save Changes' : 'Edit Profile'}
+          {saving ? 'Saving...' : (isEditing ? 'Save Changes' : 'Edit Profile')}
         </Button>
       </Box>
 
@@ -550,8 +689,8 @@ const Settings: React.FC = () => {
           />
           <ListItemSecondaryAction>
             <Switch 
-              checked={notifications.email} 
-              onChange={() => handleNotificationToggle('email')}
+              checked={notifications.email_notifications}
+              onChange={() => handleNotificationToggle('email_notifications')}
             />
           </ListItemSecondaryAction>
         </ListItem>
@@ -563,8 +702,8 @@ const Settings: React.FC = () => {
           />
           <ListItemSecondaryAction>
             <Switch 
-              checked={notifications.push}
-              onChange={() => handleNotificationToggle('push')}
+              checked={notifications.push_notifications}
+              onChange={() => handleNotificationToggle('push_notifications')}
             />
           </ListItemSecondaryAction>
         </ListItem>
@@ -576,9 +715,9 @@ const Settings: React.FC = () => {
           />
           <ListItemSecondaryAction>
             <Switch 
-              checked={notifications.sms && tierFeatures.advancedNotifications}
+              checked={notifications.sms_notifications && tierFeatures.advancedNotifications}
               disabled={!tierFeatures.advancedNotifications}
-              onChange={() => handleNotificationToggle('sms')}
+              onChange={() => handleNotificationToggle('sms_notifications')}
             />
           </ListItemSecondaryAction>
         </ListItem>
@@ -590,9 +729,9 @@ const Settings: React.FC = () => {
           />
           <ListItemSecondaryAction>
             <Switch 
-              checked={notifications.whatsapp && tierFeatures.advancedNotifications}
+              checked={notifications.whatsapp_notifications && tierFeatures.advancedNotifications}
               disabled={!tierFeatures.advancedNotifications}
-              onChange={() => handleNotificationToggle('whatsapp')}
+              onChange={() => handleNotificationToggle('whatsapp_notifications')}
             />
           </ListItemSecondaryAction>
         </ListItem>
@@ -947,38 +1086,56 @@ const Settings: React.FC = () => {
         Recent Invoices
       </Typography>
       <List>
-        <ListItem>
-          <ListItemText
-            primary="January 2025"
-            secondary={`${tierFeatures.label} - ${tierFeatures.price}`}
-          />
-          <ListItemSecondaryAction>
-            <Button 
-              variant="outlined" 
-              size="small"
-              disabled={!tierFeatures.portfolioExport}
-              onClick={() => handleDownloadInvoice('January 2025')}
-            >
-              Download
-            </Button>
-          </ListItemSecondaryAction>
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="December 2024"
-            secondary={`${tierFeatures.label} - ${tierFeatures.price}`}
-          />
-          <ListItemSecondaryAction>
-            <Button 
-              variant="outlined" 
-              size="small"
-              disabled={!tierFeatures.portfolioExport}
-              onClick={() => handleDownloadInvoice('January 2025')}
-            >
-              Download
-            </Button>
-          </ListItemSecondaryAction>
-        </ListItem>
+        {loading ? (
+          // Loading skeletons
+          Array.from({ length: 3 }).map((_, index) => (
+            <ListItem key={index}>
+              <ListItemText
+                primary={<Skeleton width="40%" height={20} />}
+                secondary={<Skeleton width="60%" height={16} />}
+              />
+              <ListItemSecondaryAction>
+                <Skeleton variant="rectangular" width={80} height={32} />
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))
+        ) : billingHistory.length === 0 ? (
+          <ListItem>
+            <ListItemText
+              primary="No billing history"
+              secondary="Your billing history will appear here once you make your first payment"
+            />
+          </ListItem>
+        ) : (
+          billingHistory.map((record) => (
+            <ListItem key={record.id}>
+              <ListItemText
+                primary={new Date(record.date).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long' 
+                })}
+                secondary={`${record.description} - ${record.currency} ${record.amount.toLocaleString()}`}
+              />
+              <ListItemSecondaryAction>
+                <Chip
+                  label={record.status.toUpperCase()}
+                  size="small"
+                  color={record.status === 'paid' ? 'success' : record.status === 'failed' ? 'error' : 'warning'}
+                  sx={{ mr: 1 }}
+                />
+                {record.pdf_url && (
+                  <Button 
+                    variant="outlined" 
+                    size="small"
+                    onClick={() => handleDownloadInvoice(record.id)}
+                  >
+                    Download
+                  </Button>
+                )}
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))
+        )}
       </List>
     </Paper>
   );
@@ -1234,6 +1391,45 @@ const Settings: React.FC = () => {
       default: return renderProfileSettings();
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh',
+        backgroundColor: theme.background,
+        transition: 'background-color 0.3s ease',
+      }}>
+        <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
+          <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: theme.text.primary }}>
+            Settings
+            <IconButton onClick={handleRefreshData} disabled={refreshing} sx={{ ml: 2 }}>
+              {refreshing ? <CircularProgress size={20} /> : <Refresh />}
+            </IconButton>
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={3}>
+              <Paper sx={{ p: 2, background: theme.surface, border: `1px solid ${theme.border}` }}>
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <Box key={index} sx={{ mb: 2 }}>
+                    <Skeleton variant="rectangular" height={40} sx={{ borderRadius: 1 }} />
+                  </Box>
+                ))}
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={9}>
+              <Paper sx={{ p: 4, background: theme.surface, border: `1px solid ${theme.border}` }}>
+                <Skeleton variant="text" width="30%" height={32} sx={{ mb: 3 }} />
+                <Skeleton variant="rectangular" height={200} sx={{ mb: 2 }} />
+                <Skeleton variant="rectangular" height={100} />
+              </Paper>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ 
@@ -1544,6 +1740,29 @@ const Settings: React.FC = () => {
           <Button onClick={() => setBrokerManageDialog(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Success/Error Snackbars */}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
+        onClose={() => setSuccessMessage('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setSuccessMessage('')} severity="success" sx={{ width: '100%' }}>
+          {successMessage}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={8000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
 
       </Container>
     </Box>
