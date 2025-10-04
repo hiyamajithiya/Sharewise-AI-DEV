@@ -9,10 +9,11 @@ const LiveMarketWidget: React.FC = () => {
   useEffect(() => {
     const fetchMarketData = async () => {
       try {
-        const token = localStorage.getItem('access_token');
+        const authTokens = localStorage.getItem('auth_tokens');
+        const tokens = authTokens ? JSON.parse(authTokens) : null;
         const response = await fetch('/api/market-data/quote/AAPL/', {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${tokens?.access}`,
             'Content-Type': 'application/json',
           },
         });

@@ -423,19 +423,19 @@ const SupportCenter: React.FC = () => {
                           </ListItemAvatar>
                           <ListItemText
                             primary={
-                              <Box sx={{ mb: 1 }}>
+                              <Typography component="div" sx={{ mb: 1 }}>
                                 <Skeleton variant="text" width="80%" height={24} />
-                                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                                <Typography component="div" sx={{ display: 'flex', gap: 1, mt: 1 }}>
                                   <Skeleton variant="rectangular" width={60} height={20} />
                                   <Skeleton variant="rectangular" width={70} height={20} />
-                                </Box>
-                              </Box>
+                                </Typography>
+                              </Typography>
                             }
                             secondary={
-                              <Box>
+                              <Typography component="div">
                                 <Skeleton variant="text" width="90%" height={20} />
                                 <Skeleton variant="text" width="40%" height={16} />
-                              </Box>
+                              </Typography>
                             }
                           />
                         </ListItem>
@@ -471,7 +471,10 @@ const SupportCenter: React.FC = () => {
                           </ListItemAvatar>
                           <ListItemText
                             primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1, flexWrap: 'wrap' }}>
+                              <Typography 
+                                component="div" 
+                                sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1, flexWrap: 'wrap' }}
+                              >
                                 <Typography variant="body1" sx={{ color: '#1F2937', fontWeight: 600 }}>
                                   {ticket.title}
                                 </Typography>
@@ -485,17 +488,17 @@ const SupportCenter: React.FC = () => {
                                   size="small"
                                   color={getStatusColor(ticket.status) as any}
                                 />
-                              </Box>
+                              </Typography>
                             }
                             secondary={
-                              <Box>
+                              <Typography component="div">
                                 <Typography variant="body2" sx={{ color: '#374151' }}>
                                   {ticket.id} • {ticket.user} • Assigned to {ticket.assignedTo}
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
                                   {formatTimeAgo(ticket.createdAt)}
                                 </Typography>
-                              </Box>
+                              </Typography>
                             }
                           />
                         </ListItem>

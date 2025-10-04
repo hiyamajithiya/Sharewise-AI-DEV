@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/portfolio/', include('apps.portfolios.urls')),
     path('api/market-data/', include('apps.market_data.urls')),
     path('api/audit/', include('apps.audit.urls')),
+    path('api/support/', include('support.urls')),
     path('api/system/', include('system_config.urls')),
     path('', include('system_config.urls')),  # Health checks at root level
 ]
