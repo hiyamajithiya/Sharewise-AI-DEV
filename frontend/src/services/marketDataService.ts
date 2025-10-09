@@ -297,17 +297,32 @@ export const marketDataService = new MarketDataService();
 
 // REST API methods for market data
 export class MarketDataAPI {
+  private static API_BASE_URL: string = (process.env.REACT_APP_API_URL as string) || 'http://localhost:8000/api';
+
   private static getHeaders() {
-    const token = localStorage.getItem('access_token');
-    return {
+    let accessToken: string | undefined;
+    try {
+      const stored = localStorage.getItem('auth_tokens');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        accessToken = parsed?.access;
+      }
+    } catch (_) {
+      // ignore parsing errors and proceed without token
+    }
+
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
     };
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+    return headers;
   }
 
   static async getQuote(symbol: string): Promise<MarketQuote | null> {
     try {
-      const response = await fetch(`/api/market-data/quote/${symbol}/`, {
+      const response = await fetch(`${this.API_BASE_URL}/market-data/quote/${encodeURIComponent(symbol)}/`, {
         headers: this.getHeaders()
       });
 
@@ -325,7 +340,7 @@ export class MarketDataAPI {
 
   static async getBulkQuotes(symbols: string[]): Promise<{ [symbol: string]: MarketQuote }> {
     try {
-      const response = await fetch('/api/market-data/quotes/bulk/', {
+      const response = await fetch(`${this.API_BASE_URL}/market-data/quotes/bulk/`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({ symbols })
@@ -345,7 +360,7 @@ export class MarketDataAPI {
 
   static async getOptionChain(underlying: string, expiry?: string): Promise<OptionChainData | null> {
     try {
-      const url = new URL(`/api/market-data/option-chain/${underlying}/`, window.location.origin);
+      const url = new URL(`${this.API_BASE_URL}/market-data/option-chain/${encodeURIComponent(underlying)}/`);
       if (expiry) {
         url.searchParams.append('expiry', expiry);
       }
@@ -368,7 +383,7 @@ export class MarketDataAPI {
 
   static async getMarketStatus(): Promise<any> {
     try {
-      const response = await fetch('/api/market-data/market-status/', {
+      const response = await fetch(`${this.API_BASE_URL}/market-data/market-status/`, {
         headers: this.getHeaders()
       });
 
@@ -385,7 +400,7 @@ export class MarketDataAPI {
 
   static async searchSymbols(query: string): Promise<any[]> {
     try {
-      const response = await fetch(`/api/market-data/search/?q=${encodeURIComponent(query)}`, {
+      const response = await fetch(`${this.API_BASE_URL}/market-data/search/?q=${encodeURIComponent(query)}`, {
         headers: this.getHeaders()
       });
 
@@ -403,7 +418,7 @@ export class MarketDataAPI {
 
   static async subscribeToSymbols(symbols: string[]): Promise<any> {
     try {
-      const response = await fetch('/api/market-data/subscribe/', {
+      const response = await fetch(`${this.API_BASE_URL}/market-data/subscribe/`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({ symbols })

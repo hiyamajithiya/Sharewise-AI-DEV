@@ -38,6 +38,7 @@ import {
   Assignment,
   ContactSupport,
   Link,
+  ShowChart,
 } from '@mui/icons-material';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectUser, logoutUser } from '../../store/slices/authSlice';
@@ -49,9 +50,10 @@ const drawerWidth = 240;
 const roleBasedMenuItems = {
   SUPER_ADMIN: [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
+    { text: 'Trading', icon: <TrendingUp />, path: '/trading' },
     { text: 'User Management', icon: <People />, path: '/users' },
     { text: 'System Analytics', icon: <BarChart />, path: '/analytics' },
-    { text: 'Trading Monitor', icon: <TrendingUp />, path: '/trading-monitor' },
+    { text: 'Trading Monitor', icon: <ShowChart />, path: '/trading-monitor' },
     { text: 'Support Center', icon: <Support />, path: '/support-center' },
     { text: 'System Settings', icon: <AdminPanelSettings />, path: '/system-settings' },
   ],
@@ -87,6 +89,7 @@ const roleBasedMenuItems = {
   ],
   USER_ELITE: [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
+    { text: 'Trading', icon: <TrendingUp />, path: '/trading' },
     { text: 'Advanced Trading', icon: <TrendingUp />, path: '/advanced-trading' },
     { text: 'Quick Trade', icon: <Psychology />, path: '/trading?mode=quick' },
     { text: 'Portfolio', icon: <AccountBalance />, path: '/portfolio' },
@@ -216,29 +219,46 @@ const Layout: React.FC = () => {
               selected={location.pathname === item.path}
               onClick={() => handleMenuItemClick(item.path)}
               sx={{
-                py: 1.5,
-                px: 2,
+                py: 1,
+                px: 1,
                 borderRadius: '12px',
-                color: 'white',
+                transition: 'all 0.2s ease-in-out',
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
                 },
                 '&.Mui-selected': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                   '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
                   },
                 },
               }}
             >
-              <ListItemIcon sx={{ minWidth: 40, color: 'white' }}>
+              <ListItemIcon sx={{ 
+                minWidth: 40, 
+                color: '#FFFFFF',
+                opacity: 1,
+                transition: 'color 0.2s ease-in-out',
+                '& .MuiSvgIcon-root': {
+                  color: '#FFFFFF',
+                  opacity: 1
+                }
+              }}>
                 {item.icon}
               </ListItemIcon>
               <ListItemText 
                 primary={item.text}
                 primaryTypographyProps={{
                   fontWeight: location.pathname === item.path ? 600 : 400,
-                  fontSize: '0.875rem'
+                  fontSize: '0.875rem',
+                  color: 'rgba(255, 255, 255, 0.9)'
+                }}
+                sx={{
+                  '& .MuiListItemText-primary': {
+                    transition: 'all 0.2s ease-in-out'
+                  }
                 }}
               />
             </ListItemButton>

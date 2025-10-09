@@ -1,0 +1,124 @@
+┌─────────────────────────────────────────────────────────────────────┐
+│ 1. API KEY STORAGE (Backend Only - Never Exposed)                   │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  backend/.env:                                                       │
+│  FINNHUB_API_KEY=d3a4vopr01qli8jcmumgd3a4vopr01qli8jcmun0          │
+│                                                                      │
+│  backend/apps/market_data/services.py (Line 223):                   │
+│  finnhub_api_key = settings.FINNHUB_API_KEY or 'fallback_key'      │
+│                                                                      │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ 2. BACKEND SERVICE USES KEY TO FETCH DATA FROM PROVIDER             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  FinnhubDataProvider (services.py):                                 │
+│  - Receives API key in constructor                                  │
+│  - Makes HTTP request to Finnhub API                                │
+│  - Adds key to request: params={'token': self.api_key}             │
+│                                                                      │
+│  Request: https://finnhub.io/api/v1/quote?symbol=AAPL&token=KEY    │
+│                                                                      │
+│  Response from Finnhub:                                             │
+│  {                                                                   │
+│    "c": 150.25,  // current price                                   │
+│    "h": 152.00,  // high                                            │
+│    "l": 149.50,  // low                                             │
+│    "o": 150.00,  // open                                            │
+│    "pc": 148.75  // previous close                                  │
+│  }                                                                   │
+│                                                                      │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ 3. BACKEND VIEW NORMALIZES & EXPOSES AS SAFE API ENDPOINT           │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  backend/apps/market_data/views.py - get_stock_quote():            │
+│                                                                      │
+│  @api_view(['GET'])                                                  │
+│  @permission_classes([IsAuthenticated])                             │
+│  def get_stock_quote(request, symbol):                              │
+│      service = get_market_data_service()                            │
+│      quote_data = service.providers['finnhub'].get_quote(symbol)   │
+│                                                                      │
+│      return Response({                                               │
+│          'status': 'success',                                        │
+│          'symbol': symbol,                                           │
+│          'data': {                                                   │
+│              'last_price': 150.25,                                  │
+│              'change': 1.50,                                        │
+│              'change_percent': 1.01,                                │
+│              'high_price': 152.00,                                  │
+│              'low_price': 149.50,                                   │
+│              'open_price': 150.00,                                  │
+│              'previous_close': 148.75,                              │
+│              'timestamp': '2025-10-09T10:30:00',                    │
+│              'data_source': 'FINNHUB'                               │
+│          }                                                           │
+│      })                                                              │
+│                                                                      │
+│  Endpoint: GET /api/market-data/quote/AAPL/                        │
+│  (NO API KEY IN RESPONSE - It's hidden on backend!)                │
+│                                                                      │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ 4. FRONTEND SERVICE CALLS BACKEND (NO KEY NEEDED)                   │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  frontend/src/services/marketDataService.ts:                        │
+│                                                                      │
+│  static async getQuote(symbol: string) {                            │
+│      const response = await fetch(                                  │
+│          `/api/market-data/quote/${symbol}/`,                       │
+│          { headers: { 'Authorization': `Bearer ${userToken}` } }    │
+│      );                                                              │
+│      return response.json();                                        │
+│  }                                                                   │
+│                                                                      │
+│  // Also in api.ts:                                                 │
+│  async getQuote(symbol: string) {                                   │
+│      return await this.api.get(`/market-data/quote/${symbol}/`);   │
+│  }                                                                   │
+│                                                                      │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ 5. REACT COMPONENT USES DATA & DISPLAYS IN UI                       │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  frontend/src/pages/Trading.tsx (Lines 240-250):                    │
+│                                                                      │
+│  // Load quotes when component mounts                               │
+│  useEffect(() => {                                                  │
+│      const loadInitialQuotes = async () => {                        │
+│          const quotes = await MarketDataAPI.getBulkQuotes([        │
+│              'NIFTY', 'BANKNIFTY', 'RELIANCE', 'TCS'              │
+│          ]);                                                         │
+│          setMarketQuotes(quotes);  // Store in state                │
+│      };                                                              │
+│      loadInitialQuotes();                                           │
+│  }, []);                                                             │
+│                                                                      │
+│  // Display the data (Lines 254-266):                               │
+│  const getRealTimePrice = (symbol: string) => {                     │
+│      const quote = marketQuotes[symbol];                            │
+│      return quote ? quote.last_price : null;                        │
+│  };                                                                  │
+│                                                                      │
+│  // In the JSX (rendered UI):                                       │
+│  <Typography variant="h4">                                          │
+│      ₹{getRealTimePrice('RELIANCE')}                                │
+│  </Typography>                                                       │
+│  <Typography color={change >= 0 ? 'success' : 'error'}>            │
+│      {formatChangeDisplay(change, changePercent)}                   │
+│  </Typography>                                                       │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘

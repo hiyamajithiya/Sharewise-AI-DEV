@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/material';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
+import { MarketDataAPI } from '../../services/marketDataService';
 
 const LiveMarketWidget: React.FC = () => {
   const [marketData, setMarketData] = useState<any>(null);
@@ -9,18 +10,8 @@ const LiveMarketWidget: React.FC = () => {
   useEffect(() => {
     const fetchMarketData = async () => {
       try {
-        const authTokens = localStorage.getItem('auth_tokens');
-        const tokens = authTokens ? JSON.parse(authTokens) : null;
-        const response = await fetch('/api/market-data/quote/AAPL/', {
-          headers: {
-            'Authorization': `Bearer ${tokens?.access}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        const data = await response.json();
-        if (data.status === 'success') {
-          setMarketData(data.data);
-        }
+        const quote = await MarketDataAPI.getQuote('AAPL');
+        if (quote) setMarketData(quote);
       } catch (error) {
         console.error('Failed to fetch market data:', error);
       } finally {

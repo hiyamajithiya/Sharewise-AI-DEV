@@ -10,6 +10,7 @@ app_name = 'market_data'
 urlpatterns = [
     # Your working simple endpoints
     path('quote/<str:symbol>/', views.get_stock_quote, name='stock_quote'),
+    path('quotes/bulk/', views.get_bulk_quotes, name='bulk_quotes'),
     path('search/', views.search_stocks, name='search_stocks'),
     path('news/', views.get_market_news, name='market_news'),
     

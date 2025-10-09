@@ -53,6 +53,58 @@ def get_stock_quote(request, symbol):
             'message': 'Failed to fetch quote data'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_bulk_quotes(request):
+    """Get quotes for multiple symbols in one call
+
+    Expected body: { "symbols": ["AAPL", "MSFT", ...] }
+    Returns: { status, data: { symbol: quote, ... } }
+    """
+    try:
+        symbols = request.data.get('symbols') or []
+        if not isinstance(symbols, list) or not symbols:
+            return Response({
+                'status': 'error',
+                'message': 'symbols must be a non-empty array'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        async def fetch_all():
+            service = await get_market_data_service()
+            results = {}
+            # Prefer finnhub provider if available
+            provider = service.providers.get('finnhub') or next(iter(service.providers.values()), None)
+            if not provider:
+                return results
+
+            for sym in symbols:
+                try:
+                    quote = await provider.get_quote(sym)
+                    if quote:
+                        results[sym] = {
+                            'symbol': quote.get('symbol', sym),
+                            'last_price': float(quote.get('last_price', 0)),
+                            'change': float(quote.get('change', 0)),
+                            'change_percent': float(quote.get('change_percent', 0)),
+                            'volume': float(quote.get('volume', 0)) if quote.get('volume') is not None else 0,
+                            'timestamp': quote.get('timestamp').isoformat() if quote.get('timestamp') else None,
+                        }
+                except Exception as inner_e:
+                    logger.warning(f"Failed to fetch quote for {sym}: {inner_e}")
+            return results
+
+        data = asyncio.run(fetch_all())
+        return Response({
+            'status': 'success',
+            'data': data
+        })
+    except Exception as e:
+        logger.error(f"Error in bulk quotes: {e}")
+        return Response({
+            'status': 'error',
+            'message': 'Failed to fetch bulk quotes'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def search_stocks(request):

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { MarketDataAPI } from '../services/marketDataService';
 
 interface MarketQuote {
   symbol: string;
@@ -27,21 +28,11 @@ export const useLiveMarketData = (symbols: string[] = ['AAPL', 'GOOGL', 'MSFT', 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('access_token');
         const data: Record<string, MarketQuote> = {};
-        
         for (const symbol of symbols) {
           try {
-            const response = await fetch(`/api/market-data/quote/${symbol}/`, {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-              data[symbol] = result.data;
-            }
+            const quote = await MarketDataAPI.getQuote(symbol);
+            if (quote) data[symbol] = quote as any;
           } catch (error) {
             console.error(`Failed to fetch ${symbol}:`, error);
           }

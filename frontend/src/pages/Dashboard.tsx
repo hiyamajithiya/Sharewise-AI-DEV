@@ -1469,16 +1469,6 @@ const Dashboard: React.FC = () => {
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#6B7280', fontSize: '1rem', lineHeight: 1.4 }}>
                       Here's what's happening with your trading portfolio today
-                      {lastRefreshed && (
-                        <Typography component="span" variant="caption" sx={{ ml: 1, color: '#9CA3AF' }}>
-                          • Last updated: {formatTimeAgo(lastRefreshed)}
-                        </Typography>
-                      )}
-                      {error && (
-                        <Alert severity="warning" sx={{ mt: 1, py: 0.5 }}>
-                          Some data may be outdated due to connectivity issues
-                        </Alert>
-                      )}
                     </Typography>
                   </Box>
                   
@@ -1489,28 +1479,6 @@ const Dashboard: React.FC = () => {
                     
                     return (
                       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                        {/* Refresh button - available to all roles */}
-                        <IconButton
-                          onClick={handleRefreshData}
-                          disabled={refreshing}
-                          sx={{
-                            ...styles.animatedButton,
-                            width: 48,
-                            height: 48,
-                            '&:hover': {
-                              ...styles.animatedButton['&:hover'],
-                              '& svg': {
-                                transform: 'rotate(180deg)',
-                              }
-                            },
-                            '& svg': {
-                              transition: 'transform 0.3s ease',
-                            }
-                          }}
-                        >
-                          {refreshing ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <Refresh sx={{ color: 'white' }} />}
-                        </IconButton>
-                        
                         {/* Role-specific action buttons */}
                         {userRole === 'SUPER_ADMIN' && (
                           <Button
@@ -1542,17 +1510,6 @@ const Dashboard: React.FC = () => {
                             onClick={() => alert('CRM system for managing leads will be implemented')}
                           >
                             Add Lead
-                          </Button>
-                        )}
-                        
-                        {userRole === 'USER' && (
-                          <Button
-                            variant="contained"
-                            startIcon={<Add />}
-                            sx={styles.animatedButton}
-                            onClick={() => navigate('/strategies?create=true')}
-                          >
-                            New Strategy
                           </Button>
                         )}
                       </Box>
