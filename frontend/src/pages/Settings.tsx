@@ -1156,106 +1156,23 @@ const Settings: React.FC = () => {
         Broker Account Management
       </Typography>
 
-      {/* Connected Accounts Summary */}
+      {/* No Connected Accounts - Empty State */}
       <Box sx={{ 
         mb: 3, 
-        p: 2, 
+        p: 4, 
         background: '#f8fafc', 
         borderRadius: '12px', 
-        border: '1px solid #e2e8f0' 
+        border: '1px solid #e2e8f0',
+        textAlign: 'center'
       }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#374151' }}>
-            Connected Accounts
-          </Typography>
-          {syncingAccounts && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Refresh sx={{ fontSize: 16, animation: 'spin 1s linear infinite', '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }} />
-              <Typography variant="caption" sx={{ color: '#667eea' }}>
-                Syncing...
-              </Typography>
-            </Box>
-          )}
-        </Box>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ fontWeight: 700, color: '#10B981' }}>
-                1
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                Active Connections
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ fontWeight: 700, color: '#667eea' }}>
-                ₹1.25L
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                Total Balance
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ fontWeight: 700, color: '#F59E0B' }}>
-                Live
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                Trading Status
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
+        <AccountBalance sx={{ fontSize: 48, color: '#9CA3AF', mb: 2 }} />
+        <Typography variant="h6" sx={{ color: '#374151', mb: 1 }}>
+          No Broker Accounts Connected
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#6B7280', mb: 2 }}>
+          Connect your broker account to start trading with ShareWise AI
+        </Typography>
       </Box>
-
-      {/* Connected Broker Accounts */}
-      <List>
-        <ListItem>
-          <ListItemIcon>
-            <AccountBalance sx={{ color: '#10B981' }} />
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>
-                  Zerodha
-                </Typography>
-                <Chip label="CONNECTED" color="success" size="small" />
-              </Box>
-            }
-            secondary={
-              <Box>
-                <Typography variant="body2" sx={{ color: '#374151' }}>
-                  Account: ZD1234 • Balance: ₹1,25,000
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#6B7280' }}>
-                  Last synced: 2 minutes ago
-                </Typography>
-              </Box>
-            }
-          />
-          <ListItemSecondaryAction>
-            <Button 
-              variant="outlined" 
-              size="small"
-              onClick={() => handleManageBroker({ name: 'Zerodha', accountId: 'ZD1234', status: 'CONNECTED', balance: 125000 })}
-              sx={{ 
-                color: '#667eea',
-                borderColor: '#667eea',
-                '&:hover': {
-                  backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                  borderColor: '#5a67d8'
-                }
-              }}
-            >
-              Manage
-            </Button>
-          </ListItemSecondaryAction>
-        </ListItem>
-      </List>
 
       {/* Quick Actions */}
       <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -1328,7 +1245,7 @@ const Settings: React.FC = () => {
         </Typography>
         <Grid container spacing={2}>
           {[
-            { name: 'Zerodha', status: 'Connected', color: '#10B981' },
+            { name: 'Zerodha', status: 'Available', color: '#6B7280' },
             { name: 'Angel Broking', status: 'Available', color: '#6B7280' },
             { name: 'Upstox', status: 'Available', color: '#6B7280' },
             { name: 'ICICI Direct', status: 'Coming Soon', color: '#9CA3AF' }

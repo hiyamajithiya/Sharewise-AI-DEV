@@ -240,20 +240,20 @@ const UserManagement: React.FC = () => {
       setSaving(true);
       
       if (selectedUser) {
-        // Edit existing user - TODO: Implement update user API
-        setUsers(users.map(u => 
-          u.id === selectedUser.id 
-            ? { 
-                ...u, 
-                first_name: newUser.first_name,
-                last_name: newUser.last_name,
-                email: newUser.email,
-                phone_number: newUser.phone_number,
-                role: newUser.role,
-                subscription_tier: newUser.subscription_tier
-              }
-            : u
-        ));
+        // Edit existing user - Call backend API to update
+        await apiService.updateUser(selectedUser.id, {
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+          email: newUser.email,
+          phone_number: newUser.phone_number,
+          role: newUser.role,
+          subscription_tier: newUser.subscription_tier,
+        });
+        
+        // Reload users list to get fresh data from backend
+        await loadUsers();
+        
+        setTestResult({ success: true, message: 'User updated successfully!' });
       } else {
         // Create new user via API
         await apiService.createUser({

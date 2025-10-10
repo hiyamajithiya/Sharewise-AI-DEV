@@ -387,6 +387,19 @@ class ApiService {
     return response.data;
   }
 
+  // Update user - Admin only
+  async updateUser(userId: string, userData: {
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    phone_number?: string;
+    role?: string;
+    subscription_tier?: string;
+    is_active?: boolean;
+  }): Promise<any> {
+    const response = await this.api.patch(`/users/admin/update-user/${userId}/`, userData);
+    return response.data;
+  }
 
   // Delete user - Admin only
   async deleteUser(userId: string): Promise<any> {

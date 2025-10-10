@@ -538,6 +538,69 @@ def create_user_admin(request):
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['PATCH', 'PUT'])
+@permission_classes([IsAuthenticated])
+def update_user_admin(request, user_id):
+    """
+    Update a user - only for super admin
+    """
+    user = request.user
+    
+    # Only super admin can update users
+    if not user.is_super_admin():
+        return Response({
+            'error': 'Access denied. Only super admin can update users.'
+        }, status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        target_user = User.objects.get(id=user_id)
+        
+        # Update user fields if provided
+        if 'first_name' in request.data:
+            target_user.first_name = request.data['first_name']
+        if 'last_name' in request.data:
+            target_user.last_name = request.data['last_name']
+        if 'email' in request.data:
+            target_user.email = request.data['email']
+        if 'role' in request.data:
+            target_user.role = request.data['role']
+            # Update staff/superuser status based on role
+            if target_user.role == User.Role.SUPER_ADMIN:
+                target_user.is_superuser = True
+                target_user.is_staff = True
+            elif target_user.role == User.Role.SUPPORT:
+                target_user.is_staff = True
+                target_user.is_superuser = False
+            else:
+                target_user.is_staff = False
+                target_user.is_superuser = False
+        if 'subscription_tier' in request.data:
+            target_user.subscription_tier = request.data['subscription_tier']
+        if 'is_active' in request.data:
+            target_user.is_active = request.data['is_active']
+        if 'phone_number' in request.data:
+            # Update profile phone number
+            if hasattr(target_user, 'profile'):
+                target_user.profile.phone_number = request.data['phone_number']
+                target_user.profile.save()
+        
+        target_user.save()
+        
+        return Response({
+            'message': 'User updated successfully!',
+            'user': UserSerializer(target_user).data
+        }, status=status.HTTP_200_OK)
+        
+    except User.DoesNotExist:
+        return Response({
+            'error': 'User not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': f'Failed to update user: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_user_admin(request, user_id):
