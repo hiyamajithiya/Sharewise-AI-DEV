@@ -496,9 +496,11 @@ const Dashboard: React.FC = () => {
             Live Market Data
           </Typography>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <LiveMarketWidget />
-        </Grid>
+        {['AAPL','GOOGL','MSFT','TSLA','AMZN'].map((sym) => (
+          <Grid key={sym} item xs={12} md={6} lg={4}>
+            <LiveMarketWidget symbol={sym} />
+          </Grid>
+        ))}
       </Grid>
 
       {/* Main Content Cards */}

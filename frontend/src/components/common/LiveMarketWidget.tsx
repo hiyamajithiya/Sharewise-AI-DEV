@@ -3,14 +3,18 @@ import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/mater
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
 import { MarketDataAPI } from '../../services/marketDataService';
 
-const LiveMarketWidget: React.FC = () => {
+type LiveMarketWidgetProps = {
+  symbol?: string;
+};
+
+const LiveMarketWidget: React.FC<LiveMarketWidgetProps> = ({ symbol = 'AAPL' }) => {
   const [marketData, setMarketData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMarketData = async () => {
       try {
-        const quote = await MarketDataAPI.getQuote('AAPL');
+        const quote = await MarketDataAPI.getQuote(symbol);
         if (quote) setMarketData(quote);
       } catch (error) {
         console.error('Failed to fetch market data:', error);
@@ -22,7 +26,7 @@ const LiveMarketWidget: React.FC = () => {
     fetchMarketData();
     const interval = setInterval(fetchMarketData, 30000); // Update every 30 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [symbol]);
 
   if (loading) return <CircularProgress />;
   if (!marketData) return <Typography>No market data available</Typography>;

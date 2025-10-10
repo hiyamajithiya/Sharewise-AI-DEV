@@ -95,3 +95,6 @@ claude/
 .env
 .env.local
 .env.*.local
+
+# Change log file (contains sensitive info and personal notes)
+jimit changes
