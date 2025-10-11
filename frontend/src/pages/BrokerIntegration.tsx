@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -27,6 +27,8 @@ import {
   Stepper,
   Step,
   StepLabel,
+  CircularProgress,
+  Snackbar,
 } from '@mui/material';
 import {
   AccountBalance,
@@ -40,22 +42,25 @@ import {
   HelpOutline,
   Lightbulb,
   Info,
-  Pause,
-  PlayArrow,
   Delete,
+  OpenInNew,
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { selectTestingState } from '../store/slices/testingSlice';
 import StatCard from '../components/common/StatCard';
+import api from '../services/api';
 
 interface BrokerAccount {
-  id: number;
-  brokerName: string;
-  accountId: string;
-  status: 'CONNECTED' | 'DISCONNECTED' | 'PENDING' | 'ERROR';
-  balance: number;
-  lastSync: string;
-  tradingEnabled: boolean;
+  id: string;
+  broker_type: string;
+  account_name: string;
+  broker_user_id: string;
+  status: 'CONNECTING' | 'ACTIVE' | 'INACTIVE' | 'ERROR' | 'EXPIRED';
+  account_balance: string;
+  available_balance: string;
+  last_connected_at: string;
+  is_primary: boolean;
+  auto_sync: boolean;
 }
 
 const BrokerIntegration: React.FC = () => {
@@ -65,35 +70,151 @@ const BrokerIntegration: React.FC = () => {
   const [credentials, setCredentials] = useState({
     apiKey: '',
     apiSecret: '',
-    accountId: '',
-    environment: 'sandbox',
+    requestToken: '',
+    accountName: 'My Zerodha Account',
   });
   const [connectionTesting, setConnectionTesting] = useState(false);
-  const [connectionResult, setConnectionResult] = useState<'success' | 'error' | null>(null);
+  const [connectionError, setConnectionError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [selectedAccountForSettings, setSelectedAccountForSettings] = useState<BrokerAccount | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' | 'info' });
+  const [loginUrl, setLoginUrl] = useState('');
 
   const testingState = useSelector(selectTestingState);
   const { isTestingMode, selectedUser } = testingState;
 
-  // Broker accounts - loaded from backend (placeholder for now)
   const [brokerAccounts, setBrokerAccounts] = useState<BrokerAccount[]>([]);
 
-  const availableBrokers: Array<{
-    name: string;
-    logo: string;
-    description: string;
-    features: string[];
-    status: 'Available' | 'Coming Soon';
-  }> = [
-    { name: 'Zerodha', logo: '🟢', description: "India's largest retail stockbroker", features: ['Kite API', 'Real-time data', 'Auto trading'], status: 'Available' },
-    { name: 'Angel Broking', logo: '🔵', description: 'Smart API for seamless trading', features: ['Smart API', 'Historical data', 'Portfolio sync'], status: 'Available' },
-    { name: 'Upstox', logo: '🟠', description: 'Modern trading platform', features: ['REST API', 'WebSocket feeds', 'Options trading'], status: 'Available' },
-    { name: 'ICICI Direct', logo: '🔴', description: 'Bank-backed trading platform', features: ['Trade API', 'Secure banking', 'Research reports'], status: 'Coming Soon' },
+  // Load broker accounts on mount
+  useEffect(() => {
+    loadBrokerAccounts();
+  }, []);
+
+// Handle OAuth callback with request_token in URL
+useEffect(() => {
+  console.log('=== OAuth Callback useEffect TRIGGERED ===');
+  console.log('Current URL:', window.location.href);
+  console.log('Pathname:', window.location.pathname);
+  console.log('Search:', window.location.search);
+  
+  // Only run on broker-integration page
+  if (!window.location.pathname.includes('broker-integration')) {
+    console.log('Not on broker-integration page, skipping...');
+    return;
+  }
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestToken = urlParams.get('request_token');
+  const status = urlParams.get('status');
+  const error = urlParams.get('error');
+  
+  console.log('Extracted params:', { requestToken, status, error });
+  
+  if (error) {
+    console.log('❌ ERROR detected in URL');
+    showSnackbar('Authentication failed or cancelled', 'error');
+    window.history.replaceState({}, '', window.location.pathname);
+    sessionStorage.removeItem("zerodha_api_key");
+    sessionStorage.removeItem("zerodha_api_secret");
+    sessionStorage.removeItem("zerodha_account_name");
+    return;
+  }
+  
+  if (requestToken && status === 'success') {
+    console.log('✅ SUCCESS! Token received:', requestToken);
+    
+    // Restore credentials from sessionStorage
+    const savedApiKey = sessionStorage.getItem("zerodha_api_key") || "";
+    const savedApiSecret = sessionStorage.getItem("zerodha_api_secret") || "";
+    const savedAccountName = sessionStorage.getItem("zerodha_account_name") || "My Zerodha Account";
+    console.log("Restored:", { apiKey: savedApiKey ? "present" : "missing" });
+    console.log('Setting credentials and opening dialog...');
+    
+    // Set the request token
+    setCredentials({
+      apiKey: savedApiKey,
+      apiSecret: savedApiSecret,
+      requestToken: requestToken,
+      accountName: savedAccountName
+    });
+    
+    // Open dialog
+    console.log('Opening dialog...');
+    setConnectDialogOpen(true);
+    
+    // Move to step 3 (Complete Setup)
+    console.log('Setting step to 3...');
+    setActiveStep(3);
+    
+    // Show success message
+    showSnackbar('Authorization successful! Please complete the setup.', 'success');
+    
+    // Clean URL after a delay
+    setTimeout(() => {
+      console.log('Cleaning URL...');
+      window.history.replaceState({}, '', window.location.pathname);
+    }, 2000);
+  } else {
+    console.log('ℹ️ No token found in URL or invalid status');
+  }
+}, []); // Empty dependency array - runs once on mount
+
+  const loadBrokerAccounts = async () => {
+    try {
+      setLoading(true);
+      const response: any = await api.get('/brokers/accounts/');
+      const accounts = response.results || response;
+      setBrokerAccounts(Array.isArray(accounts) ? accounts : []);
+    } catch (error: any) {
+      console.error('Failed to load broker accounts:', error);
+      showSnackbar('Failed to load broker accounts', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showSnackbar = (message: string, severity: 'success' | 'error' | 'info' = 'info') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const availableBrokers = [
+    { 
+      name: 'Zerodha', 
+      value: 'ZERODHA',
+      logo: '🟢', 
+      description: "India's largest retail stockbroker", 
+      features: ['Kite API', 'Real-time data', 'Auto trading'], 
+      status: 'Available' as const
+    },
+    { 
+      name: 'Upstox', 
+      value: 'UPSTOX',
+      logo: '🟠', 
+      description: 'Modern trading platform', 
+      features: ['REST API', 'WebSocket feeds', 'Options trading'], 
+      status: 'Coming Soon' as const
+    },
+    { 
+      name: 'Alice Blue', 
+      value: 'ALICE_BLUE',
+      logo: '🔵', 
+      description: 'Discount broker with API', 
+      features: ['Trade API', 'Portfolio sync', 'Low brokerage'], 
+      status: 'Coming Soon' as const
+    },
+    { 
+      name: 'Angel One', 
+      value: 'ANGEL_ONE',
+      logo: '🔴', 
+      description: 'SmartAPI for trading', 
+      features: ['Smart API', 'Research', 'Mobile trading'], 
+      status: 'Coming Soon' as const
+    },
   ];
 
-  const steps = ['Select Broker', 'Enter Credentials', 'Test Connection', 'Complete Setup'];
+  const steps = ['Select Broker', 'Enter Credentials', 'Login & Authorize', 'Complete Setup'];
 
   const GuidelineBox = ({ title, children, icon = <Info /> }: { title: string; children: React.ReactNode; icon?: React.ReactNode }) => (
     <Box sx={{ mb: 2, p: 2, borderRadius: '12px', background: '#f8f9ff', border: '1px solid #e0e0e0' }}>
@@ -105,154 +226,133 @@ const BrokerIntegration: React.FC = () => {
     </Box>
   );
 
-  const BrokerSetupGuide = ({ broker }: { broker: string }) => {
-    const panelSx = { mt: 2, p: 2, borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' } as const;
-    if (broker === 'Zerodha') {
-      const redirectHint = 'https://sharewise.chinmaytechnosoft.com/auth/zerodha/callback';
-      const loginTemplate = 'https://kite.zerodha.com/connect/login?api_key=YOUR_API_KEY&v=3&redirect_url=YOUR_REDIRECT_URL';
-      const testEndpoint = 'https://sharewise.chinmaytechnosoft.com/api/brokers/test-connection/';
-      const createEndpoint = 'https://sharewise.chinmaytechnosoft.com/api/brokers/accounts/';
-      return (
-        <Box sx={panelSx}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>Zerodha (Kite Connect) — Full Setup</Typography>
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="body2" sx={{ color: '#111827' }}>
-              <strong>What you will generate:</strong> API Key (public) and API Secret (private); request_token (via OAuth redirect); access_token (obtained by exchanging request_token + secret).
-            </Typography>
-          </Box>
-          <Box sx={{ ml: 1 }}>
-            <Typography variant="body2" sx={{ mb: 0.5 }}><strong>1) Create app in Kite Connect</strong></Typography>
-            <Typography variant="body2" sx={{ color: '#374151', mb: 0.5 }}>• Create the app → note your API Key and API Secret</Typography>
-            <Typography variant="body2" sx={{ color: '#374151', mb: 1 }}>• Set Redirect URL (example): {redirectHint}</Typography>
-            <Typography variant="body2" sx={{ mb: 0.5 }}><strong>2) Get request_token</strong></Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• Open this login URL in your browser (replace placeholders):</Typography>
-            <Box sx={{ bgcolor: 'white', border: '1px solid #e5e7eb', px: 1.5, py: 1, borderRadius: 1, mt: 0.5 }}>
-              <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{loginTemplate}</Typography>
-            </Box>
-            <Typography variant="body2" sx={{ color: '#374151', mt: 0.5 }}>• Log in → you’ll be redirected with <strong>?request_token=XXXX</strong> in the URL → copy that token</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}><strong>3) Test connection</strong></Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• UI path: Connect Broker → Select Zerodha → Next → Enter API Key & Secret → Test Connection</Typography>
-            <Typography variant="body2" sx={{ color: '#374151', mt: 0.5 }}>• Or via API:</Typography>
-            <Box sx={{ bgcolor: 'white', border: '1px solid #e5e7eb', px: 1.5, py: 1, borderRadius: 1, mt: 0.5 }}>
-              <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
-                POST {testEndpoint}{'\n'}
-                {'{'}"broker_type":"ZERODHA","credentials":{'{'}"api_key":"YOUR_API_KEY","api_secret":"YOUR_API_SECRET","request_token":"REQUEST_TOKEN_FROM_REDIRECT"{'}'}{'}'}
-              </Typography>
-            </Box>
-            <Typography variant="body2" sx={{ mt: 1 }}><strong>4) Complete setup (create account)</strong></Typography>
-            <Box sx={{ bgcolor: 'white', border: '1px solid #e5e7eb', px: 1.5, py: 1, borderRadius: 1, mt: 0.5 }}>
-              <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
-                POST {createEndpoint}{'\n'}
-                {'{'}"broker_type":"ZERODHA","account_name":"My Zerodha","broker_user_id":"your_zerodha_user_id","credentials":{'{'}"api_key":"YOUR_API_KEY","api_secret":"YOUR_API_SECRET","access_token":"ACCESS_TOKEN_FROM_EXCHANGE"{'}'}{'}'}
-              </Typography>
-            </Box>
-            <Typography variant="body2" sx={{ color: '#374151', mt: 1 }}>• Note: Credentials are encrypted by the backend. You won’t see them in plain text again.</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}><strong>5) Verify in UI</strong></Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• The Broker Integration page should list your account → click “Sync” to fetch balances/positions (if enabled)</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}><strong>Common fixes</strong></Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• “Authentication failed”: request_token missing/expired → regenerate via login URL</Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• “Encryption key not configured”: add BROKER_ENCRYPTION_KEY in backend settings</Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• 401 errors: JWT/auth token expired → log out and log in again</Typography>
-          </Box>
-        </Box>
-      );
-    }
-    if (broker === 'Angel Broking' || broker === 'Angel One') {
-      return (
-        <Box sx={panelSx}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>Angel One (SmartAPI) — Quick Steps</Typography>
-          <Box sx={{ ml: 1 }}>
-            <Typography variant="body2" sx={{ color: '#111827', mb: 0.5 }}><strong>What you will generate:</strong> API Key, Client Code, TOTP Secret, and a session/access token.</Typography>
-            <Typography variant="body2" sx={{ mb: 0.5 }}><strong>Steps:</strong></Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• Create a SmartAPI app and note API Key</Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• Keep Client Code and Password; set up TOTP (Google Authenticator)</Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• Generate session/access token per SmartAPI docs</Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• In the next step, enter API Key + any required token to test</Typography>
-          </Box>
-        </Box>
-      );
-    }
-    if (broker === 'Upstox') {
-      return (
-        <Box sx={panelSx}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>Upstox — Quick Steps</Typography>
-          <Box sx={{ ml: 1 }}>
-            <Typography variant="body2" sx={{ color: '#111827', mb: 0.5 }}><strong>What you will generate:</strong> API Key & Secret, OAuth authorization code, and access token.</Typography>
-            <Typography variant="body2" sx={{ mb: 0.5 }}><strong>Steps:</strong></Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• Create an app in Upstox Developer; note API Key & Secret</Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• Set your Redirect URL (use your ShareWise domain if hosted)</Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• Complete OAuth login to get an authorization code</Typography>
-            <Typography variant="body2" sx={{ color: '#374151' }}>• Exchange the code for an access token; then proceed to test</Typography>
-          </Box>
-        </Box>
-      );
-    }
-    return null;
-  };
-
   const resetDialog = () => {
     setConnectDialogOpen(false);
     setSelectedBroker('');
     setActiveStep(0);
-    setCredentials({ apiKey: '', apiSecret: '', accountId: '', environment: 'sandbox' });
+    setCredentials({ apiKey: '', apiSecret: '', requestToken: '', accountName: 'My Zerodha Account' });
     setConnectionTesting(false);
-    setConnectionResult(null);
+    setConnectionError('');
+    setLoginUrl('');
+    sessionStorage.removeItem("zerodha_api_key");
+    sessionStorage.removeItem("zerodha_api_secret");
+    sessionStorage.removeItem("zerodha_account_name");
   };
 
   const handleNext = () => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
   const handleBack = () => setActiveStep((prev) => Math.max(prev - 1, 0));
 
-  const handleConnectBroker = async () => {
-    console.log('Connecting to broker with credentials:', credentials);
-    alert('Broker connection will be implemented when backend API is ready. Please configure broker API credentials in the backend first.');
-    resetDialog();
+  const handleGetLoginUrl = async () => {
+    if (!credentials.apiKey) {
+      showSnackbar('Please enter API Key', 'error');
+      return;
+    }
+
+    try {
+      // Save credentials to sessionStorage
+      sessionStorage.setItem("zerodha_api_key", credentials.apiKey);
+      sessionStorage.setItem("zerodha_api_secret", credentials.apiSecret);
+      sessionStorage.setItem("zerodha_account_name", credentials.accountName);
+      setConnectionTesting(true);
+      const response: any = await api.get(`/brokers/zerodha/login-url/?api_key=${credentials.apiKey}`);
+      setLoginUrl(response.login_url);
+      showSnackbar('Login URL generated! Click the button to open Zerodha login.', 'success');
+      setConnectionTesting(false);
+      handleNext();
+    } catch (error: any) {
+      console.error('Failed to get login URL:', error);
+      showSnackbar(error.response?.data?.error || 'Failed to generate login URL', 'error');
+      setConnectionTesting(false);
+    }
   };
 
-  const handleTestConnection = async () => {
-    setConnectionTesting(true);
-    setConnectionResult(null);
+  const handleCompleteSetup = async () => {
+    if (!credentials.apiKey || !credentials.apiSecret || !credentials.requestToken) {
+      showSnackbar('Please fill in all required fields', 'error');
+      return;
+    }
+
     try {
-      if (credentials.apiKey && credentials.apiSecret) {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setConnectionResult('success');
+      setConnectionTesting(true);
+      const response: any = await api.post('/brokers/zerodha/complete-setup/', {
+        api_key: credentials.apiKey,
+        api_secret: credentials.apiSecret,
+        request_token: credentials.requestToken,
+        account_name: credentials.accountName,
+      });
+
+      if (response.success) {
+        showSnackbar('Zerodha account connected successfully!', 'success');
+        await loadBrokerAccounts();
+        resetDialog();
       } else {
-        setConnectionResult('error');
+        showSnackbar(response.error || 'Failed to complete setup', 'error');
       }
-    } catch {
-      setConnectionResult('error');
+    } catch (error: any) {
+      console.error('Failed to complete setup:', error);
+      showSnackbar(error.response?.data?.error || 'Failed to complete setup', 'error');
     } finally {
       setConnectionTesting(false);
     }
   };
 
-  const handleRefreshAccounts = async () => {
-    setRefreshing(true);
+  const handleSyncAccount = async (accountId: string) => {
     try {
-      setBrokerAccounts([]);
+      setRefreshing(true);
+      const response: any = await api.post(`/brokers/accounts/${accountId}/sync_data/`);
+      
+      if (response.success) {
+        showSnackbar('Account synced successfully', 'success');
+        await loadBrokerAccounts();
+      } else {
+        showSnackbar(response.error || 'Failed to sync account', 'error');
+      }
+    } catch (error: any) {
+      console.error('Failed to sync account:', error);
+      showSnackbar(error.response?.data?.error || 'Failed to sync account', 'error');
     } finally {
       setRefreshing(false);
     }
   };
 
-  const handleOpenAccountSettings = (account: BrokerAccount) => {
-    setSelectedAccountForSettings(account);
-    setSettingsDialogOpen(true);
+  const handleDeleteAccount = async (accountId: string, accountName: string) => {
+    if (!window.confirm(`Are you sure you want to disconnect ${accountName}?`)) {
+      return;
+    }
+
+    try {
+      await api.delete(`/brokers/accounts/${accountId}/`);
+      showSnackbar('Account disconnected successfully', 'success');
+      await loadBrokerAccounts();
+      setSettingsDialogOpen(false);
+      setSelectedAccountForSettings(null);
+    } catch (error: any) {
+      console.error('Failed to delete account:', error);
+      showSnackbar(error.response?.data?.error || 'Failed to disconnect account', 'error');
+    }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'CONNECTED': return 'success';
-      case 'PENDING': return 'warning';
+      case 'ACTIVE': return 'success';
+      case 'CONNECTING': return 'info';
+      case 'INACTIVE': return 'warning';
       case 'ERROR': return 'error';
+      case 'EXPIRED': return 'error';
       default: return 'default';
     }
+  };
+
+  const getBrokerLogo = (brokerType: string) => {
+    const broker = availableBrokers.find(b => b.value === brokerType);
+    return broker?.logo || '📊';
   };
 
   const brokerStats = [
     {
       title: 'Connected Accounts',
-      value: brokerAccounts.filter((acc) => acc.status === 'CONNECTED').length.toString(),
-      change: '+1 this month',
+      value: (brokerAccounts || []).filter((acc) => acc.status === 'ACTIVE').length.toString(),
+      change: `${(brokerAccounts || []).length} total`,
       changeType: 'positive' as const,
       icon: <AccountBalance />,
       color: 'primary' as const,
@@ -260,21 +360,21 @@ const BrokerIntegration: React.FC = () => {
     },
     {
       title: 'Total Balance',
-      value: `₹${brokerAccounts.reduce((sum, acc) => sum + acc.balance, 0).toLocaleString()}`,
-      change: '+5.2%',
+      value: `₹${(brokerAccounts || []).reduce((sum, acc) => sum + parseFloat(acc.account_balance || '0'), 0).toLocaleString()}`,
+      change: 'Synced',
       changeType: 'positive' as const,
       icon: <TrendingUp />,
       color: 'success' as const,
       subtitle: 'Across all accounts'
     },
     {
-      title: 'Trading Status',
-      value: brokerAccounts.filter((acc) => acc.tradingEnabled).length > 0 ? 'Active' : 'Inactive',
-      change: 'Real-time',
+      title: 'Auto Sync',
+      value: (brokerAccounts || []).filter((acc) => acc.auto_sync).length.toString(),
+      change: 'Enabled',
       changeType: 'positive' as const,
       icon: <Security />,
       color: 'info' as const,
-      subtitle: 'Auto trading enabled'
+      subtitle: 'Accounts with auto-sync'
     }
   ];
 
@@ -291,7 +391,12 @@ const BrokerIntegration: React.FC = () => {
                 {isTestingMode && selectedUser ? `Testing broker integrations for ${selectedUser.role} role` : 'Connect your trading accounts and sync your portfolio data'}
               </Typography>
             </Box>
-            <Button variant="contained" onClick={() => setConnectDialogOpen(true)} startIcon={<Add />} sx={{ borderRadius: '12px' }}>
+            <Button 
+              variant="contained" 
+              onClick={() => setConnectDialogOpen(true)} 
+              startIcon={<Add />} 
+              sx={{ borderRadius: '12px' }}
+            >
               Add Broker Account
             </Button>
           </Box>
@@ -305,124 +410,168 @@ const BrokerIntegration: React.FC = () => {
           ))}
         </Grid>
 
-        {brokerAccounts.length === 0 && (
-          <Paper sx={{ p: 4, mb: 4, textAlign: 'center', borderRadius: '20px' }}>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>
-              Welcome to Broker Integration!
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3, color: '#6B7280' }}>
-              Connect your broker accounts to enable automated trading and real-time portfolio sync.
-            </Typography>
-            <Box sx={{ mb: 3, p: 2, borderRadius: '16px', background: '#f8f9ff', border: '1px solid #e0e0e0' }}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                <Lightbulb sx={{ color: '#374151' }} />
-                <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: '#1F2937' }}>
-                    Why Connect Your Broker?
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#374151' }}>
-                    • Automated Trading • Real-time Sync • Secure Connection • Paper Trading
-                  </Typography>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            {(brokerAccounts || []).length === 0 && (
+              <Paper sx={{ p: 4, mb: 4, textAlign: 'center', borderRadius: '20px' }}>
+                <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>
+                  Welcome to Broker Integration!
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 3, color: '#6B7280' }}>
+                  Connect your broker accounts to enable automated trading and real-time portfolio sync.
+                </Typography>
+                <Box sx={{ mb: 3, p: 2, borderRadius: '16px', background: '#f8f9ff', border: '1px solid #e0e0e0' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <Lightbulb sx={{ color: '#374151' }} />
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: '#1F2937' }}>
+                        Why Connect Your Broker?
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#374151' }}>
+                        • Automated Trading • Real-time Sync • Secure Connection • Portfolio Tracking
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </Box>
-            </Box>
-            <Button variant="contained" onClick={() => setConnectDialogOpen(true)} startIcon={<Add />} size="large" sx={{ borderRadius: '12px' }}>
-              Connect Your First Broker
-            </Button>
-          </Paper>
+                <Button 
+                  variant="contained" 
+                  onClick={() => setConnectDialogOpen(true)} 
+                  startIcon={<Add />} 
+                  size="large" 
+                  sx={{ borderRadius: '12px' }}
+                >
+                  Connect Your First Broker
+                </Button>
+              </Paper>
+            )}
+
+            <Grid container spacing={3}>
+              <Grid item xs={12} lg={6}>
+                <Paper sx={{ p: 3, borderRadius: '20px' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
+                      Connected Accounts
+                    </Typography>
+                    <IconButton onClick={loadBrokerAccounts} disabled={loading}>
+                      <Refresh />
+                    </IconButton>
+                  </Box>
+                  {(brokerAccounts || []).length === 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <AccountBalance sx={{ fontSize: 48, mb: 2, color: '#9CA3AF' }} />
+                      <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>No broker accounts connected</Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>Connect your first broker to get started</Typography>
+                    </Box>
+                  ) : (
+                    <List>
+                      {(brokerAccounts || []).map((account) => (
+                        <ListItem key={account.id} sx={{ px: 0, mb: 2, border: '1px solid #e0e0e0', borderRadius: '12px', p: 2 }}>
+                          <ListItemIcon>
+                            <Typography variant="h4">{getBrokerLogo(account.broker_type)}</Typography>
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>
+                                  {account.account_name}
+                                </Typography>
+                                <Chip label={account.status} color={getStatusColor(account.status) as any} size="small" />
+                                {account.is_primary && <Chip label="Primary" color="primary" size="small" />}
+                              </Box>
+                            }
+                            secondary={
+                              <Box>
+                                <Typography variant="body2" sx={{ color: '#374151' }}>
+                                  {account.broker_type} • User ID: {account.broker_user_id}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#374151', fontWeight: 600 }}>
+                                  Balance: ₹{parseFloat(account.account_balance || '0').toLocaleString()}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: '#6B7280' }}>
+                                  Last synced: {account.last_connected_at ? new Date(account.last_connected_at).toLocaleString() : 'Never'}
+                                </Typography>
+                              </Box>
+                            }
+                          />
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <IconButton 
+                              onClick={() => handleSyncAccount(account.id)}
+                              disabled={refreshing}
+                              title="Sync Account"
+                            >
+                              <Refresh />
+                            </IconButton>
+                            <IconButton 
+                              onClick={() => {
+                                setSelectedAccountForSettings(account);
+                                setSettingsDialogOpen(true);
+                              }}
+                              title="Settings"
+                            >
+                              <Settings />
+                            </IconButton>
+                          </Box>
+                        </ListItem>
+                      ))}
+                    </List>
+                  )}
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} lg={6}>
+                <Paper sx={{ p: 3, borderRadius: '20px' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
+                    Available Brokers
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {availableBrokers.map((broker, index) => (
+                      <Grid item xs={12} sm={6} key={index}>
+                        <Card
+                          variant="outlined"
+                          sx={{ 
+                            height: '100%', 
+                            cursor: broker.status === 'Available' ? 'pointer' : 'default', 
+                            opacity: broker.status === 'Coming Soon' ? 0.6 : 1, 
+                            borderRadius: '16px',
+                            '&:hover': broker.status === 'Available' ? {
+                              boxShadow: 3,
+                              transform: 'translateY(-2px)',
+                              transition: 'all 0.2s'
+                            } : {}
+                          }}
+                          onClick={() => {
+                            if (broker.status === 'Available') {
+                              setSelectedBroker(broker.value);
+                              setConnectDialogOpen(true);
+                            }
+                          }}
+                        >
+                          <CardContent sx={{ textAlign: 'center' }}>
+                            <Typography variant="h4" sx={{ mb: 1 }}>{broker.logo}</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: '#1F2937' }}>{broker.name}</Typography>
+                            <Typography variant="body2" sx={{ mb: 2, color: '#374151' }}>{broker.description}</Typography>
+                            <Box sx={{ mb: 2 }}>
+                              {broker.features.map((feature, idx) => (
+                                <Chip key={idx} label={feature} size="small" variant="outlined" sx={{ m: 0.25 }} />
+                              ))}
+                            </Box>
+                            <Chip label={broker.status} color={broker.status === 'Available' ? 'success' : 'default'} size="small" />
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Paper>
+              </Grid>
+            </Grid>
+          </>
         )}
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} lg={6}>
-            <Paper sx={{ p: 3, borderRadius: '20px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
-                  Connected Accounts
-                </Typography>
-                <IconButton onClick={handleRefreshAccounts} disabled={refreshing}>
-                  <Refresh />
-                </IconButton>
-              </Box>
-              {brokerAccounts.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <AccountBalance sx={{ fontSize: 48, mb: 2, color: '#9CA3AF' }} />
-                  <Typography variant="h6" gutterBottom sx={{ color: '#1F2937' }}>No broker accounts connected</Typography>
-                  <Typography variant="body2" sx={{ color: '#6B7280' }}>Connect your first broker to get started</Typography>
-                </Box>
-              ) : (
-                <List>
-                  {brokerAccounts.map((account) => (
-                    <ListItem key={account.id} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <AccountBalance sx={{ color: '#374151' }} />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 600, color: '#1F2937' }}>
-                              {account.brokerName}
-                            </Typography>
-                            <Chip label={account.status} color={getStatusColor(account.status) as any} size="small" />
-                          </Box>
-                        }
-                        secondary={
-                          <Box>
-                            <Typography variant="body2" sx={{ color: '#374151' }}>
-                              Account: {account.accountId} • Balance: ₹{account.balance.toLocaleString()}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: '#6B7280' }}>
-                              Last synced: {account.lastSync}
-                            </Typography>
-                          </Box>
-                        }
-                      />
-                      <IconButton onClick={() => handleOpenAccountSettings(account)}>
-                        <Settings />
-                      </IconButton>
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} lg={6}>
-            <Paper sx={{ p: 3, borderRadius: '20px' }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1F2937' }}>
-                Available Brokers
-              </Typography>
-              <Grid container spacing={2}>
-                {availableBrokers.map((broker, index) => (
-                  <Grid item xs={12} sm={6} key={index}>
-                    <Card
-                      variant="outlined"
-                      sx={{ height: '100%', cursor: broker.status === 'Available' ? 'pointer' : 'default', opacity: broker.status === 'Coming Soon' ? 0.6 : 1, borderRadius: '16px' }}
-                      onClick={() => {
-                        if (broker.status === 'Available') {
-                          setSelectedBroker(broker.name);
-                          setConnectDialogOpen(true);
-                        }
-                      }}
-                    >
-                      <CardContent sx={{ textAlign: 'center' }}>
-                        <Typography variant="h4" sx={{ mb: 1 }}>{broker.logo}</Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: '#1F2937' }}>{broker.name}</Typography>
-                        <Typography variant="body2" sx={{ mb: 2, color: '#374151' }}>{broker.description}</Typography>
-                        <Box sx={{ mb: 2 }}>
-                          {broker.features.map((feature, idx) => (
-                            <Chip key={idx} label={feature} size="small" variant="outlined" sx={{ m: 0.25 }} />
-                          ))}
-                        </Box>
-                        <Chip label={broker.status} color={broker.status === 'Available' ? 'success' : 'default'} size="small" />
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Paper>
-          </Grid>
-        </Grid>
-
+        {/* Connect Broker Dialog */}
         <Dialog open={connectDialogOpen} onClose={resetDialog} maxWidth="md" fullWidth>
           <DialogTitle>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -442,6 +591,7 @@ const BrokerIntegration: React.FC = () => {
                 ))}
               </Stepper>
 
+              {/* Step 0: Select Broker */}
               {activeStep === 0 && (
                 <Box>
                   <GuidelineBox title="Choose Your Broker" icon={<HelpOutline />}>
@@ -449,9 +599,13 @@ const BrokerIntegration: React.FC = () => {
                   </GuidelineBox>
                   <FormControl fullWidth>
                     <InputLabel>Select Broker</InputLabel>
-                    <Select value={selectedBroker} label="Select Broker" onChange={(e) => setSelectedBroker(e.target.value)}>
+                    <Select 
+                      value={selectedBroker} 
+                      label="Select Broker" 
+                      onChange={(e) => setSelectedBroker(e.target.value)}
+                    >
                       {availableBrokers.filter(b => b.status === 'Available').map((broker) => (
-                        <MenuItem key={broker.name} value={broker.name}>
+                        <MenuItem key={broker.value} value={broker.value}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Typography>{broker.logo}</Typography>
                             <Box>
@@ -463,69 +617,131 @@ const BrokerIntegration: React.FC = () => {
                       ))}
                     </Select>
                   </FormControl>
-                  {selectedBroker && <BrokerSetupGuide broker={selectedBroker} />}
+                  {selectedBroker === 'ZERODHA' && (
+                    <Box sx={{ mt: 2, p: 2, borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>Zerodha Kite Connect Setup</Typography>
+                      <Typography variant="body2" sx={{ color: '#374151', mb: 1 }}>
+                        To connect your Zerodha account, you'll need:
+                      </Typography>
+                      <Typography variant="body2" component="div" sx={{ color: '#374151' }}>
+                        • API Key from Kite Connect Developer Console<br/>
+                        • API Secret (keep this confidential)<br/>
+                        • Active Zerodha trading account
+                      </Typography>
+                      <Alert severity="info" sx={{ mt: 2 }}>
+                        Don't have API credentials? Visit{' '}
+                        <a href="https://developers.kite.trade/" target="_blank" rel="noopener noreferrer">
+                          Kite Connect Developer Portal
+                        </a>
+                      </Alert>
+                    </Box>
+                  )}
                 </Box>
               )}
 
+              {/* Step 1: Enter API Key & Get Login URL */}
               {activeStep === 1 && (
                 <Box>
-                  <GuidelineBox title="API Credentials Setup" icon={<Security />}>
-                    You'll need to generate API credentials from your broker's dashboard. These are used to securely connect your account. Never share these credentials with anyone!
+                  <GuidelineBox title="Enter API Credentials" icon={<Security />}>
+                    Enter your Zerodha API Key and API Secret. These are available in your Kite Connect app dashboard.
                   </GuidelineBox>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>Environment</InputLabel>
-                        <Select value={credentials.environment} label="Environment" onChange={(e) => setCredentials({ ...credentials, environment: e.target.value })}>
-                          <MenuItem value="sandbox">Sandbox (Paper Trading)</MenuItem>
-                          <MenuItem value="live">Live Trading</MenuItem>
-                        </Select>
-                      </FormControl>
+                      <TextField
+                        label="API Key"
+                        value={credentials.apiKey}
+                        onChange={(e) => setCredentials({ ...credentials, apiKey: e.target.value })}
+                        fullWidth
+                        required
+                        helperText="Your Zerodha API Key from Kite Connect"
+                      />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField label="API Key" value={credentials.apiKey} onChange={(e) => setCredentials({ ...credentials, apiKey: e.target.value })} fullWidth type="password" required />
+                      <TextField
+                        label="API Secret"
+                        value={credentials.apiSecret}
+                        onChange={(e) => setCredentials({ ...credentials, apiSecret: e.target.value })}
+                        fullWidth
+                        type="password"
+                        required
+                        helperText="Your Zerodha API Secret (keep this confidential)"
+                      />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField label="API Secret" value={credentials.apiSecret} onChange={(e) => setCredentials({ ...credentials, apiSecret: e.target.value })} fullWidth type="password" required />
+                      <TextField
+                        label="Account Name"
+                        value={credentials.accountName}
+                        onChange={(e) => setCredentials({ ...credentials, accountName: e.target.value })}
+                        fullWidth
+                        helperText="A friendly name for this account"
+                      />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField label="Account ID (Optional)" value={credentials.accountId} onChange={(e) => setCredentials({ ...credentials, accountId: e.target.value })} fullWidth />
+                      <Button
+                        variant="contained"
+                        onClick={handleGetLoginUrl}
+                        disabled={!credentials.apiKey || connectionTesting}
+                        fullWidth
+                        startIcon={connectionTesting ? <CircularProgress size={20} /> : <OpenInNew />}
+                      >
+                        {connectionTesting ? 'Generating...' : 'Generate Login URL'}
+                      </Button>
                     </Grid>
                   </Grid>
                 </Box>
               )}
 
+              {/* Step 2: Login to Zerodha */}
               {activeStep === 2 && (
                 <Box>
-                  <GuidelineBox title="Testing Connection" icon={<CheckCircle />}>
-                    We're testing your credentials to ensure everything is configured correctly. This may take a few seconds.
+                  <GuidelineBox title="Authorize ShareWise AI" icon={<CheckCircle />}>
+                    Click the button below to login to Zerodha and authorize ShareWise AI to access your account.
                   </GuidelineBox>
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography variant="h6" gutterBottom>Testing connection to {selectedBroker}...</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                      Environment: {credentials.environment === 'sandbox' ? 'Paper Trading' : 'Live Trading'}
-                    </Typography>
-                    {connectionResult === 'success' && (<Alert severity="success" sx={{ mb: 2 }}>✅ Connection successful! Your credentials are working properly.</Alert>)}
-                    {connectionResult === 'error' && (<Alert severity="error" sx={{ mb: 2 }}>❌ Connection failed. Please check your API credentials.</Alert>)}
-                    <Button variant="outlined" onClick={handleTestConnection} disabled={connectionTesting || !credentials.apiKey || !credentials.apiSecret} startIcon={connectionTesting ? <Refresh /> : <CheckCircle />}>
-                      {connectionTesting ? 'Testing...' : 'Test Now'}
-                    </Button>
-                  </Box>
+                  {loginUrl && (
+                    <Box sx={{ textAlign: 'center', py: 3 }}>
+                      <Alert severity="info" sx={{ mb: 3 }}>
+                        After logging in, copy the <strong>request_token</strong> from the redirect URL and paste it below.
+                      </Alert>
+                      <Button
+                        variant="contained"
+                        size="large"
+                        startIcon={<OpenInNew />}
+                        onClick={() => window.location.href = loginUrl}
+                        sx={{ mb: 3 }}
+                      >
+                        Open Zerodha Login
+                      </Button>
+                      <TextField
+                        label="Request Token"
+                        value={credentials.requestToken}
+                        onChange={(e) => setCredentials({ ...credentials, requestToken: e.target.value })}
+                        fullWidth
+                        placeholder="Paste the request_token from redirect URL"
+                        helperText="After logging in, the URL will contain ?request_token=XXXXX - copy the token value"
+                      />
+                    </Box>
+                  )}
                 </Box>
               )}
 
+              {/* Step 3: Complete Setup */}
               {activeStep === 3 && (
                 <Box>
-                  <Alert severity="success" sx={{ mb: 3 }}>
-                    <Typography variant="h6" gutterBottom>Connection Successful! 🎉</Typography>
-                    <Typography variant="body2">Your {selectedBroker} account has been successfully connected. You can now start automated trading!</Typography>
-                  </Alert>
-                  <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
+                  <GuidelineBox title="Ready to Connect" icon={<CheckCircle />}>
+                    Click "Complete Setup" to finalize the connection. Your credentials will be securely encrypted and stored.
+                  </GuidelineBox>
+                  <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1, mb: 2 }}>
                     <Typography variant="subtitle2" sx={{ mb: 1 }}>Connection Summary:</Typography>
-                    <Typography variant="body2">• Broker: {selectedBroker}</Typography>
-                    <Typography variant="body2">• Environment: {credentials.environment === 'sandbox' ? 'Paper Trading' : 'Live Trading'}</Typography>
-                    <Typography variant="body2">• Status: Connected ✅</Typography>
+                    <Typography variant="body2">• Broker: Zerodha</Typography>
+                    <Typography variant="body2">• Account Name: {credentials.accountName}</Typography>
+                    <Typography variant="body2">• API Key: {credentials.apiKey.substring(0, 8)}...</Typography>
+                    <Typography variant="body2">• Status: Ready ✅</Typography>
                   </Box>
+                  {connectionError && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                      {connectionError}
+                    </Alert>
+                  )}
                 </Box>
               )}
             </Box>
@@ -534,14 +750,40 @@ const BrokerIntegration: React.FC = () => {
             <Button onClick={resetDialog}>Cancel</Button>
             <Button disabled={activeStep === 0} onClick={handleBack}>Back</Button>
             {activeStep === steps.length - 1 ? (
-              <Button variant="contained" onClick={handleConnectBroker} disabled={!selectedBroker}>Complete Setup</Button>
+              <Button 
+                variant="contained" 
+                onClick={handleCompleteSetup}
+                disabled={!credentials.requestToken || !credentials.apiKey || !credentials.apiSecret || connectionTesting}
+                startIcon={connectionTesting ? <CircularProgress size={20} /> : <CheckCircle />}
+              >
+                {connectionTesting ? 'Connecting...' : 'Complete Setup'}
+              </Button>
             ) : (
-              <Button variant="contained" onClick={handleNext} disabled={(activeStep === 0 && !selectedBroker) || (activeStep === 1 && (!credentials.apiKey.trim() || !credentials.apiSecret.trim()))}>Next</Button>
+              <Button 
+                variant="contained" 
+                onClick={handleNext}
+                disabled={
+                  (activeStep === 0 && !selectedBroker) ||
+                  (activeStep === 1 && !loginUrl) ||
+                  (activeStep === 2 && !credentials.requestToken)
+                }
+              >
+                Next
+              </Button>
             )}
           </DialogActions>
         </Dialog>
 
-        <Dialog open={settingsDialogOpen} onClose={() => { setSettingsDialogOpen(false); setSelectedAccountForSettings(null); }} maxWidth="sm" fullWidth>
+        {/* Account Settings Dialog */}
+        <Dialog 
+          open={settingsDialogOpen} 
+          onClose={() => { 
+            setSettingsDialogOpen(false); 
+            setSelectedAccountForSettings(null); 
+          }} 
+          maxWidth="sm" 
+          fullWidth
+        >
           <DialogTitle>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Settings sx={{ color: '#667eea' }} />
@@ -553,12 +795,12 @@ const BrokerIntegration: React.FC = () => {
               <Box sx={{ pt: 2 }}>
                 <Box sx={{ p: 2, mb: 3, background: '#f8f9ff', border: '1px solid #e0e0e0', borderRadius: '12px' }}>
                   <Typography variant="h6" sx={{ color: '#1F2937', mb: 2 }}>
-                    {selectedAccountForSettings.brokerName} Account
+                    {selectedAccountForSettings.account_name}
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">Account ID</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>{selectedAccountForSettings.accountId}</Typography>
+                      <Typography variant="body2" color="text.secondary">Broker</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>{selectedAccountForSettings.broker_type}</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">Status</Typography>
@@ -566,41 +808,34 @@ const BrokerIntegration: React.FC = () => {
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">Balance</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>₹{selectedAccountForSettings.balance.toLocaleString()}</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>₹{parseFloat(selectedAccountForSettings.account_balance || '0').toLocaleString()}</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">Trading</Typography>
-                      <Chip label={selectedAccountForSettings.tradingEnabled ? 'Enabled' : 'Disabled'} color={selectedAccountForSettings.tradingEnabled ? 'success' : 'default'} size="small" />
+                      <Typography variant="body2" color="text.secondary">Available</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>₹{parseFloat(selectedAccountForSettings.available_balance || '0').toLocaleString()}</Typography>
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="body2" color="text.secondary">Last Sync</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>{selectedAccountForSettings.lastSync}</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedAccountForSettings.last_connected_at ? new Date(selectedAccountForSettings.last_connected_at).toLocaleString() : 'Never'}
+                      </Typography>
                     </Grid>
                   </Grid>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Button variant="outlined" startIcon={<Refresh />} onClick={handleRefreshAccounts}>Refresh Account Data</Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={selectedAccountForSettings.tradingEnabled ? <Pause /> : <PlayArrow />}
-                    onClick={() => {
-                      setBrokerAccounts(prev => prev.map(account => account.id === selectedAccountForSettings.id ? { ...account, tradingEnabled: !account.tradingEnabled } : account));
-                      setSelectedAccountForSettings(prev => prev ? { ...prev, tradingEnabled: !prev.tradingEnabled } : null);
-                    }}
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<Refresh />} 
+                    onClick={() => handleSyncAccount(selectedAccountForSettings.id)}
+                    disabled={refreshing}
                   >
-                    {selectedAccountForSettings.tradingEnabled ? 'Disable Trading' : 'Enable Trading'}
+                    {refreshing ? 'Syncing...' : 'Sync Account Data'}
                   </Button>
                   <Button
                     variant="outlined"
                     color="error"
                     startIcon={<Delete />}
-                    onClick={() => {
-                      if (window.confirm(`Are you sure you want to disconnect ${selectedAccountForSettings.brokerName} account?`)) {
-                        setBrokerAccounts(prev => prev.filter(account => account.id !== selectedAccountForSettings.id));
-                        setSettingsDialogOpen(false);
-                        setSelectedAccountForSettings(null);
-                      }
-                    }}
+                    onClick={() => handleDeleteAccount(selectedAccountForSettings.id, selectedAccountForSettings.account_name)}
                   >
                     Disconnect Account
                   </Button>
@@ -609,9 +844,28 @@ const BrokerIntegration: React.FC = () => {
             )}
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
-            <Button onClick={() => { setSettingsDialogOpen(false); setSelectedAccountForSettings(null); }}>Close</Button>
+            <Button onClick={() => { 
+              setSettingsDialogOpen(false); 
+              setSelectedAccountForSettings(null); 
+            }}>Close</Button>
           </DialogActions>
         </Dialog>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert 
+            onClose={() => setSnackbar({ ...snackbar, open: false })} 
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );

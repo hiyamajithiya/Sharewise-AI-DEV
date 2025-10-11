@@ -269,7 +269,7 @@ class PortfolioAggregator:
             sector_values[sector] += pos.total_market_value
         
         sector_allocation = {
-            sector: float(value / total_value * 100)
+            sector: float(value / total_value * 100) if total_value > 0 else 0
             for sector, value in sector_values.items()
         }
         
@@ -288,7 +288,7 @@ class PortfolioAggregator:
         concentration_risk = {}
         
         for i, pos in enumerate(sorted_positions[:5], 1):
-            concentration_pct = float(pos.total_market_value / total_value * 100)
+            concentration_pct = float(pos.total_market_value / total_value * 100) if total_value > 0 else 0
             concentration_risk[f"top_{i}"] = concentration_pct
         
         # Overall concentration (top 5 positions)
@@ -467,7 +467,7 @@ class PortfolioAggregator:
         
         # Positive performance insight
         winning_positions = [pos for pos in positions if pos.total_pnl > 0]
-        if len(winning_positions) / len(positions) > 0.7:
+        if len(positions) > 0 and len(winning_positions) / len(positions) > 0.7:
             insights.append({
                 "type": "performance",
                 "title": "Strong Performance",

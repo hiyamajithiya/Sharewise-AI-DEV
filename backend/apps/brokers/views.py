@@ -1,11 +1,13 @@
+import logging
 import asyncio
 from django.shortcuts import get_object_or_404
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
+from django.shortcuts import redirect
 from django.utils import timezone
 
 from .models import BrokerAccount, BrokerOrder, BrokerPosition, BrokerAPILog
@@ -15,6 +17,8 @@ from .serializers import (
     BrokerAccountSummarySerializer
 )
 from .services import BrokerService, BrokerWebhookService
+
+logger = logging.getLogger(__name__)
 
 
 class BrokerAccountViewSet(ModelViewSet):
@@ -36,6 +40,24 @@ class BrokerAccountViewSet(ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def sync_data(self, request, pk=None):
+        """Sync account data from broker API"""
+        broker_account = self.get_object()
+        
+        try:
+            from asgiref.sync import async_to_sync
+            # Use async_to_sync to properly handle the async call
+            result = async_to_sync(BrokerService.sync_account_data)(broker_account)
+            
+            if result["success"]:
+                return Response(result, status=status.HTTP_200_OK)
+            else:
+                return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Account sync failed for {broker_account.id}: {str(e)}")
+            return Response(
+                {"error": f"Sync failed: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         """Sync account data from broker API"""
         broker_account = self.get_object()
         
@@ -389,3 +411,120 @@ def aggregated_portfolio(request):
             })
     
     return Response(portfolio_data, status=status.HTTP_200_OK)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def zerodha_login_url(request):
+    """Get Zerodha OAuth login URL"""
+    api_key = request.query_params.get('api_key')
+    
+    if not api_key:
+        return Response(
+            {'error': 'api_key is required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        from kiteconnect import KiteConnect
+        kite = KiteConnect(api_key=api_key)
+        login_url = kite.login_url()
+        
+        return Response({
+            'login_url': login_url,
+            'message': 'Redirect user to this URL for authentication'
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def zerodha_callback(request):
+    """Handle Zerodha OAuth callback"""
+    request_token = request.query_params.get('request_token')
+    status_param = request.query_params.get('status')
+    
+    logger.info(f"=== Zerodha Callback Received ===")
+    logger.info(f"request_token: {request_token}")
+    logger.info(f"status: {status_param}")
+    logger.info(f"Full URL: {request.build_absolute_uri()}")
+    
+    # Build frontend URL with token
+    frontend_url = 'https://sharewise.chinmaytechnosoft.com/broker-integration'
+    
+    if status_param == 'error' or not request_token:
+        error_url = f"{frontend_url}?error=authentication_failed"
+        logger.warning(f"Redirecting to error: {error_url}")
+        return redirect(error_url)
+    
+    success_url = f"{frontend_url}?request_token={request_token}&status=success"
+    logger.info(f"Redirecting to success: {success_url}")
+    return redirect(success_url)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_zerodha_setup(request):
+    """Complete Zerodha broker setup with request token"""
+    api_key = request.data.get('api_key')
+    api_secret = request.data.get('api_secret')
+    request_token = request.data.get('request_token')
+    account_name = request.data.get('account_name', 'Zerodha Account')
+    
+    if not all([api_key, api_secret, request_token]):
+        return Response(
+            {'error': 'api_key, api_secret, and request_token are required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        from kiteconnect import KiteConnect
+        
+        # Generate session
+        kite = KiteConnect(api_key=api_key)
+        data = kite.generate_session(request_token, api_secret=api_secret)
+        access_token = data["access_token"]
+        user_id = data["user_id"]
+        
+        # Create broker account
+        credentials = {
+            'api_key': api_key,
+            'api_secret': api_secret,
+            'access_token': access_token,
+            'user_id': user_id
+        }
+        
+        broker_account = BrokerAccount.objects.create(
+            user=request.user,
+            broker_type='ZERODHA',
+            account_name=account_name,
+            broker_user_id=user_id,
+            status=BrokerAccount.Status.ACTIVE
+        )
+        
+        # Encrypt and store credentials
+        broker_account.set_credentials(credentials)
+        broker_account.save()
+        
+        # Sync initial data
+        from asgiref.sync import async_to_sync
+        try:
+            async_to_sync(BrokerService.sync_account_data)(broker_account)
+        except Exception as e:
+            logger.warning(f"Initial sync failed: {str(e)}")
+        
+        serializer = BrokerAccountSerializer(broker_account)
+        return Response({
+            'success': True,
+            'message': 'Zerodha account connected successfully',
+            'data': serializer.data
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        logger.error(f"Zerodha setup failed: {str(e)}")
+        return Response(
+            {'error': f'Setup failed: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

@@ -21,4 +21,9 @@ urlpatterns = [
     
     # Webhook endpoint
     path('webhook/<str:broker_type>/<uuid:account_id>/', views.broker_webhook, name='broker_webhook'),
+# Zerodha OAuth endpoints
+    path('zerodha/login-url/', views.zerodha_login_url, name='zerodha-login-url'),
+    path('zerodha/callback/', views.zerodha_callback, name='zerodha-callback'),
+    path('zerodha/complete-setup/', views.complete_zerodha_setup, name='zerodha-complete-setup'),
 ]
+

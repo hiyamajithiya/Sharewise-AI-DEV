@@ -1,3 +1,4 @@
+from asgiref.sync import sync_to_async
 from typing import Dict, List, Any, Optional
 from django.utils import timezone
 from django.db import transaction
@@ -42,12 +43,12 @@ class BrokerService:
             if not authenticated:
                 broker_account.status = BrokerAccount.Status.ERROR
                 broker_account.last_error = 'Authentication failed'
-                broker_account.save()
+                await sync_to_async(broker_account.save)()
                 return {'success': False, 'error': 'Authentication failed'}
             
             # Get balance
             balance = await client.get_balance()
-            broker_account.update_account_info({
+            await sync_to_async(broker_account.update_account_info)({
                 'net': balance.net,
                 'available': balance.available,
                 'utilised': balance.utilised
@@ -74,7 +75,7 @@ class BrokerService:
             logger.error(f"Account sync failed for {broker_account.id}: {str(e)}")
             broker_account.status = BrokerAccount.Status.ERROR
             broker_account.last_error = str(e)
-            broker_account.save()
+            await sync_to_async(broker_account.save)()
             return {'success': False, 'error': str(e)}
     
     @staticmethod
@@ -136,7 +137,7 @@ class BrokerService:
                     trading_order.status = order.status
                     trading_order.filled_quantity = order.filled_quantity
                     trading_order.average_price = order.average_price
-                    trading_order.save()
+                    await sync_to_async(order.save)()
                 
         except Exception as e:
             logger.error(f"Order sync failed: {str(e)}")
@@ -252,7 +253,7 @@ class BrokerService:
                 broker_order.trigger_price = order_request.trigger_price
                 broker_order.order_type = order_request.order_type
                 broker_order.status = response.status
-                broker_order.save()
+                await sync_to_async(broker_order.save)()
             except BrokerOrder.DoesNotExist:
                 pass
             
@@ -292,7 +293,7 @@ class BrokerService:
                 )
                 broker_order.status = response.status
                 broker_order.cancelled_at = timezone.now()
-                broker_order.save()
+                await sync_to_async(broker_order.save)()
             except BrokerOrder.DoesNotExist:
                 pass
             
@@ -450,7 +451,7 @@ class BrokerWebhookService:
                     broker_order.status = event_data.get('status', broker_order.status)
                     broker_order.filled_quantity = event_data.get('filled_quantity', broker_order.filled_quantity)
                     broker_order.average_price = event_data.get('average_price', broker_order.average_price)
-                    broker_order.save()
+                    await sync_to_async(broker_order.save)()
                     
         except Exception as e:
             logger.error(f"Order update processing failed: {str(e)}")

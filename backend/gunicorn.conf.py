@@ -1,5 +1,5 @@
 # Gunicorn configuration for ShareWise AI
-bind = "127.0.0.1:8005"
+bind = "127.0.0.1:8004"
 workers = 3
 worker_class = "sync"
 worker_connections = 1000

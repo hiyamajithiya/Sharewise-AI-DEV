@@ -66,15 +66,15 @@ def update_position_on_order_complete(sender, instance, created, **kwargs):
             logger.error(f"Failed to update position for order {instance.id}: {str(e)}")
 
 
-@receiver(post_save, sender=BrokerAccount)
-def log_account_status_change(sender, instance, created, **kwargs):
-    """Log when broker account status changes"""
-    if not created and instance.tracker.has_changed('status'):
-        from .services import BrokerService
-        BrokerService.log_api_call(
-            broker_account=instance,
-            endpoint='account_status',
-            method='UPDATE',
-            message=f"Account status changed to {instance.status}",
-            level='INFO'
-        )
+#@receiver(post_save, sender=BrokerAccount)
+#def log_account_status_change(sender, instance, created, **kwargs):
+#    """Log when broker account status changes"""
+#    if not created and instance.tracker.has_changed('status'):
+#        from .services import BrokerService
+#        BrokerService.log_api_call(
+#            broker_account=instance,
+#            endpoint='account_status',
+#            method='UPDATE',
+#            message=f"Account status changed to {instance.status}",
+#            level='INFO'
+#        )

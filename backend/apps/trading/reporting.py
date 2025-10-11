@@ -8,7 +8,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import logging
 
 from django.db.models import Q, Sum, Avg, Count, Max, Min
@@ -552,7 +552,7 @@ def generate_user_performance_report(user: User, start_date: datetime = None,
     portfolio_summary = reporter.generate_portfolio_summary()
     
     return {
-        'performance_metrics': performance_metrics,
+        'performance_metrics': asdict(performance_metrics),
         'monthly_reports': monthly_reports,
         'strategy_comparison': strategy_comparison,
         'risk_metrics': risk_metrics,
@@ -573,7 +573,7 @@ def generate_strategy_performance_report(strategy: TradingStrategy, start_date: 
     
     return {
         'strategy_name': strategy.name,
-        'performance_metrics': performance_metrics,
+        'performance_metrics': asdict(performance_metrics),
         'monthly_reports': monthly_reports,
         'risk_metrics': risk_metrics,
         'generated_at': timezone.now().isoformat()
