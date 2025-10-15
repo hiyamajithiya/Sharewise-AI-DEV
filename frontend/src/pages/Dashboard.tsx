@@ -368,50 +368,6 @@ const Dashboard: React.FC = () => {
 
   const renderSuperAdminDashboard = (effectiveUser: any) => (
     <>
-      {/* Role Header */}
-      <Fade in timeout={600}>
-        <Card sx={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          borderRadius: '16px',
-          border: 'none',
-          boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
-          mb: 3, 
-          p: 2.5 
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <Avatar sx={{ ...styles.roleAvatar, width: 50, height: 50, mr: 2.5 }}>
-              <AdminPanelSettings sx={{ fontSize: 26, color: 'white' }} />
-            </Avatar>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h5" sx={{ 
-                fontWeight: 800, 
-                color: 'white',
-                textShadow: '1px 1px 3px rgba(0,0,0,0.2)',
-                mb: 0.3 
-              }}>
-                Super Admin Control Center
-              </Typography>
-              <Typography variant="body2" sx={{ 
-                color: 'rgba(255, 255, 255, 0.95)',
-                fontSize: '0.95rem'
-              }}>
-                Complete system oversight and management capabilities
-              </Typography>
-            </Box>
-            <Chip 
-              label="SUPER ADMIN" 
-              sx={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.25)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.8rem',
-                border: '2px solid rgba(255, 255, 255, 0.4)',
-                height: '26px'
-              }} 
-            />
-          </Box>
-        </Card>
-      </Fade>
 
       {/* Stats Grid */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -1453,73 +1409,6 @@ const Dashboard: React.FC = () => {
       <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
         {activeTab === 0 && (
           <>
-            {/* Modern Header */}
-            <Fade in timeout={400}>
-              <Card sx={{ ...styles.glassCard, mb: 3, p: 2.5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography variant="h4" component="h1" sx={{ 
-                      fontWeight: 800, 
-                      mb: 0.5,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      backgroundClip: 'text',
-                      WebkitBackgroundClip: 'text',
-                      color: 'transparent',
-                      textShadow: 'none'
-                    }}>
-                      Welcome back, {getEffectiveUser()?.first_name || 'Trader'}!
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#6B7280', fontSize: '1rem', lineHeight: 1.4 }}>
-                      Here's what's happening with your trading portfolio today
-                    </Typography>
-                  </Box>
-                  
-                  {/* Role-specific action buttons */}
-                  {(() => {
-                    const effectiveUser = getEffectiveUser();
-                    const userRole = effectiveUser?.role || 'USER';
-                    
-                    return (
-                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                        {/* Role-specific action buttons */}
-                        {userRole === 'SUPER_ADMIN' && (
-                          <Button
-                            variant="contained"
-                            startIcon={<Add />}
-                            sx={styles.animatedButton}
-                            onClick={() => navigate('/users?action=add')}
-                          >
-                            Add User
-                          </Button>
-                        )}
-                        
-                        {userRole === 'SUPPORT' && (
-                          <Button
-                            variant="contained"
-                            startIcon={<Add />}
-                            sx={styles.animatedButton}
-                            onClick={() => alert('Support ticket system will be implemented')}
-                          >
-                            New Ticket
-                          </Button>
-                        )}
-                        
-                        {userRole === 'SALES' && (
-                          <Button
-                            variant="contained"
-                            startIcon={<Add />}
-                            sx={styles.animatedButton}
-                            onClick={() => alert('CRM system for managing leads will be implemented')}
-                          >
-                            Add Lead
-                          </Button>
-                        )}
-                      </Box>
-                    );
-                  })()}
-                </Box>
-              </Card>
-            </Fade>
 
             {getRoleDashboardContent(getEffectiveUser())}
           </>

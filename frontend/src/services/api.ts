@@ -61,8 +61,8 @@ import {
   BacktestResult
 } from '../types';
 
-// API Configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// API Configuration: prefer env, fallback to localhost:8000 for dev
+const API_BASE_URL = (process.env.REACT_APP_API_URL as string) || 'http://localhost:8000/api';
 
 class ApiService {
   private api: AxiosInstance;
@@ -367,6 +367,7 @@ class ApiService {
 
   async createUser(userData: {
     email: string;
+    username?: string;
     first_name: string;
     last_name: string;
     phone_number?: string;
@@ -376,7 +377,8 @@ class ApiService {
   }): Promise<any> {
     const response = await this.api.post('/users/admin/create-user/', {
       email: userData.email,
-      username: userData.email, // Use email as username
+      // Allow passing an explicit username; fall back to email when not provided
+      username: userData.username || userData.email,
       first_name: userData.first_name,
       last_name: userData.last_name,
       phone_number: userData.phone_number,
@@ -389,6 +391,7 @@ class ApiService {
 
   // Update user - Admin only
   async updateUser(userId: string, userData: {
+    username?: string;
     first_name?: string;
     last_name?: string;
     email?: string;

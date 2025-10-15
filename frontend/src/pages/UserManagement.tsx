@@ -59,6 +59,7 @@ import apiService from '../services/api';
 
 interface User {
   id: string;
+  username?: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -107,6 +108,7 @@ const UserManagement: React.FC = () => {
   const [userDialogOpen, setUserDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
+  const [menuTargetUser, setMenuTargetUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -114,6 +116,7 @@ const UserManagement: React.FC = () => {
   const [bulkAction, setBulkAction] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [newUser, setNewUser] = useState({
+    username: '',
     first_name: '',
     last_name: '',
     email: '',
@@ -122,6 +125,7 @@ const UserManagement: React.FC = () => {
     subscription_tier: 'PRO',
     password: ''
   });
+  const [validationErrors, setValidationErrors] = useState<{ username?: string }>({});
   const [saving, setSaving] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -140,10 +144,13 @@ const UserManagement: React.FC = () => {
       // Transform backend response to match frontend interface
       const transformedUsers = response.results?.map((user: any) => ({
         id: user.id,
+        // Ensure username is captured from backend (fallback to email)
+        username: user.username || user.email || '',
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         email: user.email,
-        phone_number: user.profile?.phone_number || '',
+        // Some APIs return phone under profile, some as top-level phone_number
+        phone_number: user.profile?.phone_number || user.phone_number || '',
         role: user.role,
         subscription_tier: user.subscription_tier || 'PRO',
         status: user.is_active ? 'ACTIVE' : 'INACTIVE',
@@ -154,10 +161,12 @@ const UserManagement: React.FC = () => {
         portfolio_value: user.profile?.portfolio_value || 0,
       })) || [];
       setUsers(transformedUsers);
+      return transformedUsers;
     } catch (error) {
       console.error('Failed to load users:', error);
       // Fallback to mock data if API fails
       setUsers([]); // Empty array on error
+      return [];
     } finally {
       setLoading(false);
     }
@@ -181,6 +190,7 @@ const UserManagement: React.FC = () => {
     setUserDialogOpen(true);
     setSelectedUser(null);
     setNewUser({
+      username: '',
       first_name: '',
       last_name: '',
       email: '',
@@ -189,20 +199,25 @@ const UserManagement: React.FC = () => {
       subscription_tier: 'PRO',
       password: ''
     });
+    setValidationErrors({});
   };
 
-  const handleEditUser = () => {
-    if (selectedUser) {
+  // Accept an optional user argument to avoid relying on stale state when called from menu
+  const handleEditUser = (userArg?: User | null) => {
+    const userToEdit = userArg || selectedUser;
+    if (userToEdit) {
       setNewUser({
-        first_name: selectedUser.first_name,
-        last_name: selectedUser.last_name,
-        email: selectedUser.email,
-        phone_number: selectedUser.phone_number || '',
-        role: selectedUser.role,
-        subscription_tier: selectedUser.subscription_tier || 'PRO',
+        username: (userToEdit as any).username || '',
+        first_name: userToEdit.first_name,
+        last_name: userToEdit.last_name,
+        email: userToEdit.email,
+        phone_number: userToEdit.phone_number || '',
+        role: userToEdit.role,
+        subscription_tier: userToEdit.subscription_tier || 'PRO',
         password: ''
       });
       setUserDialogOpen(true);
+      setValidationErrors({});
     }
     setActionMenuAnchor(null);
   };
@@ -238,10 +253,17 @@ const UserManagement: React.FC = () => {
   const handleSaveUser = async () => {
     try {
       setSaving(true);
+      // Validate required fields
+      if (!((newUser as any).username || '').toString().trim()) {
+        setValidationErrors({ username: 'Username is required' });
+        setSaving(false);
+        return;
+      }
       
       if (selectedUser) {
         // Edit existing user - Call backend API to update
         await apiService.updateUser(selectedUser.id, {
+          username: (newUser as any).username,
           first_name: newUser.first_name,
           last_name: newUser.last_name,
           email: newUser.email,
@@ -251,12 +273,20 @@ const UserManagement: React.FC = () => {
         });
         
         // Reload users list to get fresh data from backend
+        const beforeReloadUsername = (newUser as any).username;
+        const beforeReloadPhone = newUser.phone_number;
         await loadUsers();
-        
-        setTestResult({ success: true, message: 'User updated successfully!' });
+        // Check persistence
+        const updated = users.find(u => u.id === selectedUser.id);
+        if (!updated || ((updated as any).username || '') !== (beforeReloadUsername || '') || (updated.phone_number || '') !== (beforeReloadPhone || '')) {
+          setTestResult({ success: false, message: 'User updated but username/phone did not persist. Please check backend or try again.' });
+        } else {
+          setTestResult({ success: true, message: 'User updated successfully!' });
+        }
       } else {
         // Create new user via API
         await apiService.createUser({
+          username: (newUser as any).username,
           email: newUser.email,
           first_name: newUser.first_name,
           last_name: newUser.last_name,
@@ -267,9 +297,15 @@ const UserManagement: React.FC = () => {
         });
         
         // Reload users list to get the newly created user
+        const createdUsername = (newUser as any).username;
+        const createdPhone = newUser.phone_number;
         await loadUsers();
-        
-        setTestResult({ success: true, message: 'User created successfully!' });
+        const created = users.find(u => (u.email === newUser.email) || ((u as any).username || '') === (createdUsername || ''));
+        if (!created || ((created as any).username || '') !== (createdUsername || '') || (created.phone_number || '') !== (createdPhone || '')) {
+          setTestResult({ success: false, message: 'User created but username/phone did not persist. Please check backend or try again.' });
+        } else {
+          setTestResult({ success: true, message: 'User created successfully!' });
+        }
       }
       
       setUserDialogOpen(false);
@@ -850,6 +886,7 @@ const UserManagement: React.FC = () => {
                       <IconButton
                         onClick={(e) => {
                           setSelectedUser(user);
+                          setMenuTargetUser(user);
                           setActionMenuAnchor(e.currentTarget);
                         }}
                         sx={{ color: '#1F2937' }}
@@ -870,16 +907,20 @@ const UserManagement: React.FC = () => {
           open={Boolean(actionMenuAnchor)}
           onClose={() => setActionMenuAnchor(null)}
         >
-          <MenuItem onClick={handleEditUser}>
+          <MenuItem onClick={() => handleEditUser(menuTargetUser)}>
             <Edit sx={{ mr: 1 }} /> Edit
           </MenuItem>
           <MenuItem onClick={() => {
+            setSelectedUser(menuTargetUser);
             setDeleteDialogOpen(true);
             setActionMenuAnchor(null);
           }}>
             <Delete sx={{ mr: 1 }} /> Delete
           </MenuItem>
-          <MenuItem onClick={handleSuspendUser}>
+          <MenuItem onClick={() => {
+            setSelectedUser(menuTargetUser);
+            handleSuspendUser();
+          }}>
             <Block sx={{ mr: 1 }} /> 
             {selectedUser?.status === 'SUSPENDED' ? 'Activate' : 'Suspend'}
           </MenuItem>
@@ -910,6 +951,38 @@ const UserManagement: React.FC = () => {
                 label="First Name"
                 value={newUser.first_name}
                 onChange={(e) => setNewUser({...newUser, first_name: e.target.value})}
+                InputLabelProps={{ 
+                  sx: { 
+                    color: '#6B7280',
+                    backgroundColor: 'white',
+                    px: 1,
+                    borderRadius: '4px'
+                  } 
+                }}
+                InputProps={{ sx: { color: '#1F2937' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid #e0e0e0',
+                    '& fieldset': { borderColor: '#e0e0e0' },
+                    '&:hover fieldset': { borderColor: '#d1d5db' },
+                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
+                  }
+                }}
+              />
+              <TextField
+                fullWidth
+                required
+                label="Username"
+                value={(newUser as any).username}
+                onChange={(e) => {
+                  const username = e.target.value;
+                  setNewUser({...newUser, username});
+                  setValidationErrors(prev => ({ ...prev, username: username.trim() ? undefined : 'Username is required' }));
+                }}
+                error={Boolean(validationErrors.username)}
+                helperText={validationErrors.username}
                 InputLabelProps={{ 
                   sx: { 
                     color: '#6B7280',

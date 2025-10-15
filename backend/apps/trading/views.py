@@ -1017,52 +1017,43 @@ def process_signal(request):
         )
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def automation_stats(request):
-    """Get automation system statistics"""
-    user = request.user
+def _compute_automation_stats_for_user(user):
+    """Shared stats computation used by API view and internal callers"""
     today = timezone.now().date()
-    
-    # Get strategy stats
+
     strategies = TradingStrategy.objects.filter(user=user)
     active_strategies = strategies.filter(status=TradingStrategy.Status.ACTIVE).count()
-    
-    # Get execution stats
+
     executions_today = AutomatedTradeExecution.objects.filter(
         strategy__user=user,
         created_at__date=today
     )
-    
+
     successful_executions_today = executions_today.filter(
         status=AutomatedTradeExecution.ExecutionStatus.COMPLETED
     ).count()
-    
-    # Get approval stats
+
     pending_approvals = TradeApproval.objects.filter(
         user=user,
         status=TradeApproval.Status.PENDING
     ).count()
-    
-    # Calculate P&L for today
+
     total_pnl_today = sum(exec.total_pnl for exec in executions_today)
-    
-    # Get open positions
+
     open_positions = PortfolioPosition.objects.filter(
         user=user,
         total_quantity__gt=0
     ).count()
-    
-    # Calculate success rate
+
     total_executions = AutomatedTradeExecution.objects.filter(strategy__user=user).count()
     successful_executions = AutomatedTradeExecution.objects.filter(
         strategy__user=user,
         status=AutomatedTradeExecution.ExecutionStatus.COMPLETED
     ).count()
-    
+
     automation_success_rate = (successful_executions / total_executions * 100) if total_executions > 0 else 0
-    
-    stats = {
+
+    return {
         'total_strategies': strategies.count(),
         'active_strategies': active_strategies,
         'total_executions_today': executions_today.count(),
@@ -1073,7 +1064,13 @@ def automation_stats(request):
         'automation_success_rate': round(automation_success_rate, 1),
         'avg_execution_time': 2.5  # Mock value
     }
-    
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def automation_stats(request):
+    """Get automation system statistics"""
+    stats = _compute_automation_stats_for_user(request.user)
     return Response(stats)
 
 
@@ -1155,7 +1152,8 @@ def automation_dashboard(request):
         'recent_executions': AutomatedTradeExecutionSerializer(recent_executions, many=True).data,
         'active_strategies': TradingStrategySerializer(active_strategies, many=True).data,
         'portfolio_positions': PortfolioPositionSerializer(positions, many=True).data,
-        'stats': automation_stats(request).data
+        # Compute stats without invoking DRF view directly to avoid Request type mismatch
+        'stats': _compute_automation_stats_for_user(user)
     }
     
     return Response(dashboard_data)

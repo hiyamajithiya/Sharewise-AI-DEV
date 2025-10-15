@@ -283,10 +283,10 @@ const Layout: React.FC = () => {
         sx={{
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          borderBottom: 'none',
-          boxShadow: '0px 2px 8px rgba(102, 126, 234, 0.3)',
+          backgroundColor: 'white',
+          color: 'primary.main',
+          borderBottom: '1px solid #e5e7eb',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
         }}
       >
         <Toolbar sx={{ py: 1 }}>
@@ -298,7 +298,7 @@ const Layout: React.FC = () => {
             sx={{ 
               mr: 2, 
               display: { md: 'none' },
-              color: 'white'
+              color: 'primary.main'
             }}
           >
             <MenuIcon />
@@ -306,10 +306,30 @@ const Layout: React.FC = () => {
           
           {/* Page Title */}
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, color: 'white' }}>
-              {currentMenuItems.find(item => item.path === location.pathname)?.text || 'Dashboard'}
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                {currentMenuItems.find(item => item.path === location.pathname)?.text || 'Dashboard'}
+              </Typography>
+              {effectiveUser?.role === 'SUPER_ADMIN' && (
+                <Box
+                  sx={{
+                    ml: 1,
+                    px: 1,
+                    py: 0.2,
+                    borderRadius: '10px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    border: '1px solid',
+                    borderColor: 'primary.light',
+                    color: 'primary.main',
+                    backgroundColor: 'white'
+                  }}
+                >
+                  SUPER ADMIN
+                </Box>
+              )}
+            </Box>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {isTestingMode && selectedUser ? (
                 `Testing as ${selectedUser.role} - ${selectedUser.first_name} ${selectedUser.last_name}`
               ) : (
@@ -330,9 +350,9 @@ const Layout: React.FC = () => {
               size="large"
               onClick={handleNotificationMenuOpen}
               sx={{ 
-                color: 'white',
+                color: 'primary.main',
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
+                  backgroundColor: 'rgba(102, 126, 234, 0.12)'
                 }
               }}
             >
@@ -362,7 +382,7 @@ const Layout: React.FC = () => {
               sx={{
                 p: 0.5,
                 '&:hover': {
-                  backgroundColor: 'rgba(0, 82, 204, 0.08)',
+                  backgroundColor: 'rgba(102, 126, 234, 0.08)',
                 }
               }}
             >

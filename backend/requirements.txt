@@ -1,4 +1,10 @@
-# Django and Core Web Framework
+# ==========================================
+# ✅ Django + FastAPI Full Stack Environment
+# Python 3.11.9 Compatible
+# Cleaned and Dependency-Resolved
+# ==========================================
+
+# --- Django and Core Web Framework ---
 Django==5.1.5
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
@@ -6,39 +12,39 @@ django-cors-headers==4.4.0
 django-extensions==3.2.3
 django-environ==0.11.2
 
-# Database and ORM
+# --- Database and ORM ---
 psycopg2-binary==2.9.9
 
-# Async and Real-time
+# --- Async and Real-time (WebSocket + Task Queue) ---
 channels==4.1.0
 channels-redis==4.2.0
 redis==5.0.8
 celery==5.4.0
 kombu==5.4.2
 
-# Machine Learning and Data Science (Core)
+# --- Machine Learning and Data Science ---
 numpy==1.26.4
 pandas==2.2.3
-scikit-learn==1.5.2
+scikit-learn==1.6.0      # ✅ Upgraded for compatibility (fixes eli5 issue)
 joblib==1.4.2
 
-# Deep Learning Libraries (For Future Implementation)
-torch>=2.5.0
-pytorch-lightning>=2.5.0
+# --- Deep Learning Libraries ---
+torch==2.8.0              # ✅ Works with Python 3.11
+pytorch-lightning==2.5.5
 
-# Gradient Boosting Models (For ML Features)
+# --- Gradient Boosting Models ---
 xgboost==2.1.1
 lightgbm==4.5.0
 
-# Financial and Market Data
-yfinance==0.2.32
+# --- Financial and Market Data ---
+yfinance==0.2.43          # ✅ Slightly newer, stable release
 
-# Web Server and API
+# --- Web Server and API (FastAPI side) ---
 fastapi==0.115.4
 uvicorn==0.32.0
 pydantic==2.9.2
 
-# Security and Authentication
+# --- Security and Authentication ---
 cryptography==46.0.2
 PyJWT==2.9.0
 python-decouple==3.8
@@ -46,42 +52,44 @@ google-auth==2.23.4
 google-auth-oauthlib==1.1.0
 google-auth-httplib2==0.1.1
 
-# Performance and Caching
+# --- Performance and Caching ---
 django-redis==5.4.0
 whitenoise==6.8.2
 
-# System Monitoring
+# --- System Monitoring ---
 psutil==6.1.0
 
-# Email and Notifications
+# --- Email and Notifications ---
 django-anymail==12.0
 
-# File Storage and Handling
+# --- File Storage and Handling ---
 Pillow==10.4.0
 
-# Date and Time
+# --- Date and Time ---
 python-dateutil==2.9.0.post0
 pytz==2024.2
 
-# Utilities
+# --- Utilities ---
 requests==2.32.3
 python-dotenv==1.0.1
 
-# API Documentation
+# --- API Documentation ---
 drf-spectacular==0.27.2
 
-# Data Processing
+# --- Data Processing ---
 openpyxl==3.1.5
 
-# Mathematical and Scientific Computing
+# --- Mathematical and Scientific Computing ---
 scipy==1.14.1
 
-# WebSocket Support
+# --- WebSocket Support ---
 websockets==13.1
 
-# API Rate Limiting
+# --- API Rate Limiting ---
 django-ratelimit==4.1.0
 
-# Health Checks
+# --- Health Checks ---
 django-health-check==3.18.3
+
+# --- Financial Trading API ---
 kiteconnect==4.2.0

@@ -120,6 +120,8 @@ class RoleTestSerializer(serializers.Serializer):
 class AdminUserCreationSerializer(serializers.Serializer):
     email = serializers.EmailField()
     username = serializers.CharField(min_length=3, max_length=150)
+    # Optional phone number (accept either phone_number or mobile_number from clients)
+    phone_number = serializers.CharField(required=False, allow_blank=True, max_length=50)
     password = serializers.CharField(write_only=True, min_length=8)
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)

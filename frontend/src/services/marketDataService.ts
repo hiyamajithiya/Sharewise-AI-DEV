@@ -360,7 +360,8 @@ export class MarketDataAPI {
 
   static async getOptionChain(underlying: string, expiry?: string): Promise<OptionChainData | null> {
     try {
-      const url = new URL(`${this.API_BASE_URL}/market-data/option-chain/${encodeURIComponent(underlying)}/`);
+      // Backend option-chain endpoint lives under trading app
+      const url = new URL(`${this.API_BASE_URL}/trading/option-chain/${encodeURIComponent(underlying)}/`);
       if (expiry) {
         url.searchParams.append('expiry', expiry);
       }

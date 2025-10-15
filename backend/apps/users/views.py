@@ -525,6 +525,21 @@ def create_user_admin(request):
             # Send welcome email if user is active
             if new_user.is_active:
                 send_welcome_email(new_user)
+
+            # Persist phone number if provided (accept phone_number or mobile_number)
+            phone_val = None
+            if 'phone_number' in serializer.validated_data:
+                phone_val = serializer.validated_data.get('phone_number')
+            elif 'mobile_number' in request.data:
+                phone_val = request.data.get('mobile_number')
+
+            if phone_val:
+                # Create or update user profile with phone number
+                if hasattr(new_user, 'profile') and new_user.profile is not None:
+                    new_user.profile.phone_number = phone_val
+                    new_user.profile.save()
+                else:
+                    UserProfile.objects.create(user=new_user, phone_number=phone_val)
             
             return Response({
                 'message': 'User created successfully!',
@@ -562,6 +577,12 @@ def update_user_admin(request, user_id):
             target_user.last_name = request.data['last_name']
         if 'email' in request.data:
             target_user.email = request.data['email']
+        if 'username' in request.data:
+            # Ensure username uniqueness before updating
+            new_username = request.data['username']
+            if CustomUser.objects.filter(username=new_username).exclude(id=target_user.id).exists():
+                return Response({'error': 'A user with this username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+            target_user.username = new_username
         if 'role' in request.data:
             target_user.role = request.data['role']
             # Update staff/superuser status based on role
@@ -578,10 +599,20 @@ def update_user_admin(request, user_id):
             target_user.subscription_tier = request.data['subscription_tier']
         if 'is_active' in request.data:
             target_user.is_active = request.data['is_active']
+        # Accept either 'phone_number' or 'mobile_number' from the client
+        phone_val = None
         if 'phone_number' in request.data:
-            # Update profile phone number
-            if hasattr(target_user, 'profile'):
-                target_user.profile.phone_number = request.data['phone_number']
+            phone_val = request.data['phone_number']
+        elif 'mobile_number' in request.data:
+            phone_val = request.data['mobile_number']
+
+        if phone_val is not None:
+            # Ensure the user has a profile; create if absent
+            if not hasattr(target_user, 'profile') or target_user.profile is None:
+                # Create a related UserProfile if it does not exist
+                UserProfile.objects.create(user=target_user, phone_number=phone_val)
+            else:
+                target_user.profile.phone_number = phone_val
                 target_user.profile.save()
         
         target_user.save()

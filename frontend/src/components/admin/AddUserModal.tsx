@@ -98,7 +98,15 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
 
     try {
       const apiService = (await import('../../services/api')).default;
-      await apiService.post('/users/admin/create-user/', formData);
+      // Create a payload that includes both phone_number and mobile_number to
+      // remain compatible with different backend expectations.
+      const payload = {
+        ...formData,
+        phone_number: formData.mobile_number,
+        mobile_number: formData.mobile_number,
+      };
+
+      await apiService.post('/users/admin/create-user/', payload);
       
       setSuccess('User created successfully!');
       onUserAdded();
