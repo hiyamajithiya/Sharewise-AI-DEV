@@ -28,8 +28,6 @@ import {
   Add,
   Person,
   AdminPanelSettings,
-  Support,
-  SellOutlined,
   CheckCircle,
   Dashboard as DashboardIcon,
   Analytics,
@@ -49,8 +47,6 @@ import {
   Holding, 
   TradingSignal, 
   AdminDashboardData,
-  SupportDashboardData,
-  SalesDashboardData,
   MarketOverview 
 } from '../types';
 // Removed AddUserModal import - now using User Management page
@@ -107,8 +103,6 @@ const Dashboard: React.FC = () => {
   const [activeTab] = useState(0);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [adminData, setAdminData] = useState<AdminDashboardData | null>(null);
-  const [supportData, setSupportData] = useState<SupportDashboardData | null>(null);
-  const [salesData, setSalesData] = useState<SalesDashboardData | null>(null);
   const [systemInfo, setSystemInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -150,14 +144,6 @@ const Dashboard: React.FC = () => {
         case 'SUPER_ADMIN':
           const adminDashboardData = await apiService.getAdminDashboardData();
           setAdminData(adminDashboardData);
-          break;
-        case 'SUPPORT':
-          const supportDashboardData = await apiService.getSupportDashboardData();
-          setSupportData(supportDashboardData);
-          break;
-        case 'SALES':
-          const salesDashboardData = await apiService.getSalesDashboardData();
-          setSalesData(salesDashboardData);
           break;
         default:
           // USER role - common data is sufficient
@@ -356,10 +342,6 @@ const Dashboard: React.FC = () => {
     switch (userRole) {
       case 'SUPER_ADMIN':
         return renderSuperAdminDashboard(effectiveUser);
-      case 'SUPPORT':
-        return renderSupportDashboard(effectiveUser);
-      case 'SALES':
-        return renderSalesDashboard(effectiveUser);
       case 'USER':
       default:
         return renderUserDashboard(effectiveUser);
@@ -368,6 +350,15 @@ const Dashboard: React.FC = () => {
 
   const renderSuperAdminDashboard = (effectiveUser: any) => (
     <>
+      {/* Page Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1F2937' }}>
+          Super Admin Dashboard
+        </Typography>
+        <Typography variant="body1" sx={{ color: '#6B7280' }}>
+          Overview of system statistics and metrics
+        </Typography>
+      </Box>
 
       {/* Stats Grid */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -489,8 +480,6 @@ const Dashboard: React.FC = () => {
                   </Typography>
                   {[
                     { label: 'Regular Users', count: systemInfo.regular_users || 0, color: '#667eea' },
-                    { label: 'Sales Team', count: systemInfo.sales_team || 0, color: '#10B981' },
-                    { label: 'Support Team', count: systemInfo.support_team || 0, color: '#F59E0B' },
                     { label: 'Super Admins', count: systemInfo.super_admins || 0, color: '#EF4444' }
                   ].map((item, idx) => (
                     <Box key={idx} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -624,428 +613,20 @@ const Dashboard: React.FC = () => {
     </>
   );
 
-  const renderSupportDashboard = (effectiveUser: any) => (
-    <>
-      {/* Role Header */}
-      <Fade in timeout={600}>
-        <Card sx={{ ...styles.gradientCard, mb: 4, p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar sx={{ ...styles.roleAvatar, mr: 3 }}>
-              <Support sx={{ fontSize: 30, color: 'white' }} />
-            </Avatar>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 800, 
-                color: 'white',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                mb: 0.5 
-              }}>
-                Support Command Center
-              </Typography>
-              <Typography variant="body1" sx={{ 
-                color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: '1.1rem'
-              }}>
-                Customer assistance and issue resolution hub
-              </Typography>
-            </Box>
-            <Chip 
-              label="SUPPORT TEAM" 
-              sx={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                border: '1px solid rgba(255, 255, 255, 0.3)'
-              }} 
-            />
-          </Box>
-        </Card>
-      </Fade>
-
-      {/* Stats Grid */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {[
-          {
-            title: "Open Tickets",
-            value: "12",
-            change: "-3 today",
-            icon: <Support />,
-            color: "#F59E0B",
-            delay: 100
-          },
-          {
-            title: "Users Helped",
-            value: "85",
-            change: "+12 today",
-            icon: <Person />,
-            color: "#10B981",
-            delay: 200
-          },
-          {
-            title: "Avg Response",
-            value: "2.5h",
-            change: "-30min",
-            icon: <Speed />,
-            color: "#3B82F6",
-            delay: 300
-          }
-        ].map((stat, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <Zoom in timeout={stat.delay}>
-              <Card sx={{ ...styles.glassCard, p: 3, height: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-                  <Box>
-                    <Typography variant="h3" sx={{ 
-                      fontWeight: 800, 
-                      color: stat.color,
-                      mb: 0.5,
-                      textShadow: `0 2px 4px ${stat.color}20`
-                    }}>
-                      {stat.value}
-                    </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#374151', mb: 1 }}>
-                      {stat.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 500 }}>
-                      {stat.change}
-                    </Typography>
-                  </Box>
-                  <Box sx={{
-                    p: 2,
-                    borderRadius: '15px',
-                    background: `${stat.color}15`,
-                    color: stat.color,
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      background: `${stat.color}25`,
-                      transform: 'rotate(10deg) scale(1.1)',
-                    }
-                  }}>
-                    {stat.icon}
-                  </Box>
-                </Box>
-              </Card>
-            </Zoom>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Main Content */}
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Slide direction="up" in timeout={800}>
-            <Card sx={{ ...styles.glassCard, p: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Box sx={{
-                  p: 2,
-                  borderRadius: '15px',
-                  background: 'linear-gradient(135deg, #3B82F615 0%, #1D4ED815 100%)',
-                  mr: 2
-                }}>
-                  <Support sx={{ color: '#3B82F6', fontSize: 30 }} />
-                </Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#1F2937' }}>
-                  Support Dashboard
-                </Typography>
-              </Box>
-              
-              <Typography variant="body1" sx={{ color: '#6B7280', mb: 4, lineHeight: 1.6 }}>
-                Access comprehensive user support tools, ticket management system, and customer assistance features to provide exceptional service.
-              </Typography>
-
-              <Grid container spacing={3}>
-                {[
-                  { icon: <Support />, title: 'Ticket Management', desc: 'Handle and resolve customer tickets efficiently' },
-                  { icon: <Person />, title: 'User Assistance', desc: 'Direct customer support and guidance' },
-                  { icon: <Analytics />, title: 'Performance Metrics', desc: 'Track support team performance and KPIs' },
-                  { icon: <Speed />, title: 'Quick Actions', desc: 'Access frequently used support tools' }
-                ].map((feature, idx) => (
-                  <Grid item xs={12} sm={6} key={idx}>
-                    <Box sx={{
-                      p: 3,
-                      borderRadius: '15px',
-                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(29, 78, 216, 0.05) 100%)',
-                      border: '1px solid rgba(59, 130, 246, 0.1)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(29, 78, 216, 0.1) 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 20px rgba(59, 130, 246, 0.15)'
-                      }
-                    }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Box sx={{
-                          p: 1.5,
-                          borderRadius: '12px',
-                          background: 'rgba(59, 130, 246, 0.1)',
-                          color: '#3B82F6',
-                          mr: 2
-                        }}>
-                          {feature.icon}
-                        </Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
-                          {feature.title}
-                        </Typography>
-                      </Box>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
-                        {feature.desc}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Card>
-          </Slide>
-        </Grid>
-      </Grid>
-    </>
-  );
-
-  const renderSalesDashboard = (effectiveUser: any) => (
-    <>
-      {/* Role Header */}
-      <Fade in timeout={600}>
-        <Card sx={{ ...styles.gradientCard, mb: 4, p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar sx={{ ...styles.roleAvatar, mr: 3 }}>
-              <SellOutlined sx={{ fontSize: 30, color: 'white' }} />
-            </Avatar>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 800, 
-                color: 'white',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                mb: 0.5 
-              }}>
-                Sales Performance Hub
-              </Typography>
-              <Typography variant="body1" sx={{ 
-                color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: '1.1rem'
-              }}>
-                Lead management and revenue tracking center
-              </Typography>
-            </Box>
-            <Chip 
-              label="SALES TEAM" 
-              sx={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                border: '1px solid rgba(255, 255, 255, 0.3)'
-              }} 
-            />
-          </Box>
-        </Card>
-      </Fade>
-
-      {/* Stats Grid */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {[
-          {
-            title: "Monthly Sales",
-            value: "₹85,000",
-            change: "+25%",
-            icon: <SellOutlined />,
-            color: "#10B981",
-            delay: 100
-          },
-          {
-            title: "New Leads",
-            value: "24",
-            change: "+8 today",
-            icon: <Person />,
-            color: "#667eea",
-            delay: 200
-          },
-          {
-            title: "Conversion Rate",
-            value: "15.2%",
-            change: "+2.1%",
-            icon: <TrendingUp />,
-            color: "#F59E0B",
-            delay: 300
-          }
-        ].map((stat, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <Zoom in timeout={stat.delay}>
-              <Card sx={{ ...styles.glassCard, p: 3, height: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-                  <Box>
-                    <Typography variant="h3" sx={{ 
-                      fontWeight: 800, 
-                      color: stat.color,
-                      mb: 0.5,
-                      textShadow: `0 2px 4px ${stat.color}20`
-                    }}>
-                      {stat.value}
-                    </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#374151', mb: 1 }}>
-                      {stat.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 500 }}>
-                      {stat.change}
-                    </Typography>
-                  </Box>
-                  <Box sx={{
-                    p: 2,
-                    borderRadius: '15px',
-                    background: `${stat.color}15`,
-                    color: stat.color,
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      background: `${stat.color}25`,
-                      transform: 'rotate(10deg) scale(1.1)',
-                    }
-                  }}>
-                    {stat.icon}
-                  </Box>
-                </Box>
-              </Card>
-            </Zoom>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Main Content */}
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Slide direction="up" in timeout={800}>
-            <Card sx={{ ...styles.glassCard, p: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Box sx={{
-                  p: 2,
-                  borderRadius: '15px',
-                  background: 'linear-gradient(135deg, #10B98115 0%, #059F8015 100%)',
-                  mr: 2
-                }}>
-                  <TrendingUp sx={{ color: '#10B981', fontSize: 30 }} />
-                </Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#1F2937' }}>
-                  Sales Dashboard
-                </Typography>
-              </Box>
-              
-              <Typography variant="body1" sx={{ color: '#6B7280', mb: 4, lineHeight: 1.6 }}>
-                Track sales performance, manage customer leads, monitor conversion rates, and optimize revenue generation strategies.
-              </Typography>
-
-              <Grid container spacing={3}>
-                {[
-                  { icon: <SellOutlined />, title: 'Revenue Tracking', desc: 'Monitor sales performance and revenue metrics' },
-                  { icon: <Person />, title: 'Lead Management', desc: 'Organize and nurture potential customers' },
-                  { icon: <Analytics />, title: 'Performance Analytics', desc: 'Analyze sales trends and conversion rates' },
-                  { icon: <Star />, title: 'Customer Success', desc: 'Track customer satisfaction and retention' }
-                ].map((feature, idx) => (
-                  <Grid item xs={12} sm={6} key={idx}>
-                    <Box sx={{
-                      p: 3,
-                      borderRadius: '15px',
-                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 159, 128, 0.05) 100%)',
-                      border: '1px solid rgba(16, 185, 129, 0.1)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 159, 128, 0.1) 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 20px rgba(16, 185, 129, 0.15)'
-                      }
-                    }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Box sx={{
-                          p: 1.5,
-                          borderRadius: '12px',
-                          background: 'rgba(16, 185, 129, 0.1)',
-                          color: '#10B981',
-                          mr: 2
-                        }}>
-                          {feature.icon}
-                        </Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
-                          {feature.title}
-                        </Typography>
-                      </Box>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
-                        {feature.desc}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Card>
-          </Slide>
-        </Grid>
-      </Grid>
-    </>
-  );
-
   const renderUserDashboard = (effectiveUser: any) => {
     const features = getUserTierFeatures(effectiveUser?.subscription_tier || 'BASIC');
     
-    const getTierGradient = (tier: string) => {
-      switch (tier) {
-        case 'ELITE':
-          return 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)';
-        case 'PRO':
-          return 'linear-gradient(135deg, #10B981 0%, #059F80 100%)';
-        default:
-          return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-      }
-    };
-
     return (
     <>
-      {/* Tier Header */}
-      <Fade in timeout={600}>
-        <Card sx={{ 
-          background: getTierGradient(effectiveUser?.subscription_tier || 'BASIC'),
-          mb: 4, 
-          p: 3,
-          border: 'none'
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar sx={{ 
-              ...styles.roleAvatar, 
-              mr: 3,
-              background: 'rgba(255, 255, 255, 0.2)',
-              border: '2px solid rgba(255, 255, 255, 0.3)'
-            }}>
-              <AccountBalance sx={{ fontSize: 30, color: 'white' }} />
-            </Avatar>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 800, 
-                color: 'white',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                mb: 0.5 
-              }}>
-                {effectiveUser?.first_name || 'User'}'s Trading Account
-              </Typography>
-              <Typography variant="body1" sx={{ 
-                color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: '1.1rem'
-              }}>
-                {features.maxStrategies === -1 ? 'Unlimited strategies & signals' : 
-                 `${features.maxStrategies} strategies, ${features.maxSignals} signals`}
-                {features.aiStudioAccess ? ' • AI Studio Access' : ''}
-                {features.advancedAnalytics ? ' • Advanced Analytics' : ''}
-                {features.customIndicators ? ' • Custom Indicators' : ''}
-              </Typography>
-            </Box>
-            <Chip 
-              label={features.tierLabel}
-              sx={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                border: '1px solid rgba(255, 255, 255, 0.3)'
-              }} 
-            />
-          </Box>
-        </Card>
-      </Fade>
+      {/* Page Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1F2937' }}>
+          {effectiveUser?.first_name || 'User'} User Dashboard
+        </Typography>
+        <Typography variant="body1" sx={{ color: '#6B7280' }}>
+          Overview of system statistics and metrics
+        </Typography>
+      </Box>
 
       {/* Stats Grid */}
       <Grid container spacing={3} sx={{ mb: 4 }}>

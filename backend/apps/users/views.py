@@ -326,7 +326,6 @@ def get_user_roles(request):
         'role_display': user.get_role_display(),
         'permissions': {
             'is_super_admin': user.is_super_admin(),
-            'is_support_team': user.is_support_team(),
             'is_staff_member': user.is_staff_member(),
             'has_admin_access': user.has_admin_access(),
             'can_manage_users': user.can_manage_users(),
@@ -370,7 +369,6 @@ def test_role_permissions(request):
             'authentication': True,
             'role_verification': user.is_staff_member(),
             'admin_access': user.has_admin_access(),
-            'support_access': user.is_support_team() or user.is_super_admin(),
             'user_management': user.can_manage_users(),
             'analytics_access': user.can_view_analytics(),
         }
@@ -381,17 +379,8 @@ def test_role_permissions(request):
             'database_access': True,  # Could test actual DB queries
             'system_health': True,   # Could check system status
             'user_count': User.objects.count(),
-            'staff_count': User.objects.filter(role__in=[User.Role.SUPER_ADMIN, User.Role.SUPPORT]).count(),
+            'staff_count': User.objects.filter(role__in=[User.Role.SUPER_ADMIN]).count(),
             'recent_registrations': User.objects.filter(created_at__gte=timezone.now() - timezone.timedelta(days=7)).count(),
-        }
-    
-    elif test_type == 'support' and (user.is_support_team() or user.is_super_admin()):
-        # Support-specific tests
-        test_results['tests'] = {
-            'ticket_access': True,
-            'user_lookup': True,
-            'analytics_read': user.can_view_analytics(),
-            'user_assistance': True,
         }
     
     else:
@@ -419,9 +408,7 @@ def get_system_info(request):
         'total_users': User.objects.count(),
         'verified_users': User.objects.filter(email_verified=True).count(),
         'super_admins': User.objects.filter(role=User.Role.SUPER_ADMIN).count(),
-        'support_team': User.objects.filter(role=User.Role.SUPPORT).count(),
         'regular_users': User.objects.filter(role=User.Role.USER).count(),
-        'sales_team': User.objects.filter(role=User.Role.SALES).count(),
     }
     
     # Additional info for super admin only
@@ -446,14 +433,14 @@ def get_system_info(request):
 @permission_classes([IsAuthenticated])
 def get_all_users(request):
     """
-    Get all users - only for super admin and support team
+    Get all users - only for super admin
     """
     user = request.user
     
-    # Only super admin and support staff can access this
-    if not (user.is_super_admin() or user.is_support_team()):
+    # Only super admin can access this
+    if not user.is_super_admin():
         return Response({
-            'error': 'Access denied. This endpoint is only available for super admin and support staff.'
+            'error': 'Access denied. This endpoint is only available for super admin.'
         }, status=status.HTTP_403_FORBIDDEN)
     
     # Get all users with their profiles
@@ -516,9 +503,6 @@ def create_user_admin(request):
             # Set superuser status if role is SUPER_ADMIN
             if new_user.role == User.Role.SUPER_ADMIN:
                 new_user.is_superuser = True
-                new_user.is_staff = True
-                new_user.save()
-            elif new_user.role == User.Role.SUPPORT:
                 new_user.is_staff = True
                 new_user.save()
             
@@ -589,9 +573,6 @@ def update_user_admin(request, user_id):
             if target_user.role == User.Role.SUPER_ADMIN:
                 target_user.is_superuser = True
                 target_user.is_staff = True
-            elif target_user.role == User.Role.SUPPORT:
-                target_user.is_staff = True
-                target_user.is_superuser = False
             else:
                 target_user.is_staff = False
                 target_user.is_superuser = False

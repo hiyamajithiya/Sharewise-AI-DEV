@@ -72,75 +72,13 @@ export interface SupportCenterData {
   supportChannels: SupportChannel[];
 }
 
-// Sales Analytics Types
-export interface SalesMetrics {
-  revenue: number;
-  revenueGrowth: number;
-  totalLeads: number;
-  leadsGrowth: number;
-  conversionRate: number;
-  conversionGrowth: number;
-  avgDealSize: number;
-  dealSizeGrowth: number;
-  refreshedAt: string;
-}
-
-export interface SalesRepPerformance {
-  id: string;
-  name: string;
-  avatar: string;
-  role: string;
-  revenue: number;
-  deals: number;
-  conversionRate: number;
-  target: number;
-  performance: number;
-  email?: string;
-}
-
-export interface MonthlyTrend {
-  month: string;
-  revenue: number;
-  leads: number;
-  deals: number;
-  conversionRate?: number;
-}
-
-export interface TopCustomer {
-  id: string;
-  name: string;
-  value: number;
-  tier: 'Enterprise' | 'Professional' | 'Basic';
-  deals: number;
-  lastActivity?: string;
-  industry?: string;
-}
-
-export interface LeadSource {
-  id: string;
-  source: string;
-  count: number;
-  conversion: number;
-  color: string;
-  cost?: number;
-  roi?: number;
-}
-
-export interface SalesAnalyticsData {
-  salesMetrics: SalesMetrics;
-  salesTeamPerformance: SalesRepPerformance[];
-  monthlyTrends: MonthlyTrend[];
-  topCustomers: TopCustomer[];
-  leadSources: LeadSource[];
-}
-
 export interface User {
   id: string;
   email: string;
   username: string;
   first_name: string;
   last_name: string;
-  role: 'USER' | 'SALES' | 'SUPPORT' | 'SUPER_ADMIN';
+    role: 'USER' | 'SUPER_ADMIN';
   subscription_tier: 'PRO' | 'ELITE';
   phone_number?: string;
   is_active: boolean;
@@ -835,33 +773,10 @@ export interface SystemHealth {
   uptime: string;
 }
 
-export interface SupportDashboardData extends DashboardData {
-  supportMetrics: SupportMetrics;
-  recentTickets: SupportTicket[];
-  ticketsByPriority: { priority: string; count: number }[];
-}
-
-export interface SalesDashboardData extends DashboardData {
-  salesMetrics: SalesMetrics;
-  salesTargets: SalesTarget[];
-  leadSources: LeadSource[];
-  recentDeals: Deal[];
-}
-
-export interface SalesTarget {
-  period: string;
-  target: number;
-  achieved: number;
-  percentage: number;
-}
-
-export interface Deal {
-  id: string;
-  client_name: string;
-  amount: number;
-  stage: string;
-  probability: number;
-  expected_close: string;
+export interface MonthlyTrend {
+  month: string;
+  revenue: number;
+  deals: number;
 }
 
 // Settings Types

@@ -153,8 +153,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
 
   const roleOptions = [
     { value: 'USER', label: 'User' },
-    { value: 'SALES', label: 'Sales Team' },
-    { value: 'SUPPORT', label: 'Support Team' },
     { value: 'SUPER_ADMIN', label: 'Super Admin' },
   ];
 

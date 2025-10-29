@@ -24,12 +24,6 @@ import CustomTools from './pages/CustomTools';
 import UserManagement from './pages/UserManagement';
 import TradingMonitor from './pages/TradingMonitor';
 import SupportCenter from './pages/SupportCenter';
-import SupportTickets from './pages/SupportTickets';
-import UserAssistance from './pages/UserAssistance';
-import KnowledgeBase from './pages/KnowledgeBase';
-import Leads from './pages/Leads';
-import SalesAnalytics from './pages/SalesAnalytics';
-import Demos from './pages/Demos';
 
 // Import components
 import Layout from './components/common/Layout';
@@ -75,14 +69,6 @@ const ThemedApp: React.FC = () => {
             <Route path="trading-monitor" element={<TradingMonitor />} />
             <Route path="support-center" element={<SupportCenter />} />
             <Route path="system-settings" element={<Settings />} />
-            {/* Support routes */}
-            <Route path="support-tickets" element={<SupportTickets />} />
-            <Route path="user-assistance" element={<UserAssistance />} />
-            <Route path="knowledge-base" element={<KnowledgeBase />} />
-            {/* Sales routes */}
-            <Route path="leads" element={<Leads />} />
-            <Route path="sales-analytics" element={<SalesAnalytics />} />
-            <Route path="demos" element={<Demos />} />
           </Route>
           
           {/* Catch all route */}

@@ -9,9 +9,6 @@ class CustomUser(AbstractUser):
     
     class Role(models.TextChoices):
         USER = 'USER', 'User'
-        TENANT_ADMIN = 'TENANT_ADMIN', 'Tenant Admin'
-        SALES = 'SALES', 'Sales Team'
-        SUPPORT = 'SUPPORT', 'Support Team'
         SUPER_ADMIN = 'SUPER_ADMIN', 'Super Admin'
     
     class SubscriptionTier(models.TextChoices):
@@ -69,13 +66,9 @@ class CustomUser(AbstractUser):
         """Check if user is a tenant admin"""
         return self.role == self.Role.TENANT_ADMIN
     
-    def is_support_team(self):
-        """Check if user is a support team member"""
-        return self.role == self.Role.SUPPORT
-    
     def is_staff_member(self):
-        """Check if user is staff (super admin, tenant admin, or support)"""
-        return self.role in [self.Role.SUPER_ADMIN, self.Role.TENANT_ADMIN, self.Role.SUPPORT]
+        """Check if user is staff (super admin only)"""
+        return self.role == self.Role.SUPER_ADMIN
     
     def get_role_display_name(self):
         """Get human-readable role name"""
@@ -83,15 +76,15 @@ class CustomUser(AbstractUser):
     
     def has_admin_access(self):
         """Check if user has admin panel access"""
-        return self.role in [self.Role.SUPER_ADMIN, self.Role.TENANT_ADMIN]
+        return self.role == self.Role.SUPER_ADMIN
     
     def can_manage_users(self):
         """Check if user can manage other users"""
-        return self.role in [self.Role.SUPER_ADMIN, self.Role.TENANT_ADMIN]
+        return self.role == self.Role.SUPER_ADMIN
     
     def can_view_analytics(self):
         """Check if user can view system analytics"""
-        return self.role in [self.Role.SUPER_ADMIN, self.Role.TENANT_ADMIN, self.Role.SUPPORT]
+        return self.role == self.Role.SUPER_ADMIN
 
 
 class UserProfile(models.Model):

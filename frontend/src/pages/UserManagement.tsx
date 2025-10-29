@@ -48,8 +48,6 @@ import {
   Visibility,
   VisibilityOff,
   AdminPanelSettings,
-  Support,
-  SellOutlined,
   AccountCircle,
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
@@ -374,8 +372,6 @@ const UserManagement: React.FC = () => {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'SUPER_ADMIN': return <AdminPanelSettings />;
-      case 'SUPPORT': return <Support />;
-      case 'SALES': return <SellOutlined />;
       default: return <AccountCircle />;
     }
   };
@@ -610,8 +606,6 @@ const UserManagement: React.FC = () => {
                 >
                   <MenuItem value="ALL">All Roles</MenuItem>
                   <MenuItem value="USER">User</MenuItem>
-                  <MenuItem value="SUPPORT">Support</MenuItem>
-                  <MenuItem value="SALES">Sales</MenuItem>
                   <MenuItem value="SUPER_ADMIN">Super Admin</MenuItem>
                 </Select>
               </FormControl>
@@ -1102,8 +1096,6 @@ const UserManagement: React.FC = () => {
                   }}
                 >
                   <MenuItem value="USER">User</MenuItem>
-                  <MenuItem value="SUPPORT">Support</MenuItem>
-                  <MenuItem value="SALES">Sales</MenuItem>
                   <MenuItem value="SUPER_ADMIN">Super Admin</MenuItem>
                 </Select>
               </FormControl>

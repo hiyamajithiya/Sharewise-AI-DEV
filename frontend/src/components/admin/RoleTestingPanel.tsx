@@ -48,7 +48,6 @@ interface UserRole {
   role_display: string;
   permissions: {
     is_super_admin: boolean;
-    is_support_team: boolean;
     is_staff_member: boolean;
     has_admin_access: boolean;
     can_manage_users: boolean;
@@ -69,9 +68,7 @@ interface SystemInfo {
   total_users: number;
   verified_users: number;
   super_admins: number;
-  support_team: number;
   regular_users: number;
-  sales_team: number;
   recent_registrations_24h?: number;
   recent_registrations_7d?: number;
   subscription_breakdown?: {
@@ -165,8 +162,6 @@ const RoleTestingPanel: React.FC = () => {
     switch (role) {
       case 'SUPER_ADMIN':
         return <AdminPanelSettings sx={{ color: '#EF4444' }} />;
-      case 'SUPPORT':
-        return <Support sx={{ color: '#3B82F6' }} />;
       default:
         return <Security sx={{ color: '#6B7280' }} />;
     }
@@ -176,8 +171,6 @@ const RoleTestingPanel: React.FC = () => {
     switch (role) {
       case 'SUPER_ADMIN':
         return 'error';
-      case 'SUPPORT':
-        return 'info';
       default:
         return 'default';
     }
@@ -314,16 +307,6 @@ const RoleTestingPanel: React.FC = () => {
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Super Admins
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#EFF8FF' }}>
-                        <Typography variant="h5" sx={{ color: '#3B82F6', fontWeight: 700 }}>
-                          {systemInfo.support_team}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Support Team
                         </Typography>
                       </Paper>
                     </Grid>

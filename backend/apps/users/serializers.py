@@ -112,7 +112,7 @@ class PasswordChangeSerializer(serializers.Serializer):
 
 class RoleTestSerializer(serializers.Serializer):
     test_type = serializers.ChoiceField(
-        choices=[('basic', 'Basic Tests'), ('advanced', 'Advanced Tests'), ('support', 'Support Tests')],
+        choices=[('basic', 'Basic Tests'), ('advanced', 'Advanced Tests')],
         default='basic'
     )
 
@@ -165,7 +165,6 @@ class UserRoleSerializer(serializers.ModelSerializer):
     def get_permissions(self, obj):
         return {
             'is_super_admin': obj.is_super_admin(),
-            'is_support_team': obj.is_support_team(),
             'is_staff_member': obj.is_staff_member(),
             'has_admin_access': obj.has_admin_access(),
             'can_manage_users': obj.can_manage_users(),

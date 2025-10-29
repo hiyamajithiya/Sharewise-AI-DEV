@@ -57,20 +57,6 @@ const roleBasedMenuItems = {
     { text: 'Support Center', icon: <Support />, path: '/support-center' },
     { text: 'System Settings', icon: <AdminPanelSettings />, path: '/system-settings' },
   ],
-  SUPPORT: [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Support Tickets', icon: <Assignment />, path: '/support-tickets' },
-    { text: 'User Assistance', icon: <ContactSupport />, path: '/user-assistance' },
-    { text: 'Knowledge Base', icon: <Psychology />, path: '/knowledge-base' },
-    { text: 'Settings', icon: <Settings />, path: '/settings' },
-  ],
-  SALES: [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Lead Management', icon: <People />, path: '/leads' },
-    { text: 'Sales Analytics', icon: <BarChart />, path: '/sales-analytics' },
-    { text: 'Customer Demos', icon: <ModelTraining />, path: '/demos' },
-    { text: 'Settings', icon: <Settings />, path: '/settings' },
-  ],
   USER_BASIC: [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Trading', icon: <TrendingUp />, path: '/trading' },
@@ -308,9 +294,11 @@ const Layout: React.FC = () => {
           <Box sx={{ flexGrow: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                {currentMenuItems.find(item => item.path === location.pathname)?.text || 'Dashboard'}
+                {location.pathname.startsWith('/dashboard')
+                  ? 'Main page'
+                  : (currentMenuItems.find(item => item.path === location.pathname)?.text || 'Main page')}
               </Typography>
-              {effectiveUser?.role === 'SUPER_ADMIN' && (
+              {/* {effectiveUser?.role === 'SUPER_ADMIN' && (
                 <Box
                   sx={{
                     ml: 1,
@@ -325,9 +313,8 @@ const Layout: React.FC = () => {
                     backgroundColor: 'white'
                   }}
                 >
-                  SUPER ADMIN
                 </Box>
-              )}
+              )} */}
             </Box>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {isTestingMode && selectedUser ? (

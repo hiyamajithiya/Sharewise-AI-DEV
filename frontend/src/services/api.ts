@@ -1,7 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { 
   AuthTokens, 
-  SalesAnalyticsData, 
   TradingMonitorData, 
   SupportCenterData,
   DashboardData,
@@ -12,8 +11,6 @@ import {
   AdminDashboardData,
   SystemHealth,
   UserActivity,
-  SupportDashboardData,
-  SalesDashboardData,
   UserSettings,
   SystemSettings,
   UserProfile,
@@ -820,84 +817,6 @@ class ApiService {
     return response.data;
   }
 
-  async getSupportTickets(params?: any): Promise<any> {
-    const response = await this.api.get('/support/tickets/', { params });
-    return response.data;
-  }
-
-  async createSupportTicket(ticketData: any): Promise<any> {
-    const response = await this.api.post('/support/tickets/', ticketData);
-    return response.data;
-  }
-
-  async updateSupportTicket(ticketId: string, updateData: any): Promise<any> {
-    const response = await this.api.patch(`/support/tickets/${ticketId}/`, updateData);
-    return response.data;
-  }
-
-  async assignSupportTicket(ticketId: string, assigneeId: string): Promise<any> {
-    const response = await this.api.patch(`/support/tickets/${ticketId}/assign/`, {
-      assignee: assigneeId
-    });
-    return response.data;
-  }
-
-  async getSupportChannels(): Promise<any> {
-    const response = await this.api.get('/support/channels/');
-    return response.data;
-  }
-
-  async getSupportAgents(): Promise<any> {
-    const response = await this.api.get('/support/agents/');
-    return response.data;
-  }
-
-  // Sales Analytics methods
-  async getSalesAnalyticsData(): Promise<SalesAnalyticsData> {
-    const response = await this.api.get('/sales/analytics/dashboard/');
-    return response.data;
-  }
-
-  async getSalesMetrics(timeframe?: string): Promise<any> {
-    const response = await this.api.get('/sales/analytics/metrics/', {
-      params: { timeframe }
-    });
-    return response.data;
-  }
-
-  async getSalesTeamPerformance(period?: string): Promise<any> {
-    const response = await this.api.get('/sales/analytics/team-performance/', {
-      params: { period }
-    });
-    return response.data;
-  }
-
-  async getMonthlyTrends(months?: number): Promise<any> {
-    const response = await this.api.get('/sales/analytics/monthly-trends/', {
-      params: { months }
-    });
-    return response.data;
-  }
-
-  async getTopCustomers(limit?: number): Promise<any> {
-    const response = await this.api.get('/sales/analytics/top-customers/', {
-      params: { limit }
-    });
-    return response.data;
-  }
-
-  async getLeadSources(): Promise<any> {
-    const response = await this.api.get('/sales/analytics/lead-sources/');
-    return response.data;
-  }
-
-  async updateSalesTarget(repId: string, target: number): Promise<any> {
-    const response = await this.api.patch(`/sales/analytics/sales-rep/${repId}/target/`, {
-      target
-    });
-    return response.data;
-  }
-
   async getSecurityStatus(): Promise<any> {
     const response = await this.api.get('/security/monitoring/');
     return response.data;
@@ -982,14 +901,6 @@ class ApiService {
 
   async getUserActivity(limit: number = 10): Promise<UserActivity[]> {
     return this.get(`/trading/automation/stats/?limit=${limit}`);
-  }
-
-  async getSupportDashboardData(): Promise<SupportDashboardData> {
-    return this.get('/trading/performance/');
-  }
-
-  async getSalesDashboardData(): Promise<SalesDashboardData> {
-    return this.get('/trading/reports/performance/');
   }
 
   // Dashboard refresh methods - using existing endpoints
