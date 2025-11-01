@@ -79,7 +79,7 @@ export interface User {
   first_name: string;
   last_name: string;
     role: 'USER' | 'SUPER_ADMIN';
-  subscription_tier: 'PRO' | 'ELITE';
+  subscription_tier: 'ELITE';
   phone_number?: string;
   is_active: boolean;
   created_at: string;
@@ -869,7 +869,7 @@ export interface TrustedDevice {
 }
 
 export interface SubscriptionSettings {
-  tier: 'BASIC' | 'PRO' | 'ELITE';
+  tier: 'ELITE';
   status: 'active' | 'cancelled' | 'expired' | 'suspended';
   start_date: string;
   end_date: string;
@@ -1624,7 +1624,7 @@ export interface QuickTip {
   category: 'beginner' | 'intermediate' | 'advanced';
   priority: number;
   isPersonalized: boolean;
-  userRoles: ('BASIC' | 'PRO' | 'ELITE' | 'ADMIN' | 'STAFF')[];
+  userRoles: ('ELITE' | 'ADMIN' | 'STAFF')[];
   tags: string[];
   createdAt: string;
   updatedAt: string;

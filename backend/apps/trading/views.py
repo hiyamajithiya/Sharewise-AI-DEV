@@ -1918,50 +1918,27 @@ def _calculate_risk_grade(performance_metrics, risk_metrics):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def subscription_status(request):
-    """Get user's subscription status and usage limits"""
+    """Get user's subscription status and usage limits - All users are ELITE tier"""
     try:
         usage_summary = get_user_usage_status(request.user)
         
-        # Add additional subscription info
+        # All users are ELITE tier
         subscription_info = {
             'user_id': str(request.user.id),
             'email': request.user.email,
-            'subscription_tier': request.user.subscription_tier,
-            'subscription_display': request.user.get_subscription_tier_display(),
+            'subscription_tier': 'ELITE',
+            'subscription_display': 'Elite Plan',
             'usage_summary': usage_summary,
-            'tier_benefits': {
-                'BASIC': [
-                    '5 signals per day',
-                    '5 backtests per day',
-                    '2 active strategies',
-                    'Basic support via email',
-                    'Basic portfolio analytics'
-                ],
-                'PRO': [
-                    '100 signals per day',
-                    '100 backtests per day',
-                    '10 active strategies',
-                    'Priority email support',
-                    'Advanced portfolio analytics',
-                    'API access',
-                    '50 portfolio positions'
-                ],
-                'ELITE': [
-                    'Unlimited signals',
-                    'Unlimited backtests',
-                    '50 active strategies',
-                    'Phone & priority support',
-                    'Advanced analytics & reporting',
-                    'Premium API access',
-                    '200 portfolio positions',
-                    'Custom ML models'
-                ]
-            },
-            'upgrade_options': {
-                'current_tier': request.user.subscription_tier,
-                'next_tier': 'PRO' if request.user.subscription_tier == 'BASIC' else 'ELITE' if request.user.subscription_tier == 'PRO' else None,
-                'can_upgrade': request.user.subscription_tier != 'ELITE'
-            }
+            'benefits': [
+                'Unlimited signals',
+                'Unlimited backtests',
+                '50 active strategies',
+                'Phone & priority support',
+                'Advanced analytics & reporting',
+                'Premium API access',
+                '200 portfolio positions',
+                'Custom ML models'
+            ]
         }
         
         return Response(subscription_info)
@@ -2059,106 +2036,7 @@ def usage_analytics(request):
         )
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def check_usage_limit(request):
-    """Check if user can perform a specific action based on usage limits"""
-    try:
-        limit_type_str = request.data.get('limit_type')
-        is_daily = request.data.get('is_daily', True)
-        
-        if not limit_type_str:
-            return Response(
-                {'error': 'limit_type is required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Convert string to LimitType enum
-        try:
-            limit_type = LimitType(limit_type_str)
-        except ValueError:
-            return Response(
-                {'error': f'Invalid limit_type: {limit_type_str}'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Check limit
-        is_allowed, current_usage, limit = usage_service.check_limit(
-            request.user, limit_type, is_daily
-        )
-        
-        # Calculate reset time
-        reset_time = usage_service.get_next_reset_time(limit_type, is_daily)
-        
-        result = {
-            'is_allowed': is_allowed,
-            'current_usage': current_usage,
-            'limit': limit,
-            'is_unlimited': limit == -1,
-            'usage_percentage': (current_usage / limit * 100) if limit > 0 else 0,
-            'reset_time': reset_time.isoformat(),
-            'limit_type': limit_type.label,
-            'subscription_tier': request.user.subscription_tier
-        }
-        
-        if not is_allowed:
-            result['upgrade_message'] = 'Upgrade to Pro or Elite plan for higher limits'
-            result['next_reset'] = reset_time.isoformat()
-        
-        return Response(result)
-        
-    except Exception as e:
-        logger.error(f"Error checking usage limit: {e}")
-        return Response(
-            {'error': f'Failed to check usage limit: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
 
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def simulate_upgrade(request):
-    """Simulate what limits would be available with an upgraded plan"""
-    try:
-        target_tier = request.data.get('target_tier', '').upper()
-        
-        if target_tier not in ['BASIC', 'PRO', 'ELITE']:
-            return Response(
-                {'error': 'target_tier must be one of: BASIC, PRO, ELITE'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Get current limits
-        current_limits = usage_service.get_user_limits(request.user)
-        
-        # Get target limits
-        target_limits = usage_service.SUBSCRIPTION_LIMITS.get(target_tier)
-        
-        if not target_limits:
-            return Response(
-                {'error': f'Invalid target tier: {target_tier}'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Calculate differences
-        comparison = {
-            'current_tier': request.user.subscription_tier,
-            'target_tier': target_tier,
-            'improvements': {},
-            'new_features': []
-        }
-        
-        # Compare limits
-        limit_comparisons = {
-            'daily_signals': (current_limits.daily_signals, target_limits.daily_signals),
-            'monthly_signals': (current_limits.monthly_signals, target_limits.monthly_signals),
-            'daily_backtests': (current_limits.daily_backtests, target_limits.daily_backtests),
-            'monthly_backtests': (current_limits.monthly_backtests, target_limits.monthly_backtests),
-            'active_strategies': (current_limits.active_strategies, target_limits.active_strategies),
-            'api_calls_daily': (current_limits.api_calls_daily, target_limits.api_calls_daily),
-            'portfolio_positions': (current_limits.portfolio_positions, target_limits.portfolio_positions),
-            'data_export_monthly': (current_limits.data_export_monthly, target_limits.data_export_monthly)
-        }
         
         for limit_name, (current, target) in limit_comparisons.items():
             if target == -1:

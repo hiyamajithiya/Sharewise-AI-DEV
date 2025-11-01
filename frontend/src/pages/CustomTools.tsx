@@ -92,7 +92,7 @@ const CustomTools: React.FC = () => {
   const { isTestingMode, selectedUser } = testingState;
   const user = useSelector((state: RootState) => state.auth.user);
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
-  const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+  const subscriptionTier = effectiveUser?.subscription_tier || 'ELITE';
 
   // State management
   const [tabValue, setTabValue] = useState(0);
@@ -1424,9 +1424,7 @@ const CustomTools: React.FC = () => {
                 </Typography>
                 <Typography variant="body2">
                   <strong>Rate Limits:</strong><br/>
-                  10,000 calls/month (Basic)<br/>
-                  50,000 calls/month (Pro)<br/>
-                  Unlimited (Enterprise)
+                  Unlimited (Elite)
                 </Typography>
               </Paper>
 

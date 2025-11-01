@@ -50,59 +50,23 @@ const Portfolio: React.FC = () => {
   const { isTestingMode, selectedUser } = testingState;
   
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
-  const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+  const subscriptionTier = effectiveUser?.subscription_tier || 'ELITE';
 
-  // Tier-based portfolio features
-  const getTierFeatures = (tier: string): {
-    maxHoldings: number;
-    portfolioValue: number;
-    advancedAnalytics: boolean;
-    riskAnalysis: boolean;
-    rebalanceAlerts: boolean;
-    exportReports: boolean;
-    color: string;
-    label: string;
-  } => {
-    switch (tier) {
-      case 'BASIC':
-        return {
-          maxHoldings: 10,
-          portfolioValue: 50000,
-          advancedAnalytics: false,
-          riskAnalysis: false,
-          rebalanceAlerts: false,
-          exportReports: false,
-          color: 'info',
-          label: 'Basic Plan'
-        };
-      case 'PRO':
-        return {
-          maxHoldings: 50,
-          portfolioValue: 250000,
-          advancedAnalytics: true,
-          riskAnalysis: true,
-          rebalanceAlerts: true,
-          exportReports: false,
-          color: 'success',
-          label: 'Pro Plan'
-        };
-      case 'ELITE':
-        return {
-          maxHoldings: -1, // Unlimited
-          portfolioValue: 1000000,
-          advancedAnalytics: true,
-          riskAnalysis: true,
-          rebalanceAlerts: true,
-          exportReports: true,
-          color: 'warning',
-          label: 'Elite Plan'
-        };
-      default:
-        return getTierFeatures('BASIC');
-    }
+  // All users get ELITE features
+  const getTierFeatures = () => {
+    return {
+      maxHoldings: -1, // Unlimited
+      portfolioValue: 1000000,
+      advancedAnalytics: true,
+      riskAnalysis: true,
+      rebalanceAlerts: true,
+      exportReports: true,
+      color: 'warning',
+      label: 'Elite Plan'
+    };
   };
 
-  const tierFeatures = getTierFeatures(subscriptionTier);
+  const tierFeatures = getTierFeatures();
 
   // Portfolio state and API integration
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
@@ -213,7 +177,7 @@ const Portfolio: React.FC = () => {
 
   const handleDownloadReport = () => {
     if (!tierFeatures.exportReports) {
-      window.alert(`🔒 Premium Feature\n\nReport export is available for ${tierFeatures.label === 'Elite Plan' ? 'Elite' : 'Pro and Elite'} subscribers only.\n\nUpgrade your plan to access detailed portfolio reports and analytics.`);
+      window.alert(`🔒 Premium Feature\n\nReport export is available for Elite subscribers only.\n\nUpgrade your plan to access detailed portfolio reports and analytics.`);
       return;
     }
 
@@ -494,24 +458,6 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
         </MenuItem>
       </Menu>
 
-        {/* Tier Limitations Alert */}
-        {subscriptionTier === 'BASIC' && (
-          <Box sx={{
-            mb: 3,
-            p: 2,
-            borderRadius: '15px',
-            background: '#eff6ff',
-            border: '1px solid #bfdbfe',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-          }}>
-            <Typography variant="body2" sx={{ color: '#1F2937' }}>
-              <strong>Basic Plan:</strong> Maximum {tierFeatures.maxHoldings} holdings, 
-              portfolio value up to ₹{tierFeatures.portfolioValue.toLocaleString()}.
-              <strong> Upgrade for advanced analytics and risk management!</strong>
-            </Typography>
-          </Box>
-        )}
-
       {/* Portfolio Stats */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {portfolioStats.map((stat, index) => (
@@ -785,7 +731,7 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
                   boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
                 }}>
                   <Typography variant="body2" sx={{ color: '#1F2937' }}>
-                    <strong>Upgrade to Pro or Elite</strong> to access advanced performance analytics, 
+                    <strong>Upgrade to Elite</strong> to access advanced performance analytics, 
                     portfolio benchmarking, and historical performance tracking.
                   </Typography>
                 </Box>
@@ -834,7 +780,7 @@ ${sectorAllocation.map(sector => `• ${sector.sector}: ${sector.percentage}%`).
                   boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
                 }}>
                   <Typography variant="body2" sx={{ color: '#1F2937' }}>
-                    <strong>Upgrade to Pro or Elite</strong> to access comprehensive risk analysis, 
+                    <strong>Upgrade to Elite</strong> to access comprehensive risk analysis, 
                     portfolio diversification insights, and automated rebalancing alerts.
                   </Typography>
                 </Box>

@@ -421,7 +421,6 @@ def get_system_info(request):
                 created_at__gte=timezone.now() - timezone.timedelta(days=7)
             ).count(),
             'subscription_breakdown': {
-                'pro': User.objects.filter(subscription_tier=User.SubscriptionTier.PRO).count(),
                 'elite': User.objects.filter(subscription_tier=User.SubscriptionTier.ELITE).count(),
             }
         })

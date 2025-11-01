@@ -425,7 +425,6 @@ MARKET_DATA_SETTINGS = {
         'HISTORICAL': 3600,  # 1 hour for historical data
     },
     'MAX_SYMBOLS_PER_USER': {
-        'BASIC': 20,
         'PREMIUM': 100,
         'PROFESSIONAL': -1,  # Unlimited
     },

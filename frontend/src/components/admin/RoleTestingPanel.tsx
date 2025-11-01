@@ -71,11 +71,8 @@ interface SystemInfo {
   regular_users: number;
   recent_registrations_24h?: number;
   recent_registrations_7d?: number;
-  subscription_breakdown?: {
-    basic: number;
-    pro: number;
-    enterprise: number;
-  };
+  // Generic subscription breakdown (no PRO tier)
+  subscription_breakdown?: Record<string, number>;
 }
 
 interface SystemUser {
@@ -190,9 +187,7 @@ const RoleTestingPanel: React.FC = () => {
         <Typography variant="h6" gutterBottom>
           Access Denied
         </Typography>
-        <Typography>
-          This panel is only available for Super Admin and Support Team members.
-        </Typography>
+        <Typography>This panel is only available for Super Admin.</Typography>
       </Alert>
     );
   }

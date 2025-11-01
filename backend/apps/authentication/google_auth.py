@@ -100,7 +100,7 @@ def google_signin(request):
                     'first_name': user.first_name,
                     'last_name': user.last_name,
                     'role': getattr(user, 'role', 'USER'),
-                    'subscription_tier': getattr(user, 'subscription_tier', 'BASIC'),
+                    'subscription_tier': getattr(user, 'subscription_tier', 'ELITE'),
                     'is_verified': True,
                 },
                 'access': str(refresh.access_token),

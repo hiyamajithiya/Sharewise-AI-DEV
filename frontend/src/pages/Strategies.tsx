@@ -117,7 +117,7 @@ const Strategies: React.FC = () => {
   const unreadCount = useSelector((state: RootState) => state.notifications.unreadCount);
   
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
-  const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+  const subscriptionTier = effectiveUser?.subscription_tier || 'ELITE';
 
   const [newStrategy, setNewStrategy] = useState({
     name: '',
@@ -158,45 +158,19 @@ const Strategies: React.FC = () => {
     }
   }, [location]);
 
-  // Tier-based strategy features
+  // Everyone gets ELITE tier features
   const getTierFeatures = (tier: string): TierFeatures => {
-    switch (tier) {
-      case 'BASIC':
-        return {
-          maxStrategies: 3,
-          backtest: false,
-          customIndicators: false,
-          advancedAnalytics: false,
-          paperTrading: true,
-          liveTrading: false,
-          color: 'info',
-          label: 'Basic Plan'
-        };
-      case 'PRO':
-        return {
-          maxStrategies: 10,
-          backtest: true,
-          customIndicators: false,
-          advancedAnalytics: true,
-          paperTrading: true,
-          liveTrading: true,
-          color: 'success',
-          label: 'Pro Plan'
-        };
-      case 'ELITE':
-        return {
-          maxStrategies: -1, // Unlimited
-          backtest: true,
-          customIndicators: true,
-          advancedAnalytics: true,
-          paperTrading: true,
-          liveTrading: true,
-          color: 'warning',
-          label: 'Elite Plan'
-        };
-      default:
-        return getTierFeatures('BASIC');
-    }
+    // All users get ELITE features
+    return {
+      maxStrategies: -1, // Unlimited
+      backtest: true,
+      customIndicators: true,
+      advancedAnalytics: true,
+      paperTrading: true,
+      liveTrading: true,
+      color: 'warning',
+      label: 'Elite Plan'
+    };
   };
 
   const tierFeatures = getTierFeatures(subscriptionTier);
@@ -208,10 +182,9 @@ const Strategies: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch strategies based on user tier
+        // Fetch all strategies (ELITE tier)
         const filters = {
           status: 'ACTIVE',
-          riskProfile: subscriptionTier === 'BASIC' ? 'LOW' : undefined,
         };
         
         const [allStrategies, myStrategies] = await Promise.all([
@@ -241,25 +214,9 @@ const Strategies: React.FC = () => {
     // Start with user's own strategies
     filteredStrategies = [...myStrategies];
     
-    // Add public strategies based on tier
+    // All users get unlimited access (ELITE tier)
     const publicStrategies = allStrategies.filter(s => s.isPublic);
-    
-    if (subscriptionTier === 'BASIC') {
-      // Basic users get limited access to low-risk strategies
-      const basicStrategies = publicStrategies
-        .filter(s => s.riskProfile === 'low')
-        .slice(0, Math.max(0, tierFeatures.maxStrategies - myStrategies.length));
-      filteredStrategies = [...filteredStrategies, ...basicStrategies];
-    } else if (subscriptionTier === 'PRO') {
-      // Pro users get access to more strategies
-      const proStrategies = publicStrategies
-        .filter(s => ['low', 'medium'].includes(s.riskProfile))
-        .slice(0, Math.max(0, tierFeatures.maxStrategies - myStrategies.length));
-      filteredStrategies = [...filteredStrategies, ...proStrategies];
-    } else {
-      // Elite users get unlimited access
-      filteredStrategies = [...filteredStrategies, ...publicStrategies];
-    }
+    filteredStrategies = [...filteredStrategies, ...publicStrategies];
     
     return filteredStrategies;
   };
@@ -767,16 +724,6 @@ const Strategies: React.FC = () => {
           onClose={() => setFeedbackMessage('')}
         >
           {feedbackMessage}
-        </Alert>
-      )}
-
-      {/* Tier Limitations Alert */}
-      {subscriptionTier === 'BASIC' && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Typography variant="body2">
-            <strong>Basic Plan:</strong> Maximum {tierFeatures.maxStrategies} strategies, paper trading only.
-            <strong> Upgrade to Pro or Elite for backtesting and live trading!</strong>
-          </Typography>
         </Alert>
       )}
 

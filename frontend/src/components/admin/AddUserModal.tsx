@@ -45,7 +45,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
     last_name: '',
     mobile_number: '',
     role: 'USER',
-    subscription_tier: 'PRO',
+    subscription_tier: 'ELITE',
     is_active: true,
     email_verified: true,
   });
@@ -53,18 +53,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  // Automatically set subscription tier to PRO for non-USER roles
-  useEffect(() => {
-    console.log('Role changed to:', formData.role);
-    if (formData.role !== 'USER') {
-      console.log('Setting subscription tier to PRO for non-USER role');
-      setFormData(prev => ({
-        ...prev,
-        subscription_tier: 'PRO'
-      }));
-    }
-  }, [formData.role]);
 
   const handleInputChange = (field: keyof UserFormData) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -141,7 +129,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
       last_name: '',
       mobile_number: '',
       role: 'USER',
-      subscription_tier: 'PRO',
+      subscription_tier: 'ELITE',
       is_active: true,
       email_verified: true,
     });
@@ -150,16 +138,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
     setLoading(false);
     onClose();
   };
-
-  const roleOptions = [
-    { value: 'USER', label: 'User' },
-    { value: 'SUPER_ADMIN', label: 'Super Admin' },
-  ];
-
-  const subscriptionOptions = [
-    { value: 'PRO', label: 'Pro Plan' },
-    { value: 'ELITE', label: 'Elite Plan' },
-  ];
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -263,39 +241,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onUserAdded 
 
             <Grid item xs={12} sm={6}>
               <TextField
-                select
-                fullWidth
-                label="Role"
-                value={formData.role}
-                onChange={handleInputChange('role')}
-                disabled={loading}
-                variant="outlined"
-              >
-                {roleOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                select
                 fullWidth
                 label="Subscription Tier"
-                value={formData.subscription_tier}
-                onChange={handleInputChange('subscription_tier')}
-                disabled={loading || formData.role !== 'USER'}
+                value="Elite"
+                disabled
                 variant="outlined"
-                helperText={formData.role !== 'USER' ? 'Subscription tiers only apply to regular users' : 'Select subscription tier for this user'}
-              >
-                {subscriptionOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
+                helperText="All users are assigned to the Elite subscription tier"
+              />
             </Grid>
 
             <Grid item xs={12} sm={6}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
@@ -19,6 +19,7 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  CircularProgress,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -44,34 +45,16 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectUser, logoutUser } from '../../store/slices/authSlice';
 import { selectTestingState } from '../../store/slices/testingSlice';
 import Footer from './Footer';
+import apiService from '../../services/api';
 
 const drawerWidth = 240;
 
 const roleBasedMenuItems = {
   SUPER_ADMIN: [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Trading', icon: <TrendingUp />, path: '/trading' },
     { text: 'User Management', icon: <People />, path: '/users' },
-    { text: 'System Analytics', icon: <BarChart />, path: '/analytics' },
-    { text: 'Trading Monitor', icon: <ShowChart />, path: '/trading-monitor' },
     { text: 'Support Center', icon: <Support />, path: '/support-center' },
     { text: 'System Settings', icon: <AdminPanelSettings />, path: '/system-settings' },
-  ],
-  USER_BASIC: [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Trading', icon: <TrendingUp />, path: '/trading' },
-    { text: 'Quick Trade', icon: <Psychology />, path: '/trading?mode=quick' },
-    { text: 'Portfolio', icon: <AccountBalance />, path: '/portfolio' },
-    { text: 'Settings', icon: <Settings />, path: '/settings' },
-  ],
-  USER_PRO: [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Trading', icon: <TrendingUp />, path: '/trading' },
-    { text: 'Quick Trade', icon: <Psychology />, path: '/trading?mode=quick' },
-    { text: 'Portfolio', icon: <AccountBalance />, path: '/portfolio' },
-    { text: 'Strategies', icon: <Psychology />, path: '/strategies' },
-    { text: 'AI Studio', icon: <ModelTraining />, path: '/ai-studio' },
-    { text: 'Settings', icon: <Settings />, path: '/settings' },
   ],
   USER_ELITE: [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
@@ -88,22 +71,23 @@ const roleBasedMenuItems = {
   USER: [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Trading', icon: <TrendingUp />, path: '/trading' },
+    { text: 'Advanced Trading', icon: <TrendingUp />, path: '/advanced-trading' },
+    { text: 'Quick Trade', icon: <Psychology />, path: '/trading?mode=quick' },
     { text: 'Portfolio', icon: <AccountBalance />, path: '/portfolio' },
     { text: 'Strategies', icon: <Psychology />, path: '/strategies' },
     { text: 'AI Studio', icon: <ModelTraining />, path: '/ai-studio' },
+    { text: 'Analytics', icon: <BarChart />, path: '/analytics' },
+    { text: 'Custom Tools', icon: <AdminPanelSettings />, path: '/custom-tools' },
     { text: 'Settings', icon: <Settings />, path: '/settings' },
   ],
 };
 
 const getMenuItemsForRole = (role: string, subscriptionTier?: string) => {
-  // For USER role, check subscription tier
-  if (role === 'USER' && subscriptionTier) {
-    const tierKey = `USER_${subscriptionTier}` as keyof typeof roleBasedMenuItems;
-    if (roleBasedMenuItems[tierKey]) {
-      return roleBasedMenuItems[tierKey];
-    }
+  // All users get ELITE features now
+  if (role === 'USER') {
+    return roleBasedMenuItems.USER_ELITE;
   }
-  return roleBasedMenuItems[role as keyof typeof roleBasedMenuItems] || roleBasedMenuItems.USER;
+  return roleBasedMenuItems[role as keyof typeof roleBasedMenuItems] || roleBasedMenuItems.USER_ELITE;
 };
 
 const Layout: React.FC = () => {
@@ -119,10 +103,42 @@ const Layout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Get effective user and menu items
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
   const currentMenuItems = getMenuItemsForRole(effectiveUser?.role || 'USER', effectiveUser?.subscription_tier);
+
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!effectiveUser) return;
+      
+      try {
+        setLoadingNotifications(true);
+        const response = await apiService.getNotifications({ limit: 10 });
+        setNotifications(response.results || []);
+        
+        // Count unread notifications
+        const unread = (response.results || []).filter((notif: any) => !notif.is_read).length;
+        setUnreadCount(unread);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+        setNotifications([]);
+      } finally {
+        setLoadingNotifications(false);
+      }
+    };
+
+    fetchNotifications();
+    
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    
+    return () => clearInterval(interval);
+  }, [effectiveUser]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -136,12 +152,57 @@ const Layout: React.FC = () => {
     setAnchorEl(null);
   };
 
-  const handleNotificationMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+  const handleNotificationMenuOpen = async (event: React.MouseEvent<HTMLElement>) => {
     setNotificationAnchorEl(event.currentTarget);
+    
+    // Fetch latest notifications when opening menu
+    try {
+      const response = await apiService.getNotifications({ limit: 10 });
+      setNotifications(response.results || []);
+      const unread = (response.results || []).filter((notif: any) => !notif.is_read).length;
+      setUnreadCount(unread);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
   };
 
   const handleNotificationMenuClose = () => {
     setNotificationAnchorEl(null);
+  };
+
+  const handleNotificationClick = async (notificationId: number) => {
+    try {
+      // Mark notification as read
+      await apiService.markNotificationAsRead(notificationId.toString());
+      
+      // Update local state
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif.id === notificationId ? { ...notif, is_read: true } : notif
+        )
+      );
+      
+      // Update unread count
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+    
+    handleNotificationMenuClose();
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await apiService.markAllNotificationsAsRead();
+      
+      // Update local state
+      setNotifications(prev => 
+        prev.map(notif => ({ ...notif, is_read: true }))
+      );
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
   };
 
   const handleLogout = async () => {
@@ -255,7 +316,7 @@ const Layout: React.FC = () => {
       {/* Footer */}
       <Box sx={{ p: 2, borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}>
         <Typography variant="body2" sx={{ textAlign: 'center', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-          v1.0.0 - Professional Trading
+          v1.0.0 - Elite Trading Platform
         </Typography>
       </Box>
     </Box>
@@ -295,8 +356,8 @@ const Layout: React.FC = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 600, color: 'primary.main' }}>
                 {location.pathname.startsWith('/dashboard')
-                  ? 'Main page'
-                  : (currentMenuItems.find(item => item.path === location.pathname)?.text || 'Main page')}
+                  ? 'Dashboard'
+                  : (currentMenuItems.find(item => item.path === location.pathname)?.text || 'Dashboard')}
               </Typography>
               {/* {effectiveUser?.role === 'SUPER_ADMIN' && (
                 <Box
@@ -344,7 +405,7 @@ const Layout: React.FC = () => {
               }}
             >
               <Badge 
-                badgeContent={4} 
+                badgeContent={unreadCount} 
                 color="error"
                 sx={{
                   '& .MuiBadge-badge': {
@@ -450,76 +511,151 @@ const Layout: React.FC = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
             Notifications
           </Typography>
+          {unreadCount > 0 && (
+            <Typography 
+              variant="caption" 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMarkAllAsRead();
+              }}
+              sx={{ 
+                color: '#667eea', 
+                cursor: 'pointer',
+                fontWeight: 600,
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              Mark all as read
+            </Typography>
+          )}
         </Box>
         
-        {/* Sample notifications for Super Admin */}
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <ListItemIcon>
-            <Badge color="success" variant="dot">
-              <AccountCircle fontSize="small" />
-            </Badge>
-          </ListItemIcon>
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              New user registered
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#6B7280' }}>
-              John Doe joined the platform • 2 min ago
-            </Typography>
+        {/* Loading state */}
+        {loadingNotifications && (
+          <Box sx={{ p: 4, textAlign: 'center' }}>
+            <CircularProgress size={40} />
           </Box>
-        </MenuItem>
+        )}
 
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <ListItemIcon>
-            <Badge color="warning" variant="dot">
-              <AdminPanelSettings fontSize="small" />
-            </Badge>
-          </ListItemIcon>
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              System maintenance scheduled
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#6B7280' }}>
-              Planned downtime at 2:00 AM UTC • 1 hour ago
-            </Typography>
-          </Box>
-        </MenuItem>
+        {/* Notifications list */}
+        {!loadingNotifications && notifications.length > 0 && notifications.map((notification) => {
+          const getNotificationIcon = (type: string) => {
+            switch (type) {
+              case 'user_registration':
+                return <AccountCircle fontSize="small" />;
+              case 'system':
+                return <AdminPanelSettings fontSize="small" />;
+              case 'support':
+                return <Support fontSize="small" />;
+              default:
+                return <Notifications fontSize="small" />;
+            }
+          };
 
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <ListItemIcon>
-            <Badge color="primary" variant="dot">
-              <Support fontSize="small" />
-            </Badge>
-          </ListItemIcon>
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              Support ticket resolved
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#6B7280' }}>
-              Ticket #1234 closed successfully • 3 hours ago
-            </Typography>
-          </Box>
-        </MenuItem>
+          const getNotificationColor = (type: string) => {
+            switch (type) {
+              case 'user_registration':
+                return 'success';
+              case 'system':
+                return 'warning';
+              case 'support':
+                return 'primary';
+              default:
+                return 'error';
+            }
+          };
 
-        <MenuItem onClick={handleNotificationMenuClose}>
-          <ListItemIcon>
-            <Badge color="error" variant="dot">
-              <Notifications fontSize="small" />
-            </Badge>
-          </ListItemIcon>
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              API rate limit warning
+          const formatTimeAgo = (dateString: string) => {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            return `${Math.floor(diffInSeconds / 86400)} days ago`;
+          };
+
+          return (
+            <MenuItem 
+              key={notification.id}
+              onClick={() => handleNotificationClick(notification.id)}
+              sx={{
+                backgroundColor: notification.is_read ? 'transparent' : 'rgba(102, 126, 234, 0.05)',
+                '&:hover': {
+                  backgroundColor: notification.is_read ? 'rgba(0, 0, 0, 0.04)' : 'rgba(102, 126, 234, 0.1)',
+                }
+              }}
+            >
+              <ListItemIcon>
+                <Badge 
+                  color={getNotificationColor(notification.notification_type) as any}
+                  variant={notification.is_read ? "standard" : "dot"}
+                >
+                  {getNotificationIcon(notification.notification_type)}
+                </Badge>
+              </ListItemIcon>
+              <Box sx={{ flex: 1 }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontWeight: notification.is_read ? 500 : 600,
+                    color: '#1F2937'
+                  }}
+                >
+                  {notification.title}
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: '#6B7280',
+                    display: 'block',
+                    mt: 0.5
+                  }}
+                >
+                  {notification.message}
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: '#9CA3AF',
+                    fontSize: '0.7rem',
+                    display: 'block',
+                    mt: 0.5
+                  }}
+                >
+                  {formatTimeAgo(notification.created_at)}
+                </Typography>
+              </Box>
+            </MenuItem>
+          );
+        })}
+
+        {/* No notifications message */}
+        {!loadingNotifications && notifications.length === 0 && (
+          <Box sx={{ 
+            p: 4, 
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <Notifications sx={{ fontSize: 48, color: '#D1D5DB', mb: 1 }} />
+            <Typography variant="body2" sx={{ fontWeight: 600, color: '#6B7280' }}>
+              No notifications
             </Typography>
-            <Typography variant="caption" sx={{ color: '#6B7280' }}>
-              High API usage detected • 5 hours ago
+            <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
+              You're all caught up!
             </Typography>
           </Box>
-        </MenuItem>
+        )}
 
       </Menu>
 

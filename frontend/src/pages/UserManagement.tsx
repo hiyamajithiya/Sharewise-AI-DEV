@@ -120,7 +120,7 @@ const UserManagement: React.FC = () => {
     email: '',
     phone_number: '',
     role: 'USER',
-    subscription_tier: 'PRO',
+    subscription_tier: 'ELITE',
     password: ''
   });
   const [validationErrors, setValidationErrors] = useState<{ username?: string }>({});
@@ -150,7 +150,7 @@ const UserManagement: React.FC = () => {
         // Some APIs return phone under profile, some as top-level phone_number
         phone_number: user.profile?.phone_number || user.phone_number || '',
         role: user.role,
-        subscription_tier: user.subscription_tier || 'PRO',
+        subscription_tier: user.subscription_tier || 'ELITE',
         status: user.is_active ? 'ACTIVE' : 'INACTIVE',
         last_login: user.last_login || new Date().toISOString(),
         created_at: user.date_joined,
@@ -194,7 +194,7 @@ const UserManagement: React.FC = () => {
       email: '',
       phone_number: '',
       role: 'USER',
-      subscription_tier: 'PRO',
+      subscription_tier: 'ELITE',
       password: ''
     });
     setValidationErrors({});
@@ -211,7 +211,7 @@ const UserManagement: React.FC = () => {
         email: userToEdit.email,
         phone_number: userToEdit.phone_number || '',
         role: userToEdit.role,
-        subscription_tier: userToEdit.subscription_tier || 'PRO',
+        subscription_tier: userToEdit.subscription_tier || 'ELITE',
         password: ''
       });
       setUserDialogOpen(true);
@@ -855,7 +855,7 @@ const UserManagement: React.FC = () => {
                     <TableCell sx={{ py: 2 }}>
                       <Chip 
                         label={user.subscription_tier} 
-                        color={user.subscription_tier === 'ELITE' ? 'warning' : user.subscription_tier === 'PRO' ? 'success' : 'default'}
+                        color="warning"
                         size="small"
                       />
                     </TableCell>
@@ -1075,54 +1075,32 @@ const UserManagement: React.FC = () => {
                   }
                 }}
               />
-              <FormControl fullWidth>
-                <InputLabel sx={{ 
-                  color: '#6B7280',
-                  backgroundColor: 'white',
-                  px: 1,
-                  borderRadius: '4px'
-                }}>Role</InputLabel>
-                <Select
-                  value={newUser.role}
-                  onChange={(e) => setNewUser({...newUser, role: e.target.value})}
-                  sx={{
-                    color: '#1F2937',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
+              <TextField
+                fullWidth
+                label="Subscription Tier"
+                value="Elite"
+                disabled
+                InputLabelProps={{ 
+                  sx: { 
+                    color: '#6B7280',
+                    backgroundColor: 'white',
+                    px: 1,
+                    borderRadius: '4px'
+                  } 
+                }}
+                InputProps={{ sx: { color: '#1F2937' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(255,255,255,0.05)',
                     backdropFilter: 'blur(5px)',
                     border: '1px solid #e0e0e0',
                     '& fieldset': { borderColor: '#e0e0e0' },
-                    '&:hover fieldset': { borderColor: '#d1d5db' },
-                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
-                  }}
-                >
-                  <MenuItem value="USER">User</MenuItem>
-                  <MenuItem value="SUPER_ADMIN">Super Admin</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel sx={{ 
-                  color: '#6B7280',
-                  backgroundColor: 'white',
-                  px: 1,
-                  borderRadius: '4px'
-                }}>Subscription Tier</InputLabel>
-                <Select
-                  value={newUser.subscription_tier}
-                  onChange={(e) => setNewUser({...newUser, subscription_tier: e.target.value})}
-                  sx={{
-                    color: '#1F2937',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(5px)',
-                    border: '1px solid #e0e0e0',
-                    '& fieldset': { borderColor: '#e0e0e0' },
-                    '&:hover fieldset': { borderColor: '#d1d5db' },
-                    '&.Mui-focused fieldset': { borderColor: '#667eea' }
-                  }}
-                >
-                  <MenuItem value="PRO">Pro</MenuItem>
-                  <MenuItem value="ELITE">Elite</MenuItem>
-                </Select>
-              </FormControl>
+                    '&:hover fieldset': { borderColor: '#e0e0e0' },
+                    '&.Mui-disabled fieldset': { borderColor: '#e0e0e0' }
+                  }
+                }}
+                helperText="All users are assigned to the Elite subscription tier"
+              />
               {!selectedUser && (
                 <TextField
                   fullWidth

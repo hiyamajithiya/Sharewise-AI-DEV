@@ -137,9 +137,9 @@ const Trading: React.FC = () => {
   
   // Get effective user (testing or actual)
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
-  const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+  const subscriptionTier = effectiveUser?.subscription_tier || 'ELITE';
   
-  // Tier-based trading features (moved before useEffect)
+  // Everyone gets ELITE tier features now
   const getTierFeatures = (tier: string): {
     maxOrderValue: number;
     allowedOrderTypes: string[];
@@ -148,37 +148,15 @@ const Trading: React.FC = () => {
     realTimeData: boolean;
     color: string;
   } => {
-    switch (tier) {
-      case 'BASIC':
-        return {
-          maxOrderValue: 10000,
-          allowedOrderTypes: ['MARKET', 'LIMIT'],
-          signalsPerDay: 5,
-          advancedCharts: false,
-          realTimeData: false,
-          color: 'info'
-        };
-      case 'PRO':
-        return {
-          maxOrderValue: 50000,
-          allowedOrderTypes: ['MARKET', 'LIMIT', 'STOP_LOSS', 'BRACKET'],
-          signalsPerDay: 20,
-          advancedCharts: true,
-          realTimeData: true,
-          color: 'success'
-        };
-      case 'ELITE':
-        return {
-          maxOrderValue: 200000,
-          allowedOrderTypes: ['MARKET', 'LIMIT', 'STOP_LOSS', 'BRACKET', 'ALGO'],
-          signalsPerDay: -1, // Unlimited
-          advancedCharts: true,
-          realTimeData: true,
-          color: 'warning'
-        };
-      default:
-        return getTierFeatures('BASIC');
-    }
+    // All users get ELITE features
+    return {
+      maxOrderValue: 200000,
+      allowedOrderTypes: ['MARKET', 'LIMIT', 'STOP_LOSS', 'BRACKET', 'ALGO'],
+      signalsPerDay: -1, // Unlimited
+      advancedCharts: true,
+      realTimeData: true,
+      color: 'warning'
+    };
   };
 
   const tierFeatures = getTierFeatures(subscriptionTier);
@@ -296,12 +274,8 @@ const Trading: React.FC = () => {
 
   // TODO: Load trading signals from API based on tier
 
-  // Filter signals based on user tier
-  const availableSignals = signals.filter(signal => {
-    if (subscriptionTier === 'BASIC') return signal.tier === 'BASIC';
-    if (subscriptionTier === 'PRO') return ['BASIC', 'PRO'].includes(signal.tier);
-    return true; // ELITE gets all signals
-  });
+  // All users get all signals (ELITE tier)
+  const availableSignals = signals;
 
   // Dynamic active orders from API
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
@@ -598,28 +572,6 @@ const Trading: React.FC = () => {
       </Box>
 
       {/* Tier Limitations Alert */}
-      {subscriptionTier === 'BASIC' && (
-        <Alert 
-          severity="info" 
-          sx={{ 
-            mb: 3,
-            background: '#e3f2fd',
-            border: '1px solid #2196f3',
-            borderRadius: '16px',
-            color: '#1F2937',
-            '& .MuiAlert-icon': {
-              color: '#2196f3'
-            }
-          }}
-        >
-          <Typography variant="body2" sx={{ color: '#1F2937' }}>
-            <strong>Basic Plan:</strong> You have access to {tierFeatures.signalsPerDay} signals per day, 
-            max order value ₹{tierFeatures.maxOrderValue.toLocaleString()}, and basic order types.
-            <strong> Upgrade to Pro or Elite for more features!</strong>
-          </Typography>
-        </Alert>
-      )}
-
       {/* Quick Trade Interface */}
       {quickTradeMode && (
         <Paper sx={{ 

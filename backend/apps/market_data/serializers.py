@@ -129,14 +129,8 @@ class DataSubscriptionSerializer(serializers.ModelSerializer):
         return len(obj.symbols) if obj.symbols else 0
 
     def get_subscription_details(self, obj):
-        """Get subscription type details"""
+        """Get subscription type details - BASIC tier removed"""
         details = {
-            'BASIC': {
-                'name': 'Basic Plan',
-                'delay': '15 minutes',
-                'features': ['Delayed quotes', 'Basic charts', 'Limited symbols'],
-                'max_symbols': 20
-            },
             'PREMIUM': {
                 'name': 'Premium Plan', 
                 'delay': 'Real-time',
@@ -150,7 +144,7 @@ class DataSubscriptionSerializer(serializers.ModelSerializer):
                 'max_symbols': -1  # Unlimited
             }
         }
-        return details.get(obj.subscription_type, details['BASIC'])
+        return details.get(obj.subscription_type, details['PREMIUM'])
 
 
 class DataSubscriptionUpdateSerializer(serializers.ModelSerializer):

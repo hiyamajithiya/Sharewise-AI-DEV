@@ -63,11 +63,9 @@ urlpatterns = [
     path('reports/trade-history/', views.trade_history_export, name='trade_history_export'),
     path('reports/risk-analysis/', views.risk_analysis, name='risk_analysis'),
     
-    # Usage Limits and Subscription endpoints
+    # Usage analytics endpoints (subscription tiers removed - all users are ELITE)
     path('subscription/status/', views.subscription_status, name='subscription_status'),
     path('subscription/usage-analytics/', views.usage_analytics, name='usage_analytics'),
-    path('subscription/check-limit/', views.check_usage_limit, name='check_usage_limit'),
-    path('subscription/simulate-upgrade/', views.simulate_upgrade, name='simulate_upgrade'),
     
     # Portfolio Aggregation endpoints
     path('portfolio/overview/', views.portfolio_overview, name='portfolio_overview'),

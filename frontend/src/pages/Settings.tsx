@@ -225,12 +225,12 @@ const Settings: React.FC = () => {
   };
 
   const theme = getThemeColors(themeMode);
-  const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+  const subscriptionTier = effectiveUser?.subscription_tier || 'ELITE';
   
   // Check if user is super admin for email configuration
   const isSuperAdmin = effectiveUser?.role === 'SUPER_ADMIN';
 
-  // Tier-based settings access
+  // Tier-based settings access - Everyone gets ELITE features
   const getTierFeatures = (tier: string): {
     advancedSecurity: boolean;
     prioritySupport: boolean;
@@ -242,46 +242,18 @@ const Settings: React.FC = () => {
     label: string;
     price: string;
   } => {
-    switch (tier) {
-      case 'BASIC':
-        return {
-          advancedSecurity: false,
-          prioritySupport: false,
-          customThemes: false,
-          apiAccess: false,
-          portfolioExport: false,
-          advancedNotifications: false,
-          color: 'info',
-          label: 'Basic Plan',
-          price: '₹999/month'
-        };
-      case 'PRO':
-        return {
-          advancedSecurity: true,
-          prioritySupport: true,
-          customThemes: true,
-          apiAccess: false,
-          portfolioExport: true,
-          advancedNotifications: true,
-          color: 'success',
-          label: 'Pro Plan',
-          price: '₹2,499/month'
-        };
-      case 'ELITE':
-        return {
-          advancedSecurity: true,
-          prioritySupport: true,
-          customThemes: true,
-          apiAccess: true,
-          portfolioExport: true,
-          advancedNotifications: true,
-          color: 'warning',
-          label: 'Elite Plan',
-          price: '₹4,999/month'
-        };
-      default:
-        return getTierFeatures('BASIC');
-    }
+    // Everyone gets ELITE features now
+    return {
+      advancedSecurity: true,
+      prioritySupport: true,
+      customThemes: true,
+      apiAccess: true,
+      portfolioExport: true,
+      advancedNotifications: true,
+      color: 'warning',
+      label: 'Elite Plan',
+      price: '₹4,999/month'
+    };
   };
 
   const tierFeatures = getTierFeatures(subscriptionTier);
@@ -453,9 +425,11 @@ const Settings: React.FC = () => {
     { id: 'security', label: 'Security', icon: <Security /> },
     { id: 'notifications', label: 'Notifications', icon: <Notifications /> },
     { id: 'preferences', label: 'Preferences', icon: <Palette /> },
-    { id: 'brokers', label: 'Broker Integration', icon: <Link /> },
-    { id: 'subscription', label: 'Subscription', icon: <Star /> },
-    { id: 'billing', label: 'Billing', icon: <AccountBalance /> },
+    ...(!isSuperAdmin ? [
+      { id: 'brokers', label: 'Broker Integration', icon: <Link /> },
+      { id: 'subscription', label: 'Subscription', icon: <Star /> },
+      { id: 'billing', label: 'Billing', icon: <AccountBalance /> },
+    ] : []),
     ...(isSuperAdmin ? [{ id: 'email', label: 'Email Configuration', icon: <Email /> }] : []),
   ];
 
@@ -627,7 +601,7 @@ const Settings: React.FC = () => {
           <ListItem>
             <Alert severity="info" sx={{ width: '100%' }}>
               <Typography variant="body2">
-                <strong>Upgrade to Pro or Elite</strong> for advanced security features including 
+                <strong>Upgrade to Elite</strong> for advanced security features including 
                 hardware key support, advanced 2FA options, and security audit logs.
               </Typography>
             </Alert>
@@ -740,7 +714,7 @@ const Settings: React.FC = () => {
       {!tierFeatures.advancedNotifications && (
         <Alert severity="info" sx={{ mt: 3 }}>
           <Typography variant="body2">
-            <strong>Upgrade to Pro or Elite</strong> for advanced notification features including 
+            <strong>Upgrade to Elite</strong> for advanced notification features including 
             custom alert conditions, WhatsApp updates, and priority delivery.
           </Typography>
         </Alert>
@@ -921,7 +895,7 @@ const Settings: React.FC = () => {
       {!tierFeatures.customThemes && (
         <Alert severity="info" sx={{ mt: 3 }}>
           <Typography variant="body2">
-            <strong>Upgrade to Pro or Elite</strong> for custom themes, advanced personalization, 
+            <strong>Upgrade to Elite</strong> for custom themes, advanced personalization, 
             and premium interface options.
           </Typography>
         </Alert>
@@ -941,11 +915,11 @@ const Settings: React.FC = () => {
         Current Subscription
       </Typography>
 
-      <Card sx={{ mb: 3, bgcolor: `${tierFeatures.color}.light`, border: '2px solid', borderColor: `${tierFeatures.color}.main` }}>
+      <Card sx={{ mb: 3, bgcolor: 'warning.light', border: '2px solid', borderColor: 'warning.main' }}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h5" sx={{ fontWeight: 600, color: `${tierFeatures.color}.main` }}>
-              {tierFeatures.label}
+            <Typography variant="h5" sx={{ fontWeight: 600, color: 'warning.main' }}>
+              Elite Plan
             </Typography>
             <Chip 
               label="ACTIVE" 
@@ -954,99 +928,41 @@ const Settings: React.FC = () => {
             />
           </Box>
           <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-            {tierFeatures.price}
+            ₹4,999/month
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Next billing date: January 15, 2025
           </Typography>
+          
+          <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(255, 167, 38, 0.1)', borderRadius: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+              Elite Plan Features:
+            </Typography>
+            <List dense>
+              <ListItem sx={{ pl: 0, py: 0.5 }}>
+                <CheckCircle color="success" sx={{ mr: 1, fontSize: 18 }} />
+                <Typography variant="body2">Unlimited strategies & trades</Typography>
+              </ListItem>
+              <ListItem sx={{ pl: 0, py: 0.5 }}>
+                <CheckCircle color="success" sx={{ mr: 1, fontSize: 18 }} />
+                <Typography variant="body2">Full AI Studio access</Typography>
+              </ListItem>
+              <ListItem sx={{ pl: 0, py: 0.5 }}>
+                <CheckCircle color="success" sx={{ mr: 1, fontSize: 18 }} />
+                <Typography variant="body2">Advanced analytics & custom indicators</Typography>
+              </ListItem>
+              <ListItem sx={{ pl: 0, py: 0.5 }}>
+                <CheckCircle color="success" sx={{ mr: 1, fontSize: 18 }} />
+                <Typography variant="body2">Priority support & API access</Typography>
+              </ListItem>
+              <ListItem sx={{ pl: 0, py: 0.5 }}>
+                <CheckCircle color="success" sx={{ mr: 1, fontSize: 18 }} />
+                <Typography variant="body2">Enhanced security features</Typography>
+              </ListItem>
+            </List>
+          </Box>
         </CardContent>
       </Card>
-
-      {subscriptionTier !== 'ELITE' && (
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-            Upgrade Your Plan
-          </Typography>
-          <Grid container spacing={2}>
-            {subscriptionTier === 'BASIC' && (
-              <Grid item xs={12} md={6}>
-                <Card sx={{ height: '100%', border: '1px solid', borderColor: 'success.main' }}>
-                  <CardContent>
-                    <Typography variant="h6" color="success.main" sx={{ fontWeight: 600, mb: 1 }}>
-                      Pro Plan
-                    </Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                      ₹2,499<Typography component="span" variant="body1">/month</Typography>
-                    </Typography>
-                    <List dense>
-                      <ListItem sx={{ pl: 0 }}>
-                        <CheckCircle color="success" sx={{ mr: 1, fontSize: 16 }} />
-                        <Typography variant="body2">Advanced analytics</Typography>
-                      </ListItem>
-                      <ListItem sx={{ pl: 0 }}>
-                        <CheckCircle color="success" sx={{ mr: 1, fontSize: 16 }} />
-                        <Typography variant="body2">Priority support</Typography>
-                      </ListItem>
-                      <ListItem sx={{ pl: 0 }}>
-                        <CheckCircle color="success" sx={{ mr: 1, fontSize: 16 }} />
-                        <Typography variant="body2">Advanced security</Typography>
-                      </ListItem>
-                    </List>
-                    <Button 
-                      variant="contained" 
-                      color="success" 
-                      fullWidth 
-                      sx={{ mt: 2 }}
-                      onClick={() => setUpgradeDialog(true)}
-                    >
-                      Upgrade to Pro
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            )}
-            
-            <Grid item xs={12} md={6}>
-              <Card sx={{ height: '100%', border: '1px solid', borderColor: 'warning.main' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="h6" color="warning.main" sx={{ fontWeight: 600 }}>
-                      Elite Plan
-                    </Typography>
-                    <Chip label="BEST VALUE" size="small" color="warning" sx={{ ml: 1 }} />
-                  </Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                    ₹4,999<Typography component="span" variant="body1">/month</Typography>
-                  </Typography>
-                  <List dense>
-                    <ListItem sx={{ pl: 0 }}>
-                      <CheckCircle color="success" sx={{ mr: 1, fontSize: 16 }} />
-                      <Typography variant="body2">Everything in Pro</Typography>
-                    </ListItem>
-                    <ListItem sx={{ pl: 0 }}>
-                      <CheckCircle color="success" sx={{ mr: 1, fontSize: 16 }} />
-                      <Typography variant="body2">API access</Typography>
-                    </ListItem>
-                    <ListItem sx={{ pl: 0 }}>
-                      <CheckCircle color="success" sx={{ mr: 1, fontSize: 16 }} />
-                      <Typography variant="body2">Unlimited everything</Typography>
-                    </ListItem>
-                  </List>
-                  <Button 
-                    variant="contained" 
-                    color="warning" 
-                    fullWidth 
-                    sx={{ mt: 2 }}
-                    onClick={() => setUpgradeDialog(true)}
-                  >
-                    Upgrade to Elite
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Box>
-      )}
     </Paper>
   );
 

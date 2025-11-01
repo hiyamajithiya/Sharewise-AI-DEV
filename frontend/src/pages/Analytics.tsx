@@ -52,7 +52,7 @@ const Analytics: React.FC = () => {
   const { isTestingMode, selectedUser } = testingState;
   const user = useSelector((state: RootState) => state.auth.user);
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
-  const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+  const subscriptionTier = effectiveUser?.subscription_tier || 'ELITE';
 
   const timeframePeriods = [
     { label: '1D', value: '1D' },

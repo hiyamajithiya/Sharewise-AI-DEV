@@ -967,7 +967,7 @@ class ApiService {
   }
 
   // Subscription management
-  async upgradeSubscription(tier: 'PRO' | 'ELITE'): Promise<{ checkout_url: string }> {
+  async upgradeSubscription(tier: 'ELITE'): Promise<{ checkout_url: string }> {
     return this.post('/settings/user/subscription/upgrade/', { tier });
   }
 

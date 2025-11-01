@@ -49,7 +49,7 @@ const AIStudio: React.FC = () => {
   const { isTestingMode, selectedUser } = testingState;
   const user = useSelector((state: any) => state.auth.user);
   const effectiveUser = isTestingMode && selectedUser ? selectedUser : user;
-  const subscriptionTier = effectiveUser?.subscription_tier || 'BASIC';
+  const subscriptionTier = effectiveUser?.subscription_tier || 'ELITE';
 
   useEffect(() => {
     dispatch(fetchStudioDashboard());

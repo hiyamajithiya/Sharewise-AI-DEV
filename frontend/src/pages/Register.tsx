@@ -195,7 +195,7 @@ const Register: React.FC = () => {
                 ShareWise AI
               </Typography>
               <Typography variant="body2" sx={{ color: '#374151' }}>
-                Professional Trading Platform
+                Elite Trading Platform
               </Typography>
             </Box>
           </Box>

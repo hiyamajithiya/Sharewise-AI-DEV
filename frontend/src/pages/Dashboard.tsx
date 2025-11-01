@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLiveMarketData } from '../hooks/useLiveMarketData';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -38,8 +37,6 @@ import {
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import DataTable, { TableColumn } from '../components/common/DataTable';
-import { MarketDataAPI } from '../services/marketDataService';
-import LiveMarketWidget from '../components/common/LiveMarketWidget';
 import apiService from '../services/api';
 import { 
   DashboardData, 
@@ -109,8 +106,6 @@ const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   
-  const { marketData, loading: marketLoading } = useLiveMarketData(['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']);
-  const [marketPeriod, setMarketPeriod] = useState('1W');
   const navigate = useNavigate();
   const user = useSelector((state: any) => state.auth.user);
 
@@ -259,27 +254,8 @@ const Dashboard: React.FC = () => {
   };
 
   const getUserTierFeatures = (subscriptionTier: string) => {
+    // Everyone gets ELITE features now
     const tierFeatures = {
-      BASIC: {
-        maxStrategies: 3,
-        maxSignals: 10,
-        aiStudioAccess: false,
-        advancedAnalytics: false,
-        customIndicators: false,
-        portfolioValue: formatCurrency(portfolioStats.totalValue),
-        tierColor: 'info',
-        tierLabel: 'Basic Plan'
-      },
-      PRO: {
-        maxStrategies: 10,
-        maxSignals: 50,
-        aiStudioAccess: true,
-        advancedAnalytics: true,
-        customIndicators: false,
-        portfolioValue: formatCurrency(portfolioStats.totalValue),
-        tierColor: 'success',
-        tierLabel: 'Pro Plan'
-      },
       ELITE: {
         maxStrategies: -1,
         maxSignals: -1,
@@ -291,7 +267,7 @@ const Dashboard: React.FC = () => {
         tierLabel: 'Elite Plan'
       }
     };
-    return tierFeatures[subscriptionTier as keyof typeof tierFeatures] || tierFeatures.BASIC;
+    return tierFeatures.ELITE;
   };
 
   // Error retry component
@@ -356,7 +332,7 @@ const Dashboard: React.FC = () => {
           Super Admin Dashboard
         </Typography>
         <Typography variant="body1" sx={{ color: '#6B7280' }}>
-          Overview of system statistics and metrics
+          System administration and user management
         </Typography>
       </Box>
 
@@ -380,23 +356,15 @@ const Dashboard: React.FC = () => {
             delay: 200
           },
           {
-            title: "Active Strategies",
-            value: loading ? <Skeleton width={40} /> : (adminData?.systemMetrics?.activeTraders?.toString() || '0'),
-            change: loading ? <Skeleton width={60} /> : "Live strategies",
-            icon: <ShowChart />,
-            color: "#F59E0B",
-            delay: 300
-          },
-          {
             title: "System Health",
             value: loading ? <Skeleton width={40} /> : `${adminData?.systemHealth?.uptime || '99.9%'}`,
             change: loading ? <Skeleton width={60} /> : "Uptime",
             icon: <Speed />,
             color: "#3B82F6",
-            delay: 400
+            delay: 300
           }
         ].map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid item xs={12} sm={6} md={4} key={index}>
             <Zoom in timeout={stat.delay}>
               <Card sx={{ ...styles.glassCard, p: 3, height: '100%' }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
@@ -432,20 +400,6 @@ const Dashboard: React.FC = () => {
                 </Box>
               </Card>
             </Zoom>
-          </Grid>
-        ))}
-      </Grid>
-
-{/* Live Market Data Section */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12}>
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-            Live Market Data
-          </Typography>
-        </Grid>
-        {['AAPL','GOOGL','MSFT','TSLA','AMZN'].map((sym) => (
-          <Grid key={sym} item xs={12} md={6} lg={4}>
-            <LiveMarketWidget symbol={sym} />
           </Grid>
         ))}
       </Grid>
@@ -614,17 +568,17 @@ const Dashboard: React.FC = () => {
   );
 
   const renderUserDashboard = (effectiveUser: any) => {
-    const features = getUserTierFeatures(effectiveUser?.subscription_tier || 'BASIC');
+    const features = getUserTierFeatures(effectiveUser?.subscription_tier || 'ELITE');
     
     return (
     <>
       {/* Page Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#1F2937' }}>
-          {effectiveUser?.first_name || 'User'} User Dashboard
+          Elite Trading Dashboard
         </Typography>
         <Typography variant="body1" sx={{ color: '#6B7280' }}>
-          Overview of system statistics and metrics
+          Complete trading and portfolio management for elite traders
         </Typography>
       </Box>
 
@@ -799,141 +753,6 @@ const Dashboard: React.FC = () => {
               </Box>
             </Card>
           </Slide>
-        </Grid>
-
-        {/* Market Overview */}
-        <Grid item xs={12}>
-          <Fade in timeout={1200}>
-            <Card sx={{ ...styles.glassCard, p: 4, minHeight: 450, height: 'auto' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={{
-                    p: 2,
-                    borderRadius: '15px',
-                    background: 'linear-gradient(135deg, #F59E0B15 0%, #D9770615 100%)',
-                    mr: 2
-                  }}>
-                    <Analytics sx={{ color: '#F59E0B', fontSize: 30 }} />
-                  </Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#1F2937' }}>
-                    Market Overview
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  {['1D', '1W', '1M'].map((period, idx) => (
-                    <Button 
-                      key={period}
-                      size="small" 
-                      variant={marketPeriod === period ? "contained" : "outlined"}
-                      onClick={() => setMarketPeriod(period)}
-                      sx={{ 
-                        ...(marketPeriod === period ? styles.animatedButton : {
-                          borderColor: '#667eea',
-                          color: '#667eea',
-                          '&:hover': {
-                            borderColor: '#5a67d8',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 2px 8px rgba(102, 126, 234, 0.2)',
-                          }
-                        }),
-                        minWidth: 50,
-                        py: 1,
-                        transition: 'all 0.3s ease',
-                        textTransform: 'none',
-                        fontWeight: 600
-                      }}
-                    >
-                      {period}
-                    </Button>
-                  ))}
-                </Box>
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: 320,
-                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
-                  borderRadius: '15px',
-                  border: '2px dashed rgba(102, 126, 234, 0.2)',
-                  color: 'text.secondary',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: '-50%',
-                    left: '-50%',
-                    width: '200%',
-                    height: '200%',
-                    background: 'radial-gradient(circle, rgba(102, 126, 234, 0.03) 0%, transparent 70%)',
-                    animation: 'rotate 20s linear infinite',
-                  }
-                }}
-              >
-                <Box sx={{ textAlign: 'center', zIndex: 1, p: 3 }}>
-                  <ShowChart sx={{ fontSize: 64, color: '#667eea', mb: 2, opacity: 0.7 }} />
-                  <Typography variant="h6" sx={{ color: '#667eea', fontWeight: 600, mb: 1 }}>
-                    Interactive Market Charts - {marketPeriod}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(102, 126, 234, 0.8)', mb: 2, lineHeight: 1.6 }}>
-                    Real-time market data and advanced analytics for {marketPeriod === '1D' ? 'daily' : marketPeriod === '1W' ? 'weekly' : 'monthly'} view
-                  </Typography>
-                  
-                  {/* Market Stats Preview */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    gap: 3,
-                    mt: 3,
-                    flexWrap: 'wrap'
-                  }}>
-                    {[
-                      { label: 'NIFTY 50', value: '19,450.85', change: '+1.2%', color: '#10B981' },
-                      { label: 'SENSEX', value: '65,220.35', change: '+0.8%', color: '#10B981' },
-                      { label: 'BANK NIFTY', value: '44,180.90', change: '-0.3%', color: '#EF4444' },
-                    ].map((index, idx) => (
-                      <Box key={idx} sx={{ 
-                        textAlign: 'center',
-                        p: 2,
-                        borderRadius: '12px',
-                        background: 'rgba(255, 255, 255, 0.6)',
-                        minWidth: 120,
-                        boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)'
-                      }}>
-                        <Typography variant="caption" sx={{ 
-                          color: '#6B7280', 
-                          fontWeight: 600,
-                          display: 'block',
-                          mb: 0.5
-                        }}>
-                          {index.label}
-                        </Typography>
-                        <Typography variant="h6" sx={{ 
-                          color: '#1F2937', 
-                          fontWeight: 700,
-                          fontSize: '0.9rem',
-                          mb: 0.5
-                        }}>
-                          {index.value}
-                        </Typography>
-                        <Typography variant="caption" sx={{ 
-                          color: index.color,
-                          fontWeight: 600,
-                          fontSize: '0.75rem'
-                        }}>
-                          {index.change}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              </Box>
-            </Card>
-          </Fade>
         </Grid>
       </Grid>
     </>

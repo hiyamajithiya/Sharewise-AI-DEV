@@ -48,58 +48,29 @@ class UsageLimitExceeded(Exception):
 
 
 class SubscriptionLimitService:
-    """Service for managing subscription limits and enforcement"""
+    """Service for managing subscription limits and enforcement - All users are ELITE tier"""
     
-    # Define subscription tier limits
-    SUBSCRIPTION_LIMITS = {
-        'BASIC': SubscriptionLimits(
-            tier='BASIC',
-            daily_signals=5,
-            monthly_signals=100,
-            daily_backtests=5,
-            monthly_backtests=50,
-            active_strategies=2,
-            api_calls_daily=100,
-            portfolio_positions=10,
-            data_export_monthly=2,
-            features=['basic_signals', 'basic_backtesting'],
-            support_level='email'
-        ),
-        'PRO': SubscriptionLimits(
-            tier='PRO',
-            daily_signals=100,
-            monthly_signals=2000,
-            daily_backtests=100,
-            monthly_backtests=1000,
-            active_strategies=10,
-            api_calls_daily=2000,
-            portfolio_positions=50,
-            data_export_monthly=20,
-            features=['advanced_signals', 'advanced_backtesting', 'portfolio_analytics', 'api_access'],
-            support_level='priority_email'
-        ),
-        'ELITE': SubscriptionLimits(
-            tier='ELITE',
-            daily_signals=-1,  # Unlimited
-            monthly_signals=-1,  # Unlimited
-            daily_backtests=-1,  # Unlimited
-            monthly_backtests=-1,  # Unlimited
-            active_strategies=50,
-            api_calls_daily=10000,
-            portfolio_positions=200,
-            data_export_monthly=-1,  # Unlimited
-            features=['premium_signals', 'unlimited_backtesting', 'advanced_analytics', 'premium_api', 'custom_models'],
-            support_level='phone_priority'
-        )
-    }
+    # Only ELITE tier exists now - all users get these limits
+    ELITE_LIMITS = SubscriptionLimits(
+        tier='ELITE',
+        daily_signals=-1,  # Unlimited
+        monthly_signals=-1,  # Unlimited
+        daily_backtests=-1,  # Unlimited
+        monthly_backtests=-1,  # Unlimited
+        active_strategies=50,
+        api_calls_daily=10000,
+        portfolio_positions=200,
+        data_export_monthly=-1,  # Unlimited
+        features=['premium_signals', 'unlimited_backtesting', 'advanced_analytics', 'premium_api', 'custom_models'],
+        support_level='phone_priority'
+    )
     
     def __init__(self):
         self.cache_timeout = 3600  # 1 hour cache
     
     def get_user_limits(self, user: User) -> SubscriptionLimits:
-        """Get limits for a user based on their subscription tier"""
-        tier = user.subscription_tier
-        return self.SUBSCRIPTION_LIMITS.get(tier, self.SUBSCRIPTION_LIMITS['BASIC'])
+        """Get limits for a user - all users get ELITE limits"""
+        return self.ELITE_LIMITS
     
     def get_or_create_tracker(self, user: User, limit_type: LimitType) -> UsageTracker:
         """Get or create usage tracker for user and limit type"""

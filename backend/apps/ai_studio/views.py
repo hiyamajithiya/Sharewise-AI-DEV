@@ -244,25 +244,14 @@ class MLModelViewSet(ModelViewSet):
             status__in=[TrainingJob.Status.QUEUED, TrainingJob.Status.RUNNING]
         ).count()
         
-        # Check subscription limits
-        limits = {
-            'FREE': 1,
-            'PRO': 5,
-            'ELITE': 20,
-            'ENTERPRISE': 100
-        }
-        
-        user_tier = getattr(user, 'subscription_tier', 'FREE')
-        max_concurrent = limits.get(user_tier, 1)
+        # All users are ELITE tier - 20 concurrent jobs allowed
+        max_concurrent = 20
         
         return active_jobs < max_concurrent
     
     def _check_publish_permissions(self, user):
-        """Check if user can publish models"""
-        # Check if user has Pro or higher subscription
-        allowed_tiers = ['PRO', 'ELITE', 'ENTERPRISE']
-        user_tier = getattr(user, 'subscription_tier', 'FREE')
-        return user_tier in allowed_tiers
+        """Check if user can publish models - all users are ELITE tier"""
+        return True  # All users can publish
 
 
 @api_view(['GET'])

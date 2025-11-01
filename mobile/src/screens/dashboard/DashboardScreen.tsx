@@ -265,8 +265,8 @@ const DashboardScreen: React.FC = () => {
           </Card.Content>
         </Card>
 
-        {/* AI Studio Access (Pro/Elite users only) */}
-        {(user?.subscriptionTier === 'PRO' || user?.subscriptionTier === 'ELITE') && (
+  {/* AI Studio Access (Elite users only) */}
+  {(user?.subscriptionTier === 'ELITE') && (
           <Card style={styles.aiStudioCard}>
             <Card.Content>
               <View style={styles.aiStudioHeader}>

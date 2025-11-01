@@ -9,11 +9,9 @@ User = get_user_model()
 
 
 class SubscriptionPlan(models.Model):
-    """Subscription plans for ShareWise AI platform"""
+    """Subscription plans for ShareWise AI platform - Only ELITE tier exists"""
     
     class PlanType(models.TextChoices):
-        FREE = 'FREE', 'Free Plan'
-        PRO = 'PRO', 'Pro Plan'
         ELITE = 'ELITE', 'Elite Plan'
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -219,7 +219,6 @@ class DataSubscription(models.Model):
     """User subscriptions for real-time data"""
     
     class SubscriptionType(models.TextChoices):
-        BASIC = 'BASIC', 'Basic (15min delay)'
         PREMIUM = 'PREMIUM', 'Premium (Real-time)'
         PROFESSIONAL = 'PROFESSIONAL', 'Professional (Real-time + L2)'
     
@@ -227,7 +226,7 @@ class DataSubscription(models.Model):
     user = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, related_name='data_subscriptions')
     
     # Subscription details
-    subscription_type = models.CharField(max_length=20, choices=SubscriptionType.choices, default=SubscriptionType.BASIC)
+    subscription_type = models.CharField(max_length=20, choices=SubscriptionType.choices, default=SubscriptionType.PREMIUM)
     symbols = models.JSONField(default=list, help_text="List of subscribed symbols")
     is_active = models.BooleanField(default=True)
     

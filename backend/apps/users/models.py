@@ -12,7 +12,6 @@ class CustomUser(AbstractUser):
         SUPER_ADMIN = 'SUPER_ADMIN', 'Super Admin'
     
     class SubscriptionTier(models.TextChoices):
-        PRO = 'PRO', 'Pro Plan'
         ELITE = 'ELITE', 'Elite Plan'
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -30,7 +29,7 @@ class CustomUser(AbstractUser):
     subscription_tier = models.CharField(
         max_length=20,
         choices=SubscriptionTier.choices,
-        default=SubscriptionTier.PRO
+        default=SubscriptionTier.ELITE
     )
     
     # Email verification fields
